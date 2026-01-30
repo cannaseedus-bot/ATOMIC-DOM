@@ -495,30 +495,512 @@ microwave: {
 ### 13.5 CSS Atomic Grammar
 
 ```ebnf
-css_atomic       = "@css", scope, "{", css_rules, "}" ;
-scope            = "global" | "scoped" | "shadow" ;
-css_rules        = { css_rule } ;
-css_rule         = selector, "{", declarations, "}" ;
-declarations     = { property, ":", value, ";" } ;
+css_document      = { directive } ;
+directive         = css_atomic | css_advanced | css_in_js | css_module
+                  | css_inference | css_dataset | css_query ;
 
-css_in_js        = "@css", "js", "{",
-                   "atomic:", boolean, ",",
-                   "generate:", ("classes" | "inline" | "variables"),
-                   "rules:", css_rules,
-                   "}" ;
-```
+css_atomic        = "@css", scope, "{", css_rules, "}" ;
+scope             = "global" | "scoped" | "shadow" | "tensor" | "compute" ;
+css_rules         = { css_rule | sql_binding_rule } ;
+css_rule          = selector, "{", declarations, "}" ;
+selector          = (class | id | element | pseudo | attribute | combinator)+ ;
+declarations      = { declaration } ;
+rules_section     = "rules:", "{", css_rules, "}" ;
 
-```css
-@css scoped {
-  .button {
-    --color-primary: #007bff;
-    padding: 8px 16px;
-  }
+declaration       = css_declaration | tensor_declaration | binary_declaration
+                  | svg_declaration | layer_declaration | weight_declaration
+                  | compute_declaration | sql_declaration ;
 
-  .button.primary {
-    background: var(--color-primary);
-  }
-}
+css_declaration   = property, ":", css_value, ";" ;
+tensor_declaration = "tensor-", property, ":", tensor_value, ";" ;
+binary_declaration = "binary-", property, ":", binary_data, ";" ;
+svg_declaration   = "svg-", property, ":", svg_spec, ";" ;
+layer_declaration = "layer-", property, ":", layer_spec, ";" ;
+weight_declaration = "weight-", property, ":", weight_spec, ";" ;
+compute_declaration = "compute-", property, ":", compute_spec, ";" ;
+sql_declaration   = "sql-", property, ":", sql_style_value, ";" ;
+
+css_value         = simple_value
+                  | array_value
+                  | function_value
+                  | var_reference
+                  | calc_value ;
+
+simple_value      = string | number | color | dimension | percentage | boolean ;
+string            = '"', { character - '"' }, '"'
+                  | "'", { character - "'" }, "'" ;
+number            = [ "-" ], digit, { digit }, [ ".", digit, { digit } ] ;
+color             = hex_color | rgb_color | rgba_color | hsl_color | hsla_color ;
+hex_color         = "#", hex_digit, hex_digit, hex_digit, [ hex_digit, hex_digit, hex_digit ]
+                  | "#", hex_digit, hex_digit, hex_digit, hex_digit, hex_digit, hex_digit, hex_digit, hex_digit ;
+rgb_color         = "rgb(", number, ",", number, ",", number, ")" ;
+rgba_color        = "rgba(", number, ",", number, ",", number, ",", number, ")" ;
+hsl_color         = "hsl(", number, ",", percentage, ",", percentage, ")" ;
+hsla_color        = "hsla(", number, ",", percentage, ",", percentage, ",", number, ")" ;
+dimension         = number, unit ;
+unit              = "px" | "em" | "rem" | "vh" | "vw" | "vmin" | "vmax" | "deg" | "rad" | "grad" | "turn" ;
+percentage        = number, "%" ;
+boolean           = "true" | "false" ;
+
+array_value       = "[", { css_value, [ "," ] }, "]" ;
+function_value    = function_name, "(", { css_value, [ "," ] }, ")" ;
+var_reference     = "var(", string, [ ",", css_value ], ")" ;
+calc_value        = "calc(", expression, ")" ;
+expression        = term, { ( "+" | "-" ), term } ;
+term              = factor, { ( "*" | "/" ), factor } ;
+factor            = number | dimension | percentage | "(", expression, ")" | var_reference ;
+
+tensor_value      = "tensor", "[",
+                    "shape:", shape_spec, ",",
+                    "dtype:", dtype, ",",
+                    "data:", data_source, ",",
+                    "values:", tensor_data,
+                    [ ",", tensor_options ],
+                    "]" ;
+
+shape_spec        = "[", { integer, [ "," ] }, "]" ;
+dtype             = "float16" | "float32" | "float64" | "int8" | "int16" | "int32" | "uint8" | "uint16" | "uint32" | "bool" ;
+data_source       = "inline" | "external" | "generated" | "computed" ;
+tensor_data       = scalar_value | vector_value | matrix_value | tensor_initializer | "none" ;
+
+scalar_value      = number ;
+vector_value      = "[", { number, [ "," ] }, "]" ;
+matrix_value      = "[", { vector_value, [ "," ] }, "]" ;
+
+tensor_initializer = initializer_type, [ "(", [ arguments ], ")" ] ;
+initializer_type  = "zeros" | "ones" | "eye" | "random" | "uniform" | "normal"
+                  | "xavier" | "he" | "kaiming" | "truncated_normal" ;
+arguments         = number, { ",", number } ;
+
+tensor_options    = "device:", device, [ ",", "requires_grad:", boolean ]
+                  | "layout:", layout, [ ",", "sparse:", boolean ] ;
+device            = "cpu" | "gpu" | "tpu" | "auto" ;
+layout            = "dense" | "sparse" | "compressed" ;
+
+binary_data       = "binary", "[",
+                    "encoding:", encoding_type, ",",
+                    "format:", binary_format, ",",
+                    "data:", binary_content,
+                    [ ",", "compression:", compression_type ],
+                    "]" ;
+
+encoding_type     = "base64" | "base64url" | "hex" | "raw" | "utf8" ;
+binary_format     = "bin" | "npy" | "hdf5" | "protobuf" | "msgpack" | "custom" ;
+binary_content    = string | "url(", string, ")" | "embedded(", integer, ")" ;
+compression_type  = "none" | "gzip" | "zstd" | "brotli" | "lz4" | "quantized" ;
+
+svg_spec          = svg_path | svg_rect | svg_circle | svg_ellipse | svg_line
+                  | svg_polyline | svg_polygon | svg_text | svg_group ;
+
+svg_path          = "path", "[",
+                    "d:", string, ",",
+                    [ "fill:", fill_spec, "," ],
+                    [ "stroke:", stroke_spec, "," ],
+                    [ "transform:", svg_transform, "," ],
+                    [ "clip-path:", string, "," ],
+                    [ "filter:", string, "," ],
+                    "]" ;
+
+fill_spec         = color | "none" | "currentColor" | gradient_spec ;
+stroke_spec       = color, ",", number, [ ",", stroke_style ] ;
+stroke_style      = "solid" | "dashed" | "dotted" | "double" | "wavy" ;
+
+svg_transform     = transform_list | transform_matrix ;
+transform_list    = { transform_item, [ "," ] } ;
+transform_item    = "translate(", number, [ ",", number ], ")"
+                  | "scale(", number, [ ",", number ], ")"
+                  | "rotate(", number, [ ",", number, ",", number ], ")"
+                  | "skewX(", number, ")"
+                  | "skewY(", number, ")" ;
+
+transform_matrix  = "matrix(", number, ",", number, ",", number, ",", number, ",", number, ",", number, ")" ;
+
+svg_rect          = "rect", "[", "x:", number, ",", "y:", number, ",", "width:", number, ",", "height:", number,
+                   [ ",", "rx:", number ], [ ",", "ry:", number ], "]" ;
+svg_circle        = "circle", "[", "cx:", number, ",", "cy:", number, ",", "r:", number, "]" ;
+svg_ellipse       = "ellipse", "[", "cx:", number, ",", "cy:", number, ",", "rx:", number, ",", "ry:", number, "]" ;
+svg_line          = "line", "[", "x1:", number, ",", "y1:", number, ",", "x2:", number, ",", "y2:", number, "]" ;
+svg_polyline      = "polyline", "[", "points:", string, "]" ;
+svg_polygon       = "polygon", "[", "points:", string, "]" ;
+svg_text          = "text", "[", "value:", string, [ ",", "x:", number ], [ ",", "y:", number ], "]" ;
+svg_group         = "group", "[", "children:", "[", { svg_spec, [ "," ] }, "]", "]" ;
+
+transform_3d      = transform_3d_item | transform_3d_list ;
+transform_3d_item = "translate3d", vector_3d
+                  | "scale3d", vector_3d
+                  | "rotate3d", vector_3d, ",", angle
+                  | "matrix3d", matrix_4x4
+                  | "perspective", number
+                  | "rotateX", angle
+                  | "rotateY", angle
+                  | "rotateZ", angle ;
+transform_3d_list = "[", { transform_3d_item, [ "," ] }, "]" ;
+
+vector_3d         = "[", number, ",", number, ",", number, "]" ;
+matrix_4x4        = "[", vector_4, ",", vector_4, ",", vector_4, ",", vector_4, "]" ;
+vector_4          = "[", number, ",", number, ",", number, ",", number, "]" ;
+angle             = number, ( "deg" | "rad" | "grad" | "turn" ) ;
+
+gradient_spec     = linear_gradient | radial_gradient | conic_gradient ;
+linear_gradient   = "linear-gradient", "[",
+                    "angle:", ( number | direction ), ",",
+                    "stops:", gradient_stops,
+                    [ ",", "repeating:", boolean ],
+                    "]" ;
+
+radial_gradient   = "radial-gradient", "[",
+                    "shape:", ( "circle" | "ellipse" ), ",",
+                    "size:", ( "closest-side" | "farthest-side" | "closest-corner" | "farthest-corner" | vector_2d ), ",",
+                    "position:", position, ",",
+                    "stops:", gradient_stops,
+                    "]" ;
+
+conic_gradient    = "conic-gradient", "[",
+                    "from:", angle, ",",
+                    "position:", position, ",",
+                    "stops:", gradient_stops,
+                    "]" ;
+
+direction         = "to", ( "top" | "bottom" | "left" | "right"
+                          | "top left" | "top right" | "bottom left" | "bottom right" ) ;
+gradient_stops    = "[", { gradient_stop, [ "," ] }, "]" ;
+gradient_stop     = color, number, [ "%" ] ;
+position          = vector_2d | keyword_position ;
+vector_2d         = "[", number, ",", number, "]" ;
+keyword_position  = "center" | "top" | "bottom" | "left" | "right"
+                  | "top left" | "top right" | "bottom left" | "bottom right" ;
+
+layer_spec        = "layer", "[",
+                    "type:", layer_type, ",",
+                    "units:", integer, ",",
+                    "weights:", tensor_value, ",",
+                    "biases:", ( tensor_value | "none" ), ",",
+                    "activation:", activation_fn,
+                    [ ",", layer_options ],
+                    "]" ;
+
+layer_type        = "dense" | "conv1d" | "conv2d" | "conv3d"
+                  | "lstm" | "gru" | "attention" | "multihead_attention"
+                  | "batch_norm" | "layer_norm" | "dropout" | "embedding" ;
+
+activation_fn     = "relu" | "leaky_relu" | "sigmoid" | "tanh" | "softmax"
+                  | "softplus" | "softsign" | "selu" | "elu" | "gelu" | "swish" | "none" ;
+
+layer_options     = "kernel_size:", integer
+                  | "stride:", integer
+                  | "padding:", ( integer | "same" | "valid" )
+                  | "dilation:", integer
+                  | "groups:", integer
+                  | "bidirectional:", boolean ;
+
+weight_spec       = "weight", "[",
+                    "value:", ( number | tensor_value ), ",",
+                    "trainable:", boolean, ",",
+                    "constraint:", weight_constraint,
+                    [ ",", "regularizer:", regularizer ],
+                    "]" ;
+
+weight_constraint = "none" | "min_max", "[", number, ",", number, "]"
+                  | "unit_norm" | "non_neg" | "orthogonal" ;
+regularizer       = "l1", "[", number, "]" | "l2", "[", number, "]" | "l1_l2", "[", number, ",", number, "]" ;
+
+compute_spec      = "compute", "[",
+                    "kernel:", kernel_type, ",",
+                    "workgroups:", vector_3d, ",",
+                    "inputs:", compute_inputs, ",",
+                    "outputs:", compute_outputs, ",",
+                    "code:", string,
+                    "]" ;
+
+kernel_type       = "shader" | "compute" | "raytracing" | "mesh" | "task" ;
+compute_inputs    = "[", { compute_buffer, [ "," ] }, "]" ;
+compute_outputs   = "[", { compute_buffer, [ "," ] }, "]" ;
+compute_buffer    = buffer_name, ":", tensor_value ;
+buffer_name       = identifier ;
+
+css_advanced      = "@css", "advanced", "{",
+                    config_section, ",",
+                    imports_section, ",",
+                    exports_section, ",",
+                    rules_section,
+                    "}" ;
+
+config_section    = "config:", "[", { config_item, [ "," ] }, "]" ;
+config_item       = "mode:", mode_type
+                  | "precision:", dtype
+                  | "target:", target_platform
+                  | "backend:", compute_backend
+                  | "optimize:", boolean
+                  | "debug:", boolean ;
+
+mode_type         = "visual" | "compute" | "hybrid" | "inference" | "training" ;
+target_platform   = "web" | "native" | "mobile" | "embedded" | "cloud" ;
+compute_backend   = "webgl" | "webgpu" | "wasm" | "vulkan" | "metal" | "cuda" | "cpu" ;
+
+imports_section   = "imports:", "[", { import_item, [ "," ] }, "]" ;
+import_item       = string, [ "as", identifier ] ;
+exports_section   = "exports:", "[", { export_item, [ "," ] }, "]" ;
+export_item       = identifier, [ ":", export_type ] ;
+export_type       = "tensor" | "shader" | "module" | "weights" ;
+
+css_in_js         = "@css", "js", "{",
+                    js_config, ",",
+                    "rules:", css_rules,
+                    "}" ;
+
+js_config         = "atomic:", boolean, ",",
+                    "generate:", generation_mode, ",",
+                    "runtime:", runtime_type, ",",
+                    "compute:", boolean, ",",
+                    "hot:", boolean ;
+
+generation_mode   = "classes" | "inline" | "variables" | "shaders" | "kernels" | "all" ;
+runtime_type      = "dom" | "canvas" | "webgl" | "webgpu" | "wasm" ;
+
+css_module        = "@css", "module", identifier, "{",
+                    state_section, ",",
+                    props_section, ",",
+                    effects_section, ",",
+                    rules_section,
+                    "}" ;
+
+state_section     = "state:", "[", { state_var, [ "," ] }, "]" ;
+state_var         = identifier, ":", state_type, [ "=", initial_value ] ;
+state_type        = "tensor" | "bool" | "number" | "string" | "color" | "array" ;
+initial_value     = css_value | tensor_value ;
+
+props_section     = "props:", "[", { prop_def, [ "," ] }, "]" ;
+prop_def          = identifier, ":", prop_type, [ "=", default_value ] ;
+prop_type         = state_type | "any" ;
+
+effects_section   = "effects:", "[", { effect_def, [ "," ] }, "]" ;
+effect_def        = identifier, ":", "[",
+                    "trigger:", trigger_event, ",",
+                    "action:", effect_action,
+                    "]" ;
+
+trigger_event     = "mount" | "unmount" | "update" | "hover" | "click" | "scroll" | "resize" ;
+effect_action     = "animate" | "compute" | "update" | "dispatch" ;
+
+css_inference     = "@inference", inference_config, "{", inference_rules, "}" ;
+inference_config  = "[",
+                    "engine:", inference_engine, ",",
+                    "precision:", inference_precision, ",",
+                    "backend:", inference_backend, ",",
+                    "mode:", inference_mode,
+                    "]" ;
+inference_engine  = "sql" | "tensorflow" | "pytorch" | "onnx" | "xgboost" | "ensemble" ;
+inference_precision = "float16" | "float32" | "float64" | "int8" | "int16" | "mixed" ;
+inference_backend = "cpu" | "gpu" | "tpu" | "wasm" | "sqlite" | "duckdb" | "postgres" ;
+inference_mode    = "training" | "inference" | "fine_tuning" | "transfer" ;
+
+inference_rules   = { inference_rule } ;
+inference_rule    = "WHEN", condition, "THEN", sql_query, "APPLY", css_block ;
+
+sql_query         = "QUERY", "[",
+                    "type:", query_type, ",",
+                    "database:", database_spec, ",",
+                    "sql:", sql_statement,
+                    "]" ;
+
+query_type        = "select" | "insert" | "update" | "delete" | "create"
+                  | "join" | "aggregate" | "window" | "recursive" | "ml_predict" ;
+
+database_spec     = "memory" | string | tensor_spec | "connection(", connection_string, ")" ;
+connection_string = string ;
+
+sql_statement     = string | multiline_string ;
+multiline_string  = "```sql", { character }, "```" ;
+
+css_dataset       = "@dataset", dataset_name, dataset_config, "{", data_schema, data_records, "}" ;
+dataset_name      = identifier ;
+dataset_config    = "[",
+                    "source:", dataset_source, ",",
+                    "format:", data_format, ",",
+                    "split:", dataset_split, ",",
+                    "shuffle:", boolean, ",",
+                    "cache:", boolean,
+                    "]" ;
+
+dataset_source    = "inline" | "external" | "generated" | "synthetic" | "streaming" ;
+data_format       = "csv" | "json" | "parquet" | "tfrecord" | "sql" | "tensor" ;
+dataset_split     = "[", train_split, ",", val_split, ",", test_split, "]" ;
+train_split       = "train:", number ;
+val_split         = "val:", number ;
+test_split        = "test:", number ;
+
+data_schema       = "SCHEMA:", "[", { column_def, [","] }, "]" ;
+column_def        = column_name, ":", column_type, [ "(", constraints, ")" ] ;
+column_name       = identifier ;
+column_type       = "INT" | "FLOAT" | "DOUBLE" | "DECIMAL" | "STRING"
+                  | "BOOL" | "DATE" | "TIME" | "DATETIME" | "TENSOR"
+                  | "VECTOR" | "MATRIX" | "JSON" | "BINARY" ;
+constraints       = constraint, { ",", constraint } ;
+constraint        = "PRIMARY KEY" | "UNIQUE" | "NOT NULL" | "DEFAULT", value
+                  | "CHECK", condition | "REFERENCES", table_name, "(", column_name, ")" ;
+
+data_records      = "DATA:", "[", { record, [","] }, "]" ;
+record            = "ROW:", "[", { field_value, [","] }, "]" ;
+field_value       = sql_value | tensor_value ;
+
+sql_value         = sql_expression | sql_function | sql_aggregate | sql_window ;
+sql_expression    = sql_term, { ("+" | "-" | "||"), sql_term } ;
+sql_term          = sql_factor, { ("*" | "/" | "%"), sql_factor } ;
+sql_factor        = sql_primary | "(", sql_expression, ")" ;
+sql_primary       = number | string | column_reference | function_call
+                  | case_expression | cast_expression ;
+
+column_reference  = [ table_name, "." ], column_name ;
+table_name        = identifier ;
+
+function_call     = function_name, "(", [ function_args ], ")" ;
+function_args     = sql_expression, { ",", sql_expression } ;
+
+sql_function      = function_name, "(", [ function_args ], ")" ;
+function_name     = "ABS" | "CEIL" | "FLOOR" | "ROUND" | "EXP" | "LN" | "LOG"
+                  | "LOG10" | "LOG2" | "POW" | "POWER" | "SQRT" | "CBRT"
+                  | "SIN" | "COS" | "TAN" | "ASIN" | "ACOS" | "ATAN" | "ATAN2"
+                  | "SINH" | "COSH" | "TANH" | "RADIANS" | "DEGREES"
+                  | "PI" | "RANDOM" | "RAND" | "SIGN" | "MOD" | "TRUNC"
+                  | "GREATEST" | "LEAST" | "CLAMP" | "LERP" | "SMOOTHSTEP" ;
+
+sql_aggregate     = aggregate_func, "(", [ "DISTINCT" ], sql_expression, ")" ;
+aggregate_func    = "SUM" | "AVG" | "MEAN" | "MEDIAN" | "MODE" | "COUNT"
+                  | "MIN" | "MAX" | "STDDEV" | "VARIANCE" | "CORR" | "COVAR"
+                  | "PERCENTILE_CONT" | "PERCENTILE_DISC" | "GROUP_CONCAT"
+                  | "ARRAY_AGG" | "JSON_AGG" | "STRING_AGG" ;
+
+sql_window        = window_func, "OVER", "(", [ partition_clause ], [ order_clause ],
+                    [ frame_clause ], ")" ;
+window_func       = "ROW_NUMBER" | "RANK" | "DENSE_RANK" | "NTILE"
+                  | "LAG" | "LEAD" | "FIRST_VALUE" | "LAST_VALUE"
+                  | "NTH_VALUE" | "CUME_DIST" | "PERCENT_RANK" ;
+partition_clause  = "PARTITION BY", column_reference, { ",", column_reference } ;
+order_clause      = "ORDER BY", sort_spec, { ",", sort_spec } ;
+sort_spec         = column_reference, [ "ASC" | "DESC" ] ;
+frame_clause      = "ROWS", frame_spec | "RANGE", frame_spec ;
+frame_spec        = frame_start, [ frame_between ] | "CURRENT ROW" ;
+frame_start       = "UNBOUNDED PRECEDING" | integer, "PRECEDING" ;
+frame_between     = "BETWEEN", frame_bound, "AND", frame_bound ;
+frame_bound       = frame_start | "CURRENT ROW" | "UNBOUNDED FOLLOWING"
+                  | integer, "FOLLOWING" ;
+
+case_expression   = "CASE", [ case_operand ],
+                    { "WHEN", when_condition, "THEN", result_expression },
+                    [ "ELSE", else_expression ],
+                    "END" ;
+
+case_operand      = sql_expression ;
+when_condition    = condition ;
+result_expression = sql_expression ;
+else_expression   = sql_expression ;
+
+cast_expression   = "CAST", "(", sql_expression, "AS", data_type, ")"
+                  | sql_expression, "::", data_type ;
+
+data_type         = column_type | "INTEGER" | "REAL" | "TEXT" | "BLOB"
+                  | "NUMERIC" | "BOOLEAN" | "TIMESTAMP" | "INTERVAL"
+                  | "UUID" | "ARRAY" | "VECTOR" ;
+
+css_query         = "@query", query_name, query_config, "{", query_body, "}" ;
+query_name        = identifier ;
+query_config      = "[",
+                    "type:", query_body_type, ",",
+                    "materialized:", boolean, ",",
+                    "cache:", cache_policy, ",",
+                    "ttl:", duration,
+                    "]" ;
+
+query_body_type   = "view" | "table" | "function" | "pipeline" | "materialized_view" ;
+cache_policy      = "none" | "memory" | "disk" | "distributed" ;
+duration          = number, time_unit ;
+time_unit         = "ms" | "s" | "m" | "h" | "d" ;
+
+query_body        = sql_statement | query_pipeline ;
+query_pipeline    = "PIPELINE:", "[", { pipeline_step, [","] }, "]" ;
+pipeline_step     = step_name, ":", "(", step_type, ":", step_config, ")" ;
+step_name         = identifier ;
+step_type         = "sql" | "transform" | "aggregate" | "join" | "filter" | "window" ;
+step_config       = sql_statement | transformation ;
+
+transformation    = "TRANSFORM", "[",
+                    "input:", transformation_input, ",",
+                    "operations:", "[", { operation, [","] }, "]", ",",
+                    "output:", transformation_output,
+                    "]" ;
+
+transformation_input = column_reference | tensor_spec | "SELECT", "*", "FROM", table_name ;
+operation         = operation_type, "(", operation_args, ")" ;
+operation_type    = "normalize" | "standardize" | "one_hot" | "embed"
+                  | "pca" | "kmeans" | "scale" | "clip" | "noise" | "augment"
+                  | "resample" | "interpolate" | "derivative" | "integrate" ;
+operation_args    = sql_expression, { ",", sql_expression } ;
+transformation_output = "RETURNS", data_type | "AS", table_name ;
+
+condition         = sql_condition | css_condition | ml_condition ;
+sql_condition     = boolean_expression ;
+boolean_expression = boolean_term, { "OR", boolean_term } ;
+boolean_term      = boolean_factor, { "AND", boolean_factor } ;
+boolean_factor    = [ "NOT" ], comparison | "(", boolean_expression, ")" ;
+comparison        = sql_expression, comparison_operator, sql_expression ;
+comparison_operator = "=" | "!=" | "<>" | "<" | "<=" | ">" | ">="
+                    | "LIKE" | "NOT LIKE" | "ILIKE" | "IN" | "NOT IN"
+                    | "BETWEEN" | "IS NULL" | "IS NOT NULL"
+                    | "EXISTS" | "ANY" | "ALL" ;
+
+ml_condition      = "PREDICT", "(", model_reference, ",", features, ")", comparison_operator, threshold ;
+model_reference   = identifier | "MODEL", "(", model_spec, ")" ;
+features          = "[", { sql_expression, [","] }, "]" ;
+threshold         = number | sql_expression ;
+
+css_block         = "{", css_rules, "}" | "APPLY", style_function ;
+style_function    = function_name, "(", [ function_args ], ")" ;
+
+sql_binding_rule  = "BIND", binding_name, "FROM", sql_query, "AS", binding_type ;
+binding_name      = identifier ;
+binding_type      = "tensor" | "scalar" | "vector" | "color" | "gradient" | "animation" ;
+
+sql_style_value   = sql_scalar | sql_vector | sql_gradient | sql_animation ;
+sql_scalar        = "SCALAR", "(", sql_query, ")" ;
+sql_vector        = "VECTOR", "(", sql_query, "ORDER BY", order_clause, ")" ;
+sql_gradient      = "GRADIENT", "(",
+                    "colors:", sql_query, ",",
+                    "positions:", sql_query, ",",
+                    "angle:", sql_expression,
+                    ")" ;
+sql_animation     = "ANIMATION", "(",
+                    "keyframes:", sql_query, ",",
+                    "duration:", sql_expression, ",",
+                    "easing:", easing_function,
+                    ")" ;
+
+easing_function   = "linear" | "ease" | "ease-in" | "ease-out" | "ease-in-out"
+                  | cubic_bezier | steps | spring ;
+cubic_bezier      = "cubic-bezier", "(", number, ",", number, ",", number, ",", number, ")" ;
+steps             = "steps", "(", integer, [ ",", ( "start" | "end" ) ], ")" ;
+spring            = "spring", "(", number, [ ",", number ], ")" ;
+
+tensor_spec       = tensor_value ;
+model_spec        = string | identifier ;
+css_condition     = "STATE", identifier | "HAS", selector ;
+value             = css_value | sql_value ;
+
+property          = identifier | custom_property ;
+custom_property   = "--", identifier ;
+identifier        = letter, { letter | digit | "-" | "_" } ;
+integer           = digit, { digit } ;
+hex_digit         = digit | "a" | "b" | "c" | "d" | "e" | "f" | "A" | "B" | "C" | "D" | "E" | "F" ;
+letter            = "a" | "b" | ... | "z" | "A" | "B" | ... | "Z" ;
+digit             = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+character         = ? any Unicode character ? ;
+
+class             = ".", identifier ;
+id                = "#", identifier ;
+element           = identifier ;
+pseudo            = ":", ( "hover" | "focus" | "active" | "visited" | "before" | "after"
+                         | "first-child" | "last-child" | "nth-child(", expression, ")" ) ;
+attribute         = "[", identifier, [ ( "=" | "~=" | "|=" | "^=" | "$=" | "*=" ), string ], "]" ;
+combinator        = " " | ">" | "+" | "~" ;
 ```
 
 ### 13.6 Unified Example (TodoMVC)
