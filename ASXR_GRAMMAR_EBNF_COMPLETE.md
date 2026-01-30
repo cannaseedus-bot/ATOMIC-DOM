@@ -492,6 +492,67 @@ path            = "/", { character - " " } ;
 
 ---
 
+## 16. Control Plane ASCII (Pre-Semantic Layer)
+
+### 16.1 Control Operators
+```ebnf
+control_operator  = ascii_control | unicode_control | whitespace_semantic ;
+ascii_control     = x'00'..x'1F' | x'7F' ;
+unicode_control   = u200B..u206F ;
+whitespace_semantic = space_tab_newline | zero_width ;
+
+space_tab_newline = " " | "\t" | "\n" | "\r" ;
+zero_width        = u200B | u200C | u200D | uFEFF ;
+```
+
+### 16.2 Control Plane Assignments
+```ebnf
+control_plane_block = "@control-plane", "{", { control_operator_def }, "}" ;
+control_operator_def = "@operator", control_name, "(", control_literal, ")",
+                       "=", control_semantics, ";" ;
+control_name      = identifier ;
+control_literal   = string_literal ;
+control_semantics = identifier | control_semantics, "|", identifier ;
+```
+
+### 16.3 Pre-Semantic Control Layer
+```ebnf
+pre_semantic_layer = "raw_bytes", "→", "control_parsing", "→", "interpretation" ;
+
+control_parsing    = "{",
+                     "phase:", phase_operator, ",",
+                     "context:", context_stack, ",",
+                     "mode:", grammar_mode, ",",
+                     "flow:", flow_directives,
+                     "}" ;
+
+phase_operator     = "NUL" | "SOH" | "STX" | "ETX" | "EOT" ;
+context_stack      = "[", context, { ",", context }, "]" ;
+context            = identifier ;
+grammar_mode       = "text" | "binary" | "escape" | "literal" ;
+flow_directives    = "{",
+                     "can-collapse:", boolean_literal, ",",
+                     "can-escape:", boolean_literal, ",",
+                     "can-nest:", boolean_literal,
+                     "}" ;
+```
+
+### 16.4 Control Scan Pipeline
+```ebnf
+control_scan_block = "@control-scan", "{",
+                     "extract:", control_ranges, ",",
+                     "graph:", control_graph,
+                     "}" ;
+control_ranges     = string_literal ;
+control_graph      = "{",
+                     "nodes:", identifier, ",",
+                     "edges:", identifier, ",",
+                     "metadata:", identifier,
+                     "}" ;
+```
+
+---
+
 ### ✅ ASXR_GRAMMAR_EBNF_COMPLETE.md — UPDATED & LOCKED
 
 This grammar now includes:
