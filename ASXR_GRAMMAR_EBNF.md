@@ -10,10 +10,11 @@
 ### 1.1 Atomic Block Structure
 
 ```ebnf
-atomic_block         = "@", block_type, [ block_id ], "{", block_body, "}" ;
+atomic_block         = "@atomic", [ block_id ], "{", block_body, "}"
+                     | "@", block_type, [ block_id ], "{", block_body, "}" ;
 block_type           = identifier | quoted_string ;
 block_id             = "[", identifier, "]" ;
-block_body           = { property_assignment | nested_block } ;
+block_body           = { property_assignment | statement | expression | nested_block } ;
 property_assignment  = property_name, ":", value, ";" ;
 property_name        = identifier | "@", identifier ;
 value                = literal | reference | expression ;
@@ -52,9 +53,13 @@ block_reference  = "#", identifier ;
 ### 2.1 Core Program Shape (Minimal)
 
 ```ebnf
-program              = { block | statement | plugin_directive } ;
+program              = { block | statement | plugin_directive
+                       | plugin_section | conflict_resolution
+                       | transform_directive } ;
 block                = atomic_block | dom_block | component_def ;
-block_body           = { statement | expression | nested_block } ;
+dom_block            = dom_atomic_block ;
+component_def        = "@component", identifier, "{", component_body, "}" ;
+component_body       = block_body ;
 ```
 
 ### 2.2 Plugin Directives and Declarations
@@ -81,7 +86,40 @@ syntax_rule          = "{",
                        "}" ;
 ```
 
-### 2.3 Control Flow as Plugin Statements
+### 2.3 Plugin Loading, Resolution, and Conflicts
+
+```ebnf
+plugin_section       = "@plugins", "{", plugin_load, { ",", plugin_load }, "}" ;
+plugin_load          = plugin_name, [ "as", identifier ], [ "version", version_spec ] ;
+version_spec         = string_literal | version_range ;
+version_range        = "[", version, ",", version, "]" ;
+
+conflict_resolution  = "@resolve", "conflicts", "{",
+                       conflict_rule, { ",", conflict_rule },
+                       "}" ;
+conflict_rule        = conflict_pair, ":", resolution ;
+conflict_pair        = "(", plugin_name, ",", plugin_name, ")" ;
+resolution           = "prefer", plugin_name
+                     | "merge", "{", merge_strategy, "}"
+                     | "error" ;
+```
+
+### 2.4 Transformation Pipeline
+
+```ebnf
+transform_directive  = "@transform", "using", plugin_name, "{",
+                       "input:", block_reference, ",",
+                       "output:", "[", output_spec, { ",", output_spec }, "]",
+                       "}" ;
+
+output_spec          = "{",
+                       "language:", ( "js" | "wasm" | "dom" | "ir" ), ",",
+                       "format:", ( "esm" | "cjs" | "iife" ),
+                       [ ",", "optimize:", boolean ],
+                       "}" ;
+```
+
+### 2.5 Control Flow as Plugin Statements
 
 ```ebnf
 plugin_statement     = if_statement | while_statement | for_statement
@@ -112,7 +150,7 @@ switch_body          = "{", block_body, "}" | atomic_block ;
 do_while_statement   = "@do", loop_block, "@while", "(", condition, ")" ;
 ```
 
-### 2.4 Statement Forms
+### 2.6 Statement Forms
 
 ```ebnf
 statement            = assignment | function_call | plugin_statement ;
@@ -213,7 +251,11 @@ epoch_value      = integer ;
 
 ```ebnf
 asxr_program     = { directive | definition } ;
-directive        = "@use", identifier, ";" ;
+directive        = "@use", identifier, ";"
+                | plugin_directive
+                | plugin_section
+                | conflict_resolution
+                | transform_directive ;
 definition       = block_definition | tokenizer_def |
                    endpoint_def | projection_def ;
 
@@ -241,6 +283,11 @@ endpoint_def     = "@endpoint", identifier, "{",
 
 ```ebnf
 identifier       = letter, { letter | digit | "_" } ;
+quoted_string    = string_literal ;
+regex_literal    = "/", { character - "/" }, "/" ;
+handler_ref      = block_reference ;
+version          = integer, { ".", integer } ;
+merge_strategy   = identifier | "union" | "priority" | "override" ;
 letter           = "A" | "B" | ... | "Z" | "a" | "b" | ... | "z" ;
 digit            = "0" | "1" | ... | "9" ;
 hex_digit        = digit | "A" | "B" | "C" | "D" | "E" | "F" |
@@ -355,13 +402,16 @@ This section merges the ASX-R EBNF with Atomic DOM concepts to define a unified 
 ### 13.1 Atomic DOM Block Grammar
 
 ```ebnf
-dom_atomic_block = "@dom", block_type, block_id, "{", dom_operations, "}" ;
-block_type       = "frame" | "mutation" | "style" | "layout" ;
-block_id         = "[", element_selector, "]" ;
+dom_atomic_block = "@dom", dom_block_type, dom_block_id, "{", dom_operations, "}" ;
+dom_block_type   = "frame" | "mutation" | "style" | "layout" | "component" | "element"
+                 | identifier ;
+dom_block_id     = "[", element_selector, "]" ;
+element_selector = selector | string_literal | identifier | id | class ;
 dom_operations   = { dom_operation } ;
 dom_operation    = property_op | child_op | attribute_op | class_op ;
 property_op      = "prop", ":", identifier, "=", value, ";" ;
 child_op         = "children", ":", "[", element_def, { ",", element_def }, "]", ";" ;
+element_def      = dom_atomic_block | block_reference | element_selector ;
 attribute_op     = "attr", ":", identifier, "=", string_literal, ";" ;
 class_op         = "class", ":", class_list, ";" ;
 ```
@@ -545,8 +595,8 @@ boolean           = "true" | "false" ;
 array_value       = "[", { css_value, [ "," ] }, "]" ;
 function_value    = function_name, "(", { css_value, [ "," ] }, ")" ;
 var_reference     = "var(", string, [ ",", css_value ], ")" ;
-calc_value        = "calc(", expression, ")" ;
-expression        = term, { ( "+" | "-" ), term } ;
+calc_value        = "calc(", calc_expression, ")" ;
+calc_expression   = term, { ( "+" | "-" ), term } ;
 term              = factor, { ( "*" | "/" ), factor } ;
 factor            = number | dimension | percentage | "(", expression, ")" | var_reference ;
 
