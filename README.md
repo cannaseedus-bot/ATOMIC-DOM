@@ -199,6 +199,50 @@ syntax_rule      = "{",
 }
 ```
 
+## ECMAScript Integration Strategy
+
+ASX-R can integrate with JavaScript in several ways. The primary concern is balancing
+adoption (minimal friction for JS developers) with language innovation and runtime
+optimization.
+
+### Option 1: ECMAScript Syntax (JS Superset)
+
+Treat ASX-R as a JS dialect so teams keep their existing toolchains (TypeScript, Babel,
+ESLint) while layering atomic DOM semantics into familiar syntax. This maximizes adoption,
+but constrains ASX-R to JS grammar and semantics.
+
+### Option 2: Bridge Language (Dedicated ASX-R + JS Interop)
+
+Keep ASX-R as a separate language with a compiler that emits optimized JS and a runtime
+adapter for interoperability. This allows maximum language design freedom and runtime
+optimizations, but requires new tooling for parsing, linting, and editor support.
+
+### Option 3: Hybrid (TypeScript-Style Superset)
+
+Model ASX-R as a typed superset that compiles to JS, preserving JS ergonomics while
+enabling new syntax for atomic control flow and DOM operations. This enables strong
+interoperability at the cost of compiler and source-map complexity.
+
+### Option 4: Embedded DSL (Template/JSX)
+
+Embed ASX-R constructs in JS via tagged templates or JSX-like syntax. This keeps
+adoption easy and tooling familiar, but limits static analysis and compiler optimization.
+
+### Recommended Path
+
+Start with the bridge strategy to keep ASX-R clean and optimizable, while providing a
+first-class JS/TS interop layer. As usage grows, evolve toward a hybrid model by exposing
+TypeScript-compatible APIs and exploring JS syntax proposals for atomic batching and
+declarative DOM operations.
+
+### Implementation Phases
+
+1. **Bridge compiler**: Compile `.asxr` to optimized JS plus optional `.d.ts` output.
+2. **Interop runtime**: Provide a JS adapter API for mounting ASX-R components in
+   existing JS/TS apps.
+3. **Hybrid evolution**: Add TypeScript-friendly decorators and AST transforms that
+   preserve atomic semantics while staying inside mainstream tooling.
+
 ## Control Flow as Plugins
 
 Control flow is not baked into the core; it arrives via plugins.
