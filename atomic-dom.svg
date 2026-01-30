@@ -1,0 +1,96 @@
+<svg
+  width="512"
+  height="512"
+  viewBox="0 0 512 512"
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-label="Atomic DOM Logo"
+>
+
+  <defs>
+    <!-- Background -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1020"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <!-- Accent -->
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+
+    <!-- Subtle glow -->
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Card -->
+  <rect x="0" y="0" width="512" height="512" rx="96" fill="url(#bg)"/>
+
+  <!-- Atomic Ring -->
+  <circle
+    cx="256"
+    cy="236"
+    r="128"
+    fill="none"
+    stroke="url(#accent)"
+    stroke-width="14"
+    opacity="0.85"
+  />
+
+  <!-- DOM Grid -->
+  <g stroke="#334155" stroke-width="4" opacity="0.5">
+    <line x1="192" y1="172" x2="320" y2="172"/>
+    <line x1="192" y1="236" x2="320" y2="236"/>
+    <line x1="192" y1="300" x2="320" y2="300"/>
+
+    <line x1="192" y1="172" x2="192" y2="300"/>
+    <line x1="256" y1="172" x2="256" y2="300"/>
+    <line x1="320" y1="172" x2="320" y2="300"/>
+  </g>
+
+  <!-- Nucleus -->
+  <g filter="url(#softGlow)">
+    <circle
+      cx="256"
+      cy="236"
+      r="16"
+      fill="#22d3ee"
+    />
+    <line x1="256" y1="212" x2="256" y2="260" stroke="#22d3ee" stroke-width="3"/>
+    <line x1="232" y1="236" x2="280" y2="236" stroke="#22d3ee" stroke-width="3"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text
+    x="256"
+    y="400"
+    text-anchor="middle"
+    font-size="64"
+    font-family="system-ui, -apple-system, Segoe UI, sans-serif"
+    font-weight="700"
+    fill="#e5e7eb"
+    letter-spacing="-2"
+  >
+    ATOMIC
+  </text>
+
+  <text
+    x="256"
+    y="444"
+    text-anchor="middle"
+    font-size="36"
+    font-family="system-ui, -apple-system, Segoe UI, sans-serif"
+    fill="#94a3b8"
+    letter-spacing="6"
+  >
+    DOM
+  </text>
+
+</svg>
