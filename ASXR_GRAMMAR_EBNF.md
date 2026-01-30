@@ -47,85 +47,77 @@ path_expression  = ( identifier | "@", identifier ),
 block_reference  = "#", identifier ;
 ```
 
-## 2. Control Flow Extensions
+## 2. Plugin-Based Syntax Extensions
 
-### 2.1 Control Flow Integration
+### 2.1 Core Program Shape (Minimal)
 
 ```ebnf
-program              = { block | control_flow } ;
-control_flow         = while_loop | for_loop | do_while_loop
-                     | conditional | switch_statement
-                     | error_boundary ;
+program              = { block | statement | plugin_directive } ;
+block                = atomic_block | dom_block | component_def ;
+block_body           = { statement | expression | nested_block } ;
 ```
 
-### 2.2 Loop Constructs
+### 2.2 Plugin Directives and Declarations
 
 ```ebnf
-while_loop           = "@while", [ loop_modifier ], "(", condition, ")",
-                       loop_body ;
-for_loop             = "@for", [ loop_modifier ], "(", iterator, "in",
-                       iterable, ")", loop_body ;
-do_while_loop        = "@do", loop_body, "@while", "(", condition, ")" ;
+plugin_directive     = "@use", "plugin", plugin_name,
+                       [ "from", string_literal ],
+                       [ "with", plugin_config ], ";" ;
+plugin_name          = identifier | namespace_path ;
+namespace_path       = identifier, { "/", identifier } ;
+plugin_config        = "{", [ config_pair, { ",", config_pair } ], "}" ;
+config_pair          = identifier, ":", value ;
 
-loop_modifier        = "batch" | "parallel" | "incremental" | "lazy" ;
-loop_body            = "{", loop_content, "}" | atomic_block ;
-loop_content         = { statement | atomic_block } ;
-
-condition            = expression | reference | boolean_literal ;
-iterator             = identifier | destructuring_pattern ;
-iterable             = reference | array_literal | range_expression ;
-destructuring_pattern = "[", identifier, { ",", identifier }, "]"
-                      | "{", identifier, { ",", identifier }, "}" ;
-range_expression     = "[", integer, "..", integer, [ "step", integer ], "]" ;
+plugin_decl          = "@plugin", plugin_name, "{",
+                       "version:", string_literal, ",",
+                       "syntax:", "[", syntax_rule, { ",", syntax_rule }, "]",
+                       "handlers:", "[", handler_ref, { ",", handler_ref }, "]",
+                       [ "conflicts:", "[", plugin_name, { ",", plugin_name }, "]" ],
+                       "}" ;
+syntax_rule          = "{",
+                       "pattern:", regex_literal, ",",
+                       "ast_node:", identifier, ",",
+                       "priority:", integer,
+                       "}" ;
 ```
 
-### 2.3 Conditional Constructs
+### 2.3 Control Flow as Plugin Statements
 
 ```ebnf
-conditional          = "@if", [ reactive_modifier ], "(", condition, ")",
-                       then_branch, [ else_branch ] ;
-then_branch          = "{", conditional_content, "}" | atomic_block ;
-else_branch          = "@else", ( "{", conditional_content, "}"
+plugin_statement     = if_statement | while_statement | for_statement
+                     | switch_statement | do_while_statement ;
+
+if_statement         = "@if", "(", condition, ")", then_block,
+                       [ else_block ] ;
+then_block           = "{", block_body, "}" | atomic_block ;
+else_block           = "@else", ( "{", block_body, "}"
                                | atomic_block
-                               | "@if", [ reactive_modifier ],
-                                 "(", condition, ")", then_branch ) ;
-conditional_content  = { statement | atomic_block } ;
-```
+                               | if_statement ) ;
 
-### 2.4 Switch Constructs
+while_statement      = "@while", "(", condition, ")", loop_block ;
+loop_block           = "{", loop_body, "}" | atomic_block ;
 
-```ebnf
+for_statement        = "@for", "(", for_spec, ")", loop_block ;
+for_spec             = identifier, "in", expression
+                     | for_init, ";", condition, ";", for_update ;
+for_init             = [ assignment_expr | expression ] ;
+for_update           = [ expression ] ;
+
 switch_statement     = "@switch", "(", expression, ")", "{",
                        { case_clause }, [ default_clause ], "}" ;
-case_clause          = "@case", literal, ":", switch_body ;
+case_clause          = "@case", expression, ":", switch_body ;
 default_clause       = "@default", ":", switch_body ;
-switch_body          = "{", { statement | atomic_block }, "}" | atomic_block ;
+switch_body          = "{", block_body, "}" | atomic_block ;
+
+do_while_statement   = "@do", loop_block, "@while", "(", condition, ")" ;
 ```
 
-### 2.5 Error Boundaries
+### 2.4 Statement Forms
 
 ```ebnf
-error_boundary       = "@try", "{", try_content, "}",
-                       "@catch", "(", identifier, ")", "{", catch_content, "}" ;
-try_content          = { statement | atomic_block } ;
-catch_content        = { statement | atomic_block } ;
-```
-
-### 2.6 Reactive Control Flow
-
-```ebnf
-reactive_modifier    = "reactive" ;
-reactive_for         = "@for", "reactive", "(", iterator, "in",
-                       reactive_iterable, ")", loop_body ;
-reactive_if          = "@if", "reactive", "(", condition, ")", then_branch ;
-reactive_iterable    = reference | expression ;
-```
-
-### 2.7 Statement Forms
-
-```ebnf
-statement            = assignment | function_call | control_flow ;
+statement            = assignment | function_call | plugin_statement ;
 assignment           = "@set", identifier, "=", expression, ";" ;
+assignment_expr      = identifier, "=", expression ;
 function_call        = "@call", identifier, "(", [ expression, { ",", expression } ], ")", ";" ;
 ```
 
