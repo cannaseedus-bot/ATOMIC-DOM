@@ -47,9 +47,91 @@ path_expression  = ( identifier | "@", identifier ),
 block_reference  = "#", identifier ;
 ```
 
-## 2. Extended Grammar for Runtime Server API
+## 2. Control Flow Extensions
 
-### 2.1 HTTP API Grammar
+### 2.1 Control Flow Integration
+
+```ebnf
+program              = { block | control_flow } ;
+control_flow         = while_loop | for_loop | do_while_loop
+                     | conditional | switch_statement
+                     | error_boundary ;
+```
+
+### 2.2 Loop Constructs
+
+```ebnf
+while_loop           = "@while", [ loop_modifier ], "(", condition, ")",
+                       loop_body ;
+for_loop             = "@for", [ loop_modifier ], "(", iterator, "in",
+                       iterable, ")", loop_body ;
+do_while_loop        = "@do", loop_body, "@while", "(", condition, ")" ;
+
+loop_modifier        = "batch" | "parallel" | "incremental" | "lazy" ;
+loop_body            = "{", loop_content, "}" | atomic_block ;
+loop_content         = { statement | atomic_block } ;
+
+condition            = expression | reference | boolean_literal ;
+iterator             = identifier | destructuring_pattern ;
+iterable             = reference | array_literal | range_expression ;
+destructuring_pattern = "[", identifier, { ",", identifier }, "]"
+                      | "{", identifier, { ",", identifier }, "}" ;
+range_expression     = "[", integer, "..", integer, [ "step", integer ], "]" ;
+```
+
+### 2.3 Conditional Constructs
+
+```ebnf
+conditional          = "@if", [ reactive_modifier ], "(", condition, ")",
+                       then_branch, [ else_branch ] ;
+then_branch          = "{", conditional_content, "}" | atomic_block ;
+else_branch          = "@else", ( "{", conditional_content, "}"
+                               | atomic_block
+                               | "@if", [ reactive_modifier ],
+                                 "(", condition, ")", then_branch ) ;
+conditional_content  = { statement | atomic_block } ;
+```
+
+### 2.4 Switch Constructs
+
+```ebnf
+switch_statement     = "@switch", "(", expression, ")", "{",
+                       { case_clause }, [ default_clause ], "}" ;
+case_clause          = "@case", literal, ":", switch_body ;
+default_clause       = "@default", ":", switch_body ;
+switch_body          = "{", { statement | atomic_block }, "}" | atomic_block ;
+```
+
+### 2.5 Error Boundaries
+
+```ebnf
+error_boundary       = "@try", "{", try_content, "}",
+                       "@catch", "(", identifier, ")", "{", catch_content, "}" ;
+try_content          = { statement | atomic_block } ;
+catch_content        = { statement | atomic_block } ;
+```
+
+### 2.6 Reactive Control Flow
+
+```ebnf
+reactive_modifier    = "reactive" ;
+reactive_for         = "@for", "reactive", "(", iterator, "in",
+                       reactive_iterable, ")", loop_body ;
+reactive_if          = "@if", "reactive", "(", condition, ")", then_branch ;
+reactive_iterable    = reference | expression ;
+```
+
+### 2.7 Statement Forms
+
+```ebnf
+statement            = assignment | function_call | control_flow ;
+assignment           = "@set", identifier, "=", expression, ";" ;
+function_call        = "@call", identifier, "(", [ expression, { ",", expression } ], ")", ";" ;
+```
+
+## 3. Extended Grammar for Runtime Server API
+
+### 3.1 HTTP API Grammar
 
 ```ebnf
 api_request      = http_method, sp, api_endpoint, [ "?", query_params ],
@@ -67,7 +149,7 @@ reason_phrase    = "STATE_ACCEPTED" | "PROPOSAL_REJECTED" |
 response_body    = state_acknowledgment | error_projection ;
 ```
 
-### 2.2 State Acknowledgment Grammar
+### 3.2 State Acknowledgment Grammar
 
 ```ebnf
 state_acknowledgment = "@ack", "{",
@@ -79,9 +161,9 @@ projection        = "{", "target:", identifier, ",",
                     "content:", quoted_string, "}" ;
 ```
 
-## 3. Shell Subsystem Grammar
+## 4. Shell Subsystem Grammar
 
-### 3.1 Tokenizer Plugin Grammar
+### 4.1 Tokenizer Plugin Grammar
 
 ```ebnf
 tokenizer_def    = "@tokenizer", identifier, "{",
@@ -93,7 +175,7 @@ pattern          = "{", "match:", regex_literal, ",",
                    "transform:", block_reference, "}" ;
 ```
 
-### 3.2 Multi-Shell Grammar
+### 4.2 Multi-Shell Grammar
 
 ```ebnf
 multi_shell_cmd  = shell_type, ":", shell_command ;
@@ -106,9 +188,9 @@ python_command   = python_expression ;
 xjson_command    = extended_json_block ;
 ```
 
-## 4. Type and Value Grammar
+## 5. Type and Value Grammar
 
-### 4.1 Primitive Types
+### 5.1 Primitive Types
 
 ```ebnf
 literal          = string_literal | number_literal |
@@ -124,7 +206,7 @@ reference        = "{{", path_expression, "}}" ;
 expression       = arithmetic_expr | logical_expr | comparison_expr ;
 ```
 
-### 4.2 Special Runtime Types
+### 5.2 Special Runtime Types
 
 ```ebnf
 hash_value       = "sha256:", hex_string ;
@@ -133,9 +215,9 @@ phase_name       = "genesis" | "execution" | "compression" | "projection" ;
 epoch_value      = integer ;
 ```
 
-## 5. Complete Program Structure
+## 6. Complete Program Structure
 
-### 5.1 ASX-R Program
+### 6.1 ASX-R Program
 
 ```ebnf
 asxr_program     = { directive | definition } ;
@@ -152,7 +234,7 @@ block_schema     = "{", "properties:", property_defs,
                    "}" ;
 ```
 
-### 5.2 Endpoint Definition
+### 6.2 Endpoint Definition
 
 ```ebnf
 endpoint_def     = "@endpoint", identifier, "{",
@@ -163,7 +245,7 @@ endpoint_def     = "@endpoint", identifier, "{",
                    "}" ;
 ```
 
-## 6. Terminal Symbols
+## 7. Terminal Symbols
 
 ```ebnf
 identifier       = letter, { letter | digit | "_" } ;
@@ -176,31 +258,31 @@ sp               = ? whitespace character ? ;
 crlf             = "\r\n" ;
 ```
 
-## 7. Key Grammar Updates from Our Discussion
+## 8. Key Grammar Updates from Our Discussion
 
-### 7.1 Explicit State Transition Grammar
+### 8.1 Explicit State Transition Grammar
 
 Added `@propose` construct to formally represent state proposals to the runtime server.
 
-### 7.2 Shell Inference Integration
+### 8.2 Shell Inference Integration
 
 Added `shell_command` grammar to support the "shell = inference" model, with specific syntax for different shell types.
 
-### 7.3 API-First Design
+### 8.3 API-First Design
 
 Formalized HTTP API grammar showing how runtime interactions occur via structured endpoints.
 
-### 7.4 Tokenizer Plugin System
+### 8.4 Tokenizer Plugin System
 
 Added `@tokenizer` definition for creating syntax interpreters, enabling multiple "computer tongues."
 
-### 7.5 Projection Response Grammar
+### 8.5 Projection Response Grammar
 
 Added `@ack` response structure showing how the runtime returns state acknowledgments with projections.
 
-## 8. Example Valid Programs
+## 9. Example Valid Programs
 
-### 8.1 Genesis Block Definition
+### 9.1 Genesis Block Definition
 
 ```asxr
 @block system {
@@ -229,7 +311,7 @@ Added `@ack` response structure showing how the runtime returns state acknowledg
 }
 ```
 
-### 8.2 Shell Command via API
+### 9.2 Shell Command via API
 
 ```text
 POST /api/asc-r/runtime
@@ -238,7 +320,7 @@ Content-Type: application/asxr
 bash: ls -la /var/www
 ```
 
-### 8.3 Tokenizer Plugin Definition
+### 9.3 Tokenizer Plugin Definition
 
 ```asxr
 @tokenizer xjson {
@@ -251,7 +333,7 @@ bash: ls -la /var/www
 }
 ```
 
-## 9. Grammar Consistency Rules
+## 10. Grammar Consistency Rules
 
 1. **Closed World**: All identifiers must be declared before use (except built-in types)
 2. **Explicit State**: All state transitions must use `@propose` with explicit prior hash
@@ -259,7 +341,7 @@ bash: ls -la /var/www
 4. **Deterministic Parsing**: Grammar is LL(1) for deterministic parsing
 5. **Replay Sufficiency**: Parse tree contains all information needed for execution replay
 
-## 10. Implementation Notes
+## 11. Implementation Notes
 
 This grammar can be implemented with:
 
@@ -270,15 +352,15 @@ This grammar can be implemented with:
 
 The grammar maintains **backward compatibility** with previous atomic block syntax while extending it with server and shell constructs.
 
-## 11. Validation
+## 12. Validation
 
 This grammar defines the **syntactic structure** of ASX-R. Semantic validation (laws, schemas, constraints) occurs after parsing, during the state admission process.
 
-## 12. Atomic DOM Unified Grammar (Extension)
+## 13. Atomic DOM Unified Grammar (Extension)
 
 This section merges the ASX-R EBNF with Atomic DOM concepts to define a unified grammar for declarative, transactional DOM updates.
 
-### 12.1 Atomic DOM Block Grammar
+### 13.1 Atomic DOM Block Grammar
 
 ```ebnf
 dom_atomic_block = "@dom", block_type, block_id, "{", dom_operations, "}" ;
@@ -307,7 +389,7 @@ class_op         = "class", ":", class_list, ";" ;
 }
 ```
 
-### 12.2 DOM State Proposals (Virtual DOM Alternative)
+### 13.2 DOM State Proposals (Virtual DOM Alternative)
 
 ```ebnf
 dom_proposal     = "@propose_dom", "{",
@@ -355,7 +437,7 @@ element_path     = integer, { ".", integer } ;
 }
 ```
 
-### 12.3 Render Shell Grammar (JSX/Templates)
+### 13.3 Render Shell Grammar (JSX/Templates)
 
 ```ebnf
 render_shell      = shell_type, ":", render_expression ;
@@ -380,7 +462,7 @@ vanilla: @dom element[button] {
 }
 ```
 
-### 12.4 Browser Runtime API Grammar
+### 13.4 Browser Runtime API Grammar
 
 ```ebnf
 browser_api      = method, ":", api_call ;
@@ -418,7 +500,7 @@ microwave: {
 }
 ```
 
-### 12.5 CSS Atomic Grammar
+### 13.5 CSS Atomic Grammar
 
 ```ebnf
 css_atomic       = "@css", scope, "{", css_rules, "}" ;
@@ -447,7 +529,7 @@ css_in_js        = "@css", "js", "{",
 }
 ```
 
-### 12.6 Unified Example (TodoMVC)
+### 13.6 Unified Example (TodoMVC)
 
 ```asxr
 @block todo_app {
