@@ -499,13 +499,28 @@ css_atomic       = "@css", scope, "{", css_rules, "}" ;
 scope            = "global" | "scoped" | "shadow" ;
 css_rules        = { css_rule } ;
 css_rule         = selector, "{", declarations, "}" ;
-declarations     = { property, ":", value, ";" } ;
+declarations     = { declaration } ;
+declaration      = property, ":", value, ";"
+                 | property, ":", array_value, ";" ;
 
 css_in_js        = "@css", "js", "{",
                    "atomic:", boolean, ",",
-                   "generate:", ("classes" | "inline" | "variables"),
+                   "generate:", ("classes" | "inline" | "variables"), ",",
+                   "breakpoints:", array_value, ",",
+                   "spacing:", array_value, ",",
+                   "colors:", array_value, ",",
                    "rules:", css_rules,
                    "}" ;
+
+value            = string | number | color | function | var_ref | calc ;
+array_value      = "[", { value, [","] }, "]" ;
+string           = '"', { character }, '"' ;
+color            = "#", hex_digit, { hex_digit }
+                 | "rgb(", number, ",", number, ",", number, ")"
+                 | "rgba(", number, ",", number, ",", number, ",", number, ")" ;
+var_ref          = "var(", string, ")" ;
+function         = function_name, "(", { value, [","] }, ")" ;
+calc             = "calc(", expression, ")" ;
 ```
 
 ```css
@@ -517,6 +532,22 @@ css_in_js        = "@css", "js", "{",
 
   .button.primary {
     background: var(--color-primary);
+  }
+}
+```
+
+```css
+@css js {
+  atomic: true,
+  generate: classes,
+  breakpoints: ["640px", "1024px"],
+  spacing: [0, 4, 8, 16],
+  colors: ["#111111", "#ffffff", "#007bff"],
+  rules: {
+    .card {
+      padding: [16px, 24px];
+      box-shadow: [0 2px 4px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.1)];
+    }
   }
 }
 ```
