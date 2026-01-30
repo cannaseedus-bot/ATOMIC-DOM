@@ -199,6 +199,61 @@ syntax_rule      = "{",
 }
 ```
 
+## CSS Atomic Grammar & Class Generation
+
+The CSS atomic grammar lives in `ASXR_GRAMMAR_EBNF.md` and now includes advanced directives for SQL inference, datasets, and class generation. The `@classes` directive provides a structured way to declare class categories and generation rules for utility-first workflows.
+
+```ebnf
+css_document = { directive } ;
+directive    = css_atomic | css_advanced | css_in_js | css_module
+             | css_inference | css_dataset | css_query | css_classes ;
+
+css_classes  = "@classes", class_config, "{", class_categories, "}" ;
+```
+
+```css
+@classes [
+  prefix: "ac-",
+  separator: "-",
+  responsive: true,
+  dark_mode: true,
+  important: false,
+  minify: true,
+  sourcemaps: true
+] {
+  layout {
+    display: [block, flex, grid, none];
+    position: [static, relative, absolute, fixed, sticky];
+  }
+  spacing {
+    margin: ["": [auto, 0..64, step: 4]];
+    padding: ["": [0..64, step: 4]];
+  }
+}
+```
+
+## Runtime-Selectable Projection Modes
+
+ASX-R projection is intentionally non-authoritative: Atomic Blocks define structure, while projection defines appearance. That separation allows a single build to select a projection strategy at runtime without changing structural law.
+
+**Recommended runtime selection**
+
+```text
+mode = userSelection || appProfile
+
+if mode === "dynamic"  -> stateful VDOM + diffing
+if mode === "static"   -> stateless projection
+if mode === "prebuilt" -> compile-time output
+```
+
+**Mode mapping**
+
+| Runtime choice | Best for | Notes |
+| --- | --- | --- |
+| dynamic | Gaming / realtime apps | Highest update frequency |
+| static | CMS / docs / dashboards | Recompute projection on change |
+| prebuilt | Static sites | No runtime projection cost |
+
 ## ECMAScript Integration Strategy
 
 ASX-R can integrate with JavaScript in several ways. The primary concern is balancing
