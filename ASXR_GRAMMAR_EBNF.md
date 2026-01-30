@@ -12,11 +12,11 @@
 ```ebnf
 atomic_block         = "@atomic", [ block_id ], "{", block_body, "}"
                      | "@", block_type, [ block_id ], "{", block_body, "}" ;
-block_type           = identifier | quoted_string ;
+block_type           = qualified_identifier | quoted_string ;
 block_id             = "[", identifier, "]" ;
 block_body           = { property_assignment | statement | expression | nested_block } ;
 property_assignment  = property_name, ":", value, ";" ;
-property_name        = identifier | "@", identifier ;
+property_name        = qualified_identifier | "@", qualified_identifier ;
 value                = literal | reference | expression ;
 nested_block         = atomic_block ;
 ```
@@ -153,10 +153,108 @@ do_while_statement   = "@do", loop_block, "@while", "(", condition, ")" ;
 ### 2.6 Statement Forms
 
 ```ebnf
-statement            = assignment | function_call | plugin_statement ;
+statement            = assignment | function_call | plugin_statement
+                     | server_call | binary_trigger | reactor_block ;
 assignment           = "@set", identifier, "=", expression, ";" ;
 assignment_expr      = identifier, "=", expression ;
 function_call        = "@call", identifier, "(", [ expression, { ",", expression } ], ")", ";" ;
+```
+
+### 2.7 Server Call Functions and Binary Triggers
+
+```ebnf
+server_call       = "@call", call_id, [ call_modifiers ], "(",
+                    [ arguments ], ")", [ "->", return_handler ], ";" ;
+call_id           = endpoint_url | function_reference ;
+endpoint_url      = protocol, "://", host, [ path ] ;
+function_reference = "#", identifier ;
+
+call_modifiers    = "[", modifier, { ",", modifier }, "]" ;
+modifier          = "async" | "stream" | "atomic" | "cache"
+                  | "retry", [ ":", integer ]
+                  | "background" | "batch", [ ":", string_literal ]
+                  | "priority", [ ":", string_literal ]
+                  | "timeout", [ ":", string_literal ]
+                  | "pool", [ ":", string_literal ] ;
+
+arguments         = named_arg, { ",", named_arg } ;
+named_arg         = identifier, ":", value ;
+
+return_handler    = block_reference | lambda_expr ;
+lambda_expr       = "(", [ parameters ], ")", "=>", block_body ;
+
+binary_trigger    = "@on", trigger_source, [ trigger_filter ],
+                    "{", trigger_body, "}" ;
+trigger_source    = "udp" | "dns" | "mqtt" | "raw-tcp" | "websocket-frame"
+                  | "dom-event" | "intersection" | "raf" | "timer" ;
+trigger_filter    = [ identifier, [ "=", string_literal ] ] ;
+trigger_body      = { binary_pattern | server_call | statement } ;
+
+binary_pattern    = "{",
+                    "match:", match_spec, ",",
+                    "action:", server_call,
+                    "}" ;
+match_spec        = hex_pattern | regex_binary | match_object ;
+hex_pattern       = "hex:", hex_string ;
+regex_binary      = "regex:", string_literal ;
+match_object      = "{", [ match_pair, { ",", match_pair } ], "}" ;
+match_pair        = identifier, ":", value ;
+```
+
+### 2.8 Reactor, Pooling, and Routing Constructs
+
+```ebnf
+reactor_block     = "@reactor", identifier, "{", reactor_body, "}" ;
+reactor_body      = { binary_trigger | timer_block | statement } ;
+
+timer_block       = "@every", string_literal, "{", block_body, "}" ;
+
+call_pool         = "@call-pool", identifier, "{",
+                    "endpoints:", "[", endpoint_url, { ",", endpoint_url }, "]", ",",
+                    "strategy:", string_literal, ",",
+                    "health-check:", string_literal, ",",
+                    "failover:", string_literal, ",",
+                    { server_call },
+                    "}" ;
+
+protocol_bridge   = "@protocol-bridge", identifier, "{",
+                    "source:", endpoint_url, ",",
+                    "protocol:", string_literal, ",",
+                    { message_def },
+                    "}" ;
+message_def       = "@message", string_literal, "{",
+                    "pattern:", match_spec, ",",
+                    "parse:", block_reference, ",",
+                    "action:", server_call,
+                    "}" ;
+
+websocket_router  = "@websocket-router", identifier, "{",
+                    "endpoint:", endpoint_url, ",",
+                    { route_def | timer_block },
+                    "}" ;
+route_def         = "@route", route_selector, "{",
+                    "action:", server_call,
+                    "}" ;
+route_selector    = identifier, "=", ( integer | hex_string | string_literal ) ;
+
+event_bus         = "@event-bus", identifier, "{",
+                    { subscription_def | middleware_def },
+                    "}" ;
+subscription_def  = "@subscribe", string_literal, "{",
+                    "action:", server_call,
+                    "}" ;
+middleware_def    = "@middleware", block_reference ;
+
+state_machine     = "@state-machine", identifier, "{",
+                    "initial:", string_literal, ",",
+                    { state_def },
+                    "}" ;
+state_def         = "@state", string_literal, "{",
+                    { state_event | timer_block },
+                    "}" ;
+state_event       = "@on", identifier, "{",
+                    "action:", server_call,
+                    "}" ;
 ```
 
 ## 3. Extended Grammar for Runtime Server API
@@ -224,7 +322,7 @@ xjson_command    = extended_json_block ;
 
 ```ebnf
 literal          = string_literal | number_literal |
-                   boolean_literal | null_literal ;
+                   boolean_literal | null_literal | block_string ;
 string_literal   = '"', { character - '"' }, '"' ;
 number_literal   = integer | float ;
 integer          = [ "-" ], digit, { digit } ;
@@ -234,6 +332,16 @@ null_literal     = "null" ;
 
 reference        = "{{", path_expression, "}}" ;
 expression       = arithmetic_expr | logical_expr | comparison_expr ;
+arithmetic_expr  = arithmetic_term, { ( "+" | "-" ), arithmetic_term } ;
+arithmetic_term  = arithmetic_factor, { ( "*" | "/" | "%" ), arithmetic_factor } ;
+arithmetic_factor = number_literal | reference | "(", arithmetic_expr, ")" ;
+comparison_expr  = arithmetic_expr, comparison_operator, arithmetic_expr ;
+logical_expr     = logical_term, { "OR", logical_term } ;
+logical_term     = logical_factor, { "AND", logical_factor } ;
+logical_factor   = [ "NOT" ], ( comparison_expr | "(", logical_expr, ")" ) ;
+comparison_operator = "=" | "!=" | "<>" | "<" | "<=" | ">" | ">="
+                    | "LIKE" | "NOT LIKE" | "ILIKE" | "IN" | "NOT IN"
+                    | "BETWEEN" | "IS NULL" | "IS NOT NULL" ;
 ```
 
 ### 5.2 Special Runtime Types
@@ -283,11 +391,16 @@ endpoint_def     = "@endpoint", identifier, "{",
 
 ```ebnf
 identifier       = letter, { letter | digit | "_" } ;
+qualified_identifier = identifier, { ".", ( identifier | integer ) } ;
 quoted_string    = string_literal ;
 regex_literal    = "/", { character - "/" }, "/" ;
 handler_ref      = block_reference ;
 version          = integer, { ".", integer } ;
 merge_strategy   = identifier | "union" | "priority" | "override" ;
+block_string     = "|", nl, indent, { text_line }, dedent ;
+protocol         = identifier ;
+host             = identifier, { ".", identifier } ;
+path             = "/", { character - sp } ;
 letter           = "A" | "B" | ... | "Z" | "a" | "b" | ... | "z" ;
 digit            = "0" | "1" | ... | "9" ;
 hex_digit        = digit | "A" | "B" | "C" | "D" | "E" | "F" |
@@ -295,6 +408,9 @@ hex_digit        = digit | "A" | "B" | "C" | "D" | "E" | "F" |
 character        = ? any Unicode character ? ;
 sp               = ? whitespace character ? ;
 crlf             = "\r\n" ;
+nl               = "\n" ;
+indent           = ? indentation increase ? ;
+dedent           = ? indentation decrease ? ;
 ```
 
 ## 8. Key Grammar Updates from Our Discussion
@@ -1807,4 +1923,45 @@ raf: [
     prop: animation = "fadeIn 0.3s"
   }
 ]
+```
+
+## 14. π-Geometric Tensor Calculus Specification (Extension)
+
+This section defines a lightweight annotation DSL used for π-geometric tensor calculus and
+WebGPU/Phi-3 architecture notes.
+
+```ebnf
+quantum_spec_document     = { spec_section } ;
+spec_section              = quantum_foundation_block | architecture_block
+                          | heading | code_block | text_block ;
+
+quantum_foundation_block  = "@quantum_geometric_foundation", nl,
+                            indent, { foundation_entry }, dedent ;
+foundation_entry          = annotation_pair | core_unification_block ;
+
+core_unification_block    = "@core.unification", nl,
+                            indent, { theorem_block }, dedent ;
+theorem_block             = "@theorem", ".", integer, ":", string_literal, nl,
+                            indent,
+                            "formal:", annotation_value, nl,
+                            "where:", nl, indent, { where_entry }, dedent,
+                            "interpretation:", block_string,
+                            dedent ;
+
+where_entry               = annotation_key, where_op, annotation_value, nl ;
+where_op                  = ":" | "=" | "∈" ;
+
+architecture_block        = heading, nl, { annotation_pair | code_block | text_block } ;
+
+annotation_pair           = annotation_key, ":", annotation_value, nl ;
+annotation_key            = qualified_identifier | identifier ;
+annotation_value          = string_literal | number_literal | identifier
+                          | block_string | free_text ;
+
+heading                   = "#", { "#" }, sp, free_text, nl ;
+code_block                = "```", identifier, nl, { code_line }, "```", nl ;
+code_line                 = { character - nl }, nl ;
+text_block                = { text_line } ;
+text_line                 = free_text, nl ;
+free_text                 = { character - nl } ;
 ```
