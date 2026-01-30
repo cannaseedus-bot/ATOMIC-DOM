@@ -1003,6 +1003,22 @@ attribute         = "[", identifier, [ ( "=" | "~=" | "|=" | "^=" | "$=" | "*=" 
 combinator        = " " | ">" | "+" | "~" ;
 ```
 
+```css
+@css js {
+  atomic: true,
+  generate: classes,
+  breakpoints: ["640px", "1024px"],
+  spacing: [0, 4, 8, 16],
+  colors: ["#111111", "#ffffff", "#007bff"],
+  rules: {
+    .card {
+      padding: [16px, 24px];
+      box-shadow: [0 2px 4px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.1)];
+    }
+  }
+}
+```
+
 ### 13.6 Unified Example (TodoMVC)
 
 ```asxr
