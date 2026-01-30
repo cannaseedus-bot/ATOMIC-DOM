@@ -53,6 +53,34 @@ requestAnimationFrame(() => {
 - **CSS is global**: cascading styles can affect unrelated nodes.
 - **JavaScript can observe mid-update** via MutationObserver.
 
+## What We Have vs What We Want
+
+Today’s batching tools help, but they are not true transactions:
+
+- **`cssText`** bundles style writes.
+- **`DocumentFragment`** batches DOM inserts.
+- **`requestAnimationFrame`** groups writes per frame.
+
+What’s missing is a native transactional API that applies all updates atomically:
+
+```javascript
+// Hypothetical: not a real browser API today.
+const transaction = document.createTransaction();
+
+transaction.start();
+div.style.width = '100px';
+div.style.height = '200px';
+div.appendChild(newChild);
+div.classList.add('active');
+transaction.commit();
+```
+
+Why this is hard:
+
+- DOM updates can affect layout outside the mutated subtree.
+- CSS cascade means changes are not isolated.
+- Observers can see intermediate states without a transaction boundary.
+
 ## Virtual DOM vs API DOM
 
 **Virtual DOM** is an in-memory representation (plain JavaScript objects) that frameworks diff to compute minimal updates. **API DOM** is the browser’s live DOM tree accessed via `document`, where mutations can trigger layout and paint.
@@ -65,6 +93,48 @@ requestAnimationFrame(() => {
 | Purpose | Optimization layer | Actual UI representation |
 
 Atomic DOM proposals aim to bring some of the virtual DOM’s batching benefits closer to the browser’s native DOM APIs.
+
+## Why Not Just Use the DOM API Directly?
+
+Direct DOM manipulation works well for small or isolated changes, but it scales poorly for dynamic, data-driven interfaces.
+
+### The Cost of Naive DOM Updates
+
+```javascript
+function updateFeed(newPosts) {
+  const feed = document.getElementById('feed');
+  feed.innerHTML = '';
+
+  newPosts.forEach(post => {
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <h3>${post.title}</h3>
+      <p>${post.content}</p>
+      <span>Likes: ${post.likes}</span>
+    `;
+    feed.appendChild(div);
+  });
+}
+```
+
+Why this hurts:
+
+- **Rebuilds everything** even if one item changes.
+- **Loses state** (focus, scroll position, media playback).
+- **Triggers repeated layout** for every inserted node.
+
+### What Virtual DOM Buys You
+
+- **Diffing**: update only what changed.
+- **Batching**: apply changes together instead of per mutation.
+- **Declarative flow**: update state, let the renderer compute DOM changes.
+
+### When Direct DOM Still Wins
+
+- Simple static pages.
+- Canvas/WebGL rendering.
+- Tight animation loops with `requestAnimationFrame`.
+- Small, encapsulated widgets or Web Components.
 
 ## ASX-R Core Grammar (Minimal)
 
