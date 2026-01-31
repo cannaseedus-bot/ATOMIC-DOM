@@ -1,0 +1,209 @@
+{
+  "Atomic Block": {
+    "prefix": ["@atomic", "atomic"],
+    "body": [
+      "@atomic[${1:name}] {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Create an atomic block"
+  },
+  "DOM Block": {
+    "prefix": ["@dom", "dom"],
+    "body": [
+      "@dom ${1:div} {",
+      "\t${2:prop: class = \"${3:container}\";}",
+      "\t$0",
+      "}"
+    ],
+    "description": "Create a DOM block"
+  },
+  "Component": {
+    "prefix": ["@component", "component"],
+    "body": [
+      "@component[${1:Name}] {",
+      "\tprops: {",
+      "\t\t${2:propName}: ${3:defaultValue}",
+      "\t}",
+      "\tstate: {",
+      "\t\t${4:stateName}: ${5:initialValue}",
+      "\t}",
+      "\t$0",
+      "}"
+    ],
+    "description": "Create a component definition"
+  },
+  "State Block": {
+    "prefix": ["@state", "state"],
+    "body": [
+      "@state[${1:name}] {",
+      "\t${2:property}: ${3:value}",
+      "\t$0",
+      "}"
+    ],
+    "description": "Create a state block"
+  },
+  "Reactor": {
+    "prefix": ["@reactor", "reactor"],
+    "body": [
+      "@reactor {",
+      "\twhen: ${1:condition},",
+      "\tthen: {",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ],
+    "description": "Create a reactive block"
+  },
+  "If Statement": {
+    "prefix": ["@if", "if"],
+    "body": [
+      "@if (${1:condition}) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Create an if statement"
+  },
+  "If-Else Statement": {
+    "prefix": ["@ifelse", "ifelse"],
+    "body": [
+      "@if (${1:condition}) {",
+      "\t$2",
+      "} @else {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Create an if-else statement"
+  },
+  "For Loop": {
+    "prefix": ["@for", "for"],
+    "body": [
+      "@for (${1:item} in ${2:items}) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Create a for loop"
+  },
+  "While Loop": {
+    "prefix": ["@while", "while"],
+    "body": [
+      "@while (${1:condition}) {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Create a while loop"
+  },
+  "Switch Statement": {
+    "prefix": ["@switch", "switch"],
+    "body": [
+      "@switch (${1:expression}) {",
+      "\t@case ${2:value}:",
+      "\t\t$3",
+      "\t\t@break;",
+      "\t@default:",
+      "\t\t$0",
+      "}"
+    ],
+    "description": "Create a switch statement"
+  },
+  "Use Plugin": {
+    "prefix": ["@use", "use"],
+    "body": [
+      "@use plugin \"${1:plugin-name}\" from \"${2:plugin-source}\";"
+    ],
+    "description": "Import a plugin"
+  },
+  "Plugin Definition": {
+    "prefix": ["@plugin", "plugin"],
+    "body": [
+      "@plugin ${1:name} {",
+      "\tversion: \"${2:1.0.0}\",",
+      "\tsyntax: [",
+      "\t\t{ pattern: /${3:pattern}/, ast_node: \"${4:NodeType}\", priority: ${5:100} }",
+      "\t],",
+      "\thandlers: [${6:#handler}]",
+      "}"
+    ],
+    "description": "Define a plugin"
+  },
+  "State Proposal": {
+    "prefix": ["@propose", "propose"],
+    "body": [
+      "@propose {",
+      "\tstate: {{${1:statePath}}},",
+      "\tpatch: {",
+      "\t\t${2:property}: ${3:value}",
+      "\t}",
+      "}"
+    ],
+    "description": "Create a state proposal"
+  },
+  "Server Call": {
+    "prefix": ["@server", "server"],
+    "body": [
+      "@server.${1:functionName}(${2:args}) -> {{${3:result}}}"
+    ],
+    "description": "Make a server call"
+  },
+  "Event Handler": {
+    "prefix": ["on:", "event"],
+    "body": [
+      "on: ${1:click} => ${2:handleClick}();"
+    ],
+    "description": "Add an event handler"
+  },
+  "Property": {
+    "prefix": ["prop:", "property"],
+    "body": [
+      "prop: ${1:name} = ${2:value};"
+    ],
+    "description": "Set a property"
+  },
+  "Style Property": {
+    "prefix": ["style:"],
+    "body": [
+      "style: {",
+      "\t${1:property}: ${2:value};",
+      "\t$0",
+      "}"
+    ],
+    "description": "Add inline styles"
+  },
+  "State Reference": {
+    "prefix": ["{{", "ref"],
+    "body": [
+      "{{${1:statePath}}}"
+    ],
+    "description": "Reference state value"
+  },
+  "Block Reference": {
+    "prefix": ["#", "blockref"],
+    "body": [
+      "#${1:blockId}"
+    ],
+    "description": "Reference a block"
+  },
+  "Transform": {
+    "prefix": ["@transform", "transform"],
+    "body": [
+      "@transform using ${1:transformer} {",
+      "\tinput: #${2:blockId},",
+      "\toutput: [{ language: \"${3:js}\", format: \"${4:esm}\" }]",
+      "}"
+    ],
+    "description": "Apply a transformation"
+  },
+  "Compile Pipeline": {
+    "prefix": ["@compile", "pipeline"],
+    "body": [
+      "@compile pipeline {",
+      "\t@pipe [",
+      "\t\t\"${1:syntax/control-flow}\"",
+      "\t\t-> \"${2:optimize/atomic-batch}\"",
+      "\t\t-> \"${3:target/js-es2022}\"",
+      "\t]",
+      "}"
+    ],
+    "description": "Define a compilation pipeline"
+  }
+}

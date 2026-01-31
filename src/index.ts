@@ -128,6 +128,28 @@ export {
   type SVGRendererOptions,
 } from './projection/index.js';
 
+// TypeScript integration exports
+export {
+  Atomic,
+  Component,
+  State,
+  Prop,
+  Reactive,
+  Computed,
+  On,
+  Watch,
+  Child,
+  toBlock,
+  reactive,
+  getBlockMetadata,
+  transformToTypeScript,
+  generateTypesFromProgram,
+  TypeRegistry,
+  type BlockMetadata,
+  type TransformOptions,
+  type TypeGenOptions,
+} from './typescript/index.js';
+
 // Re-export parse as parseASXR for convenience
 export { parse as parseASXR } from './parser/parser.js';
 

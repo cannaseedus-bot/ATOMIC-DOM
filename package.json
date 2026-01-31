@@ -6,7 +6,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "asxr": "dist/cli.js"
+    "asxr": "dist/cli.js",
+    "asxr-lsp": "dist/lsp-server.js"
   },
   "exports": {
     ".": {
@@ -36,6 +37,14 @@
     "./testing": {
       "types": "./dist/testing/index.d.ts",
       "import": "./dist/testing/index.js"
+    },
+    "./lsp": {
+      "types": "./dist/lsp/index.d.ts",
+      "import": "./dist/lsp/index.js"
+    },
+    "./typescript": {
+      "types": "./dist/typescript/index.d.ts",
+      "import": "./dist/typescript/index.js"
     }
   },
   "scripts": {
