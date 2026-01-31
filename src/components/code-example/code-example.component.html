@@ -1,52 +1,68 @@
-<section class="py-20 sm:py-24">
+<section id="examples" class="py-20 sm:py-24 scroll-mt-20">
   <div class="container mx-auto px-6">
     <div class="text-center">
-      <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Simple, Expressive API</h2>
-      <p class="mt-4 text-lg leading-8 text-slate-300">
+      <span class="text-atomic-primary font-semibold text-sm uppercase tracking-wider">Examples</span>
+      <h2 class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">Simple, Expressive API</h2>
+      <p class="mt-4 text-lg leading-8 text-slate-300 max-w-2xl mx-auto">
         Write less code and achieve more with an API designed for modern development.
       </p>
     </div>
     <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8">
-      
+
       <!-- Classic DOM Example -->
       <div>
-        <h3 class="text-2xl font-semibold text-slate-400 mb-4 text-center lg:text-left">Standard DOM</h3>
-        <div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden border border-slate-700 h-full">
-          <div class="bg-slate-900 p-3 flex items-center">
-            <div class="flex space-x-2">
-              <div class="w-3 h-3 rounded-full bg-red-500"></div>
-              <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <div class="w-3 h-3 rounded-full bg-green-500"></div>
+        <div class="flex items-center gap-2 mb-4">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">Before</span>
+          <h3 class="text-xl font-semibold text-slate-400">Standard DOM</h3>
+        </div>
+        <div class="bg-slate-800/80 rounded-xl shadow-lg overflow-hidden border border-slate-700 h-full">
+          <div class="bg-slate-900 p-3 flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="flex space-x-2">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              </div>
+              <span class="ml-4 text-slate-400 text-sm font-mono">classic-dom.js</span>
             </div>
-            <span class="ml-4 text-slate-400 text-sm">classic-dom.js</span>
+            <span class="text-xs text-red-400">Multiple reflows</span>
           </div>
           <pre class="p-6 text-sm text-slate-200 overflow-x-auto"><code class="font-mono">{{ classicDomCode() }}</code></pre>
         </div>
       </div>
-      
+
       <!-- AtomicDOM Example -->
       <div class="flex flex-col space-y-6">
-        <h3 class="text-2xl font-semibold text-atomic-secondary mb-0 text-center lg:text-left">AtomicDOM</h3>
-         <div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden border border-atomic-primary/50">
-          <div class="bg-slate-900 p-3 flex items-center">
-            <div class="flex space-x-2">
-              <div class="w-3 h-3 rounded-full bg-red-500"></div>
-              <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <div class="w-3 h-3 rounded-full bg-green-500"></div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-atomic-secondary/10 text-atomic-secondary border border-atomic-secondary/20">After</span>
+          <h3 class="text-xl font-semibold text-atomic-secondary">ATOMIC-DOM</h3>
+        </div>
+        <div class="bg-slate-800/80 rounded-xl shadow-lg overflow-hidden border border-atomic-primary/50">
+          <div class="bg-slate-900 p-3 flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="flex space-x-2">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              </div>
+              <span class="ml-4 text-slate-400 text-sm font-mono">atomic-dom.ts</span>
             </div>
-            <span class="ml-4 text-slate-400 text-sm">atomic-dom.ts</span>
+            <span class="text-xs text-atomic-secondary">Single reflow</span>
           </div>
           <pre class="p-6 text-sm text-slate-200 overflow-x-auto"><code class="font-mono">{{ atomicDomCode() }}</code></pre>
         </div>
-        <button (click)="toggleState()" class="w-full sm:w-auto self-center bg-atomic-primary hover:bg-cyan-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 flex items-center justify-center space-x-2">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.664 0l3.181-3.183m-4.991-2.695v-2.695A8.25 8.25 0 005.156 9.348v2.695m0 0a8.25 8.25 0 0011.664 0" />
+        <button (click)="toggleState()" class="w-full sm:w-auto self-center bg-atomic-primary hover:bg-cyan-500 text-white font-bold py-2.5 px-6 rounded-lg shadow-lg shadow-atomic-primary/20 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
           </svg>
-          <span>Simulate State Change</span>
+          <span>Run Demo</span>
         </button>
         <div>
-          <h4 class="text-xl font-semibold text-slate-300 mb-2 text-center lg:text-left">Live DOM Representation</h4>
-          <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 min-h-[200px]">
+          <h4 class="text-lg font-semibold text-slate-300 mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-atomic-primary animate-pulse"></span>
+            Live DOM Tree
+          </h4>
+          <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700 min-h-[200px]">
             <app-dom-visualizer [node]="domTree()"></app-dom-visualizer>
           </div>
         </div>
@@ -58,23 +74,29 @@
 <section class="py-20 sm:py-24 bg-slate-900/70">
   <div class="container mx-auto px-6">
     <div class="text-center">
-      <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Build Complex, Interactive UIs</h2>
-      <p class="mt-4 text-lg leading-8 text-slate-300">
-        Map data to views and let AtomicDOM handle the updates when state changes.
+      <span class="text-atomic-secondary font-semibold text-sm uppercase tracking-wider">Interactive</span>
+      <h2 class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">Build Complex, Interactive UIs</h2>
+      <p class="mt-4 text-lg leading-8 text-slate-300 max-w-2xl mx-auto">
+        Map data to views and let ATOMIC-DOM handle the updates when state changes.
       </p>
     </div>
     <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
       <!-- Flip Card Code -->
       <div>
-        <h3 class="text-2xl font-semibold text-atomic-secondary mb-4 text-center lg:text-left">AtomicDOM Code</h3>
-        <div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden border border-atomic-primary/50">
+        <h3 class="text-xl font-semibold text-atomic-secondary mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+          </svg>
+          Component Code
+        </h3>
+        <div class="bg-slate-800/80 rounded-xl shadow-lg overflow-hidden border border-atomic-primary/50">
           <div class="bg-slate-900 p-3 flex items-center">
             <div class="flex space-x-2">
               <div class="w-3 h-3 rounded-full bg-red-500"></div>
               <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
               <div class="w-3 h-3 rounded-full bg-green-500"></div>
             </div>
-            <span class="ml-4 text-slate-400 text-sm">flip-cards.ts</span>
+            <span class="ml-4 text-slate-400 text-sm font-mono">flip-cards.asxr</span>
           </div>
           <pre class="p-6 text-sm text-slate-200 overflow-x-auto"><code class="font-mono">{{ flipCardCode() }}</code></pre>
         </div>
@@ -82,18 +104,25 @@
       <!-- Flip Card Interactive Previews -->
       <div class="flex flex-col space-y-6">
         <div>
-          <h3 class="text-2xl font-semibold text-slate-300 mb-4 text-center lg:text-left">Interactive Preview</h3>
+          <h3 class="text-xl font-semibold text-slate-300 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-atomic-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+            Interactive Preview
+            <span class="text-xs text-slate-500">(click to flip)</span>
+          </h3>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             @for(card of cards(); track card.title; let i = $index) {
-              <div class="h-40 flip-card-container" 
+              <div class="h-40 flip-card-container"
                    [class.flipped]="flippedCardIndex() === i"
                    (click)="flipCard(i)">
                 <div class="flip-card-inner">
-                  <div class="flip-card-front bg-slate-800 border border-slate-700 text-center">
+                  <div class="flip-card-front bg-slate-800 border border-slate-700 text-center hover:border-atomic-primary/50 transition-colors">
                     <div class="text-4xl mb-2">{{ card.icon }}</div>
                     <h4 class="font-bold text-white">{{ card.title }}</h4>
                   </div>
-                  <div class="flip-card-back bg-atomic-primary border border-cyan-400 text-center text-white">
+                  <div class="flip-card-back bg-gradient-to-br from-atomic-primary to-cyan-600 border border-cyan-400/50 text-center text-white">
                     <p class="text-sm">{{ card.description }}</p>
                   </div>
                 </div>
@@ -102,8 +131,11 @@
           </div>
         </div>
         <div>
-          <h3 class="text-2xl font-semibold text-slate-300 mb-4 text-center lg:text-left">Live DOM Representation</h3>
-          <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+          <h4 class="text-lg font-semibold text-slate-300 mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-atomic-secondary animate-pulse"></span>
+            Live DOM Tree
+          </h4>
+          <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700">
             <app-dom-visualizer [node]="flipCardDomTree()"></app-dom-visualizer>
           </div>
         </div>
