@@ -1,27 +1,75 @@
 {
-  "name": "atomicdom-school",
-  "private": true,
-  "version": "0.0.0",
+  "name": "atomic-dom",
+  "version": "0.1.0",
+  "description": "ASXR language parser and compiler for atomic DOM operations",
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "asxr": "dist/cli.js",
+    "asxr-lsp": "dist/lsp-server.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/index.d.ts",
+      "import": "./dist/runtime/index.js"
+    },
+    "./splash": {
+      "types": "./dist/splash/index.d.ts",
+      "import": "./dist/splash/index.js"
+    },
+    "./compiler": {
+      "types": "./dist/compiler/index.d.ts",
+      "import": "./dist/compiler/index.js"
+    },
+    "./validator": {
+      "types": "./dist/validator/index.d.ts",
+      "import": "./dist/validator/index.js"
+    },
+    "./projection": {
+      "types": "./dist/projection/index.d.ts",
+      "import": "./dist/projection/index.js"
+    },
+    "./plugins": {
+      "types": "./dist/plugins/index.d.ts",
+      "import": "./dist/plugins/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "import": "./dist/testing/index.js"
+    },
+    "./lsp": {
+      "types": "./dist/lsp/index.d.ts",
+      "import": "./dist/lsp/index.js"
+    },
+    "./typescript": {
+      "types": "./dist/typescript/index.d.ts",
+      "import": "./dist/typescript/index.js"
+    }
+  },
   "scripts": {
-    "dev": "ng serve",
-    "build": "ng build",
-    "preview": "ng serve --configuration=production"
+    "build": "tsc",
+    "test": "node dist/parser/parser.test.js",
+    "dev": "tsc --watch",
+    "docs": "open docs/index.html"
   },
-  "dependencies": {
-    "rxjs": "^7.8.2",
-    "@angular/compiler": "^21.1.0",
-    "@angular/core": "^21.1.0",
-    "@angular/platform-browser": "^21.1.0",
-    "@angular/build": "^21.1.0",
-    "@angular/cli": "^21.1.0",
-    "@angular/common": "^21.1.0",
-    "@angular/compiler-cli": "^21.1.0",
-    "tailwindcss": "latest"
-  },
+  "keywords": [
+    "dom",
+    "atomic",
+    "parser",
+    "compiler",
+    "asxr"
+  ],
+  "license": "MIT",
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "@types/node": "^25.1.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

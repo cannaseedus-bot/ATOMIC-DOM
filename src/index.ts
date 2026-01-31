@@ -150,6 +150,15 @@ export {
   type TypeGenOptions,
 } from './typescript/index.js';
 
+// Splash runtime exports
+export {
+  createSplashRuntime,
+  boot,
+  AtomicApp,
+  type SplashConfig,
+  type SplashRuntime,
+} from './splash/index.js';
+
 // Re-export parse as parseASXR for convenience
 export { parse as parseASXR } from './parser/parser.js';
 
