@@ -85,6 +85,28 @@ export { walkAST } from './parser/ast.js';
 // Compiler exports
 export { CodeGenerator, generate, type CodeGenOptions } from './compiler/codegen.js';
 
+// Validator exports
+export {
+  validate,
+  isValid,
+  formatDiagnostics,
+  checkLaws,
+  validateBlock,
+  createSchema,
+  createLaw,
+  getAvailableLaws,
+  BUILTIN_SCHEMAS,
+  BUILTIN_LAWS,
+  type ValidatorOptions,
+  type ValidatorResult,
+  type Diagnostic,
+  type BlockSchema,
+  type PropertySchema,
+  type ValidationError,
+  type LawViolation,
+  type LawResult,
+} from './validator/index.js';
+
 // Re-export parse as parseASXR for convenience
 export { parse as parseASXR } from './parser/parser.js';
 

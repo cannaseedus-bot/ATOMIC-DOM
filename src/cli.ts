@@ -7,6 +7,7 @@
 import { readFileSync, writeFileSync, existsSync, watch } from 'fs';
 import { parse, Parser } from './parser/parser.js';
 import { generate, CodeGenOptions } from './compiler/codegen.js';
+import { validate, formatDiagnostics } from './validator/index.js';
 
 interface CLIOptions {
   input: string;
@@ -14,6 +15,8 @@ interface CLIOptions {
   format: 'esm' | 'cjs';
   minify: boolean;
   watch: boolean;
+  check: boolean;
+  strict: boolean;
   help: boolean;
 }
 
@@ -27,6 +30,8 @@ Options:
   -o, --output <file>    Output file (default: <input>.js)
   -f, --format <type>    Output format: esm | cjs (default: esm)
   -m, --minify           Minify output
+  -c, --check            Validate only, don't compile
+  -s, --strict           Strict mode (treat warnings as errors)
   -w, --watch            Watch for changes
   -h, --help             Show this help message
 
@@ -34,6 +39,7 @@ Examples:
   asxr app.asxr                    # Compile to app.js
   asxr app.asxr -o dist/app.js     # Compile to specific output
   asxr app.asxr -f cjs             # Output CommonJS format
+  asxr app.asxr -c                 # Check for errors only
   asxr app.asxr -w                 # Watch mode
 `);
 }
@@ -44,6 +50,8 @@ function parseArgs(args: string[]): CLIOptions {
     format: 'esm',
     minify: false,
     watch: false,
+    check: false,
+    strict: false,
     help: false,
   };
 
@@ -63,6 +71,10 @@ function parseArgs(args: string[]): CLIOptions {
       }
     } else if (arg === '-m' || arg === '--minify') {
       options.minify = true;
+    } else if (arg === '-c' || arg === '--check') {
+      options.check = true;
+    } else if (arg === '-s' || arg === '--strict') {
+      options.strict = true;
     } else if (arg === '-w' || arg === '--watch') {
       options.watch = true;
     } else if (!arg.startsWith('-')) {
@@ -85,13 +97,51 @@ function compile(inputPath: string, options: CLIOptions): boolean {
   // Parse
   const parser = new Parser(source);
   const ast = parser.parse();
-  const errors = parser.getErrors();
+  const parseErrors = parser.getErrors();
 
-  if (errors.length > 0) {
+  if (parseErrors.length > 0) {
     console.error(`Parse errors in ${inputPath}:`);
-    for (const error of errors) {
+    for (const error of parseErrors) {
       console.error(`  Line ${error.position.line}: ${error.message}`);
     }
+    return false;
+  }
+
+  // Validate
+  const validationResult = validate(ast, {
+    schemas: true,
+    laws: true,
+    checkReferences: true,
+    warnUnused: options.strict,
+  });
+
+  if (validationResult.diagnostics.length > 0) {
+    const formatted = formatDiagnostics(validationResult.diagnostics);
+    console.log(`\nValidation (${inputPath}):`);
+    for (const line of formatted) {
+      console.log(`  ${line}`);
+    }
+    console.log(`\n  ${validationResult.stats.errors} error(s), ${validationResult.stats.warnings} warning(s)`);
+  }
+
+  // In check mode, just validate
+  if (options.check) {
+    if (validationResult.valid) {
+      console.log(`✓ ${inputPath} is valid`);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // In strict mode, treat warnings as errors
+  if (options.strict && validationResult.stats.warnings > 0) {
+    console.error('Strict mode: warnings treated as errors');
+    return false;
+  }
+
+  // Don't generate if there are errors
+  if (!validationResult.valid) {
     return false;
   }
 
