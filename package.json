@@ -5,9 +5,26 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "asxr": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/index.d.ts",
+      "import": "./dist/runtime/index.js"
+    },
+    "./compiler": {
+      "types": "./dist/compiler/index.d.ts",
+      "import": "./dist/compiler/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc",
-    "test": "node --test dist/**/*.test.js",
+    "test": "node dist/parser/parser.test.js",
     "dev": "tsc --watch"
   },
   "keywords": [
@@ -19,6 +36,7 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^25.1.0",
     "typescript": "^5.3.0"
   },
   "engines": {

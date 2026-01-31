@@ -82,5 +82,21 @@ export type {
 
 export { walkAST } from './parser/ast.js';
 
+// Compiler exports
+export { CodeGenerator, generate, type CodeGenOptions } from './compiler/codegen.js';
+
 // Re-export parse as parseASXR for convenience
 export { parse as parseASXR } from './parser/parser.js';
+
+// Import for compile helper
+import { parse as _parse } from './parser/parser.js';
+import { generate as _generate } from './compiler/codegen.js';
+import type { CodeGenOptions } from './compiler/codegen.js';
+
+/**
+ * Compile ASXR source to JavaScript
+ */
+export function compile(source: string, options?: Partial<CodeGenOptions>): string {
+  const ast = _parse(source);
+  return _generate(ast, options);
+}
