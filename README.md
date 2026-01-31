@@ -20,6 +20,7 @@
 | **Core Plugins** | :white_check_mark: Complete | `src/plugins/` |
 | **Testing Framework** | :white_check_mark: Complete | `src/testing/` |
 | **Language Server (LSP)** | :white_check_mark: Complete | `src/lsp/` |
+| **VS Code Extension** | :white_check_mark: Complete | `editors/vscode/` |
 
 ---
 
@@ -52,7 +53,7 @@
 
 - [x] **Testing Framework** — Test runner, assertions, snapshots (`src/testing/`)
 - [x] **Language Server (LSP)** — Editor integration with diagnostics, completion, hover (`src/lsp/`)
-- [ ] Editor extensions (VS Code, Vim, Emacs)
+- [x] **VS Code Extension** — Syntax highlighting, snippets, LSP client (`editors/vscode/`)
 - [ ] TypeScript-friendly decorators and AST transforms
 - [ ] Documentation site and playground
 - [ ] Community plugin registry
