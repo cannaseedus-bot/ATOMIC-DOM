@@ -12,9 +12,9 @@
 | **Complete Grammar Spec** | :lock: LOCKED | `ASXR_GRAMMAR_EBNF_COMPLETE.md` (v3.0) |
 | **Atomic Block Language** | :lock: LOCKED | `atomic/ATOMIC_BLOCK_LANGUAGE_SPEC.md` |
 | **Plugin Architecture** | :white_check_mark: Designed | Embedded in grammar specs |
+| **Parser (Lexer + AST)** | :white_check_mark: Complete | `src/lexer/`, `src/parser/` |
 | **Bridge Compiler** | :construction: Not Started | — |
 | **Interop Runtime** | :construction: Not Started | — |
-| **Reference Implementation** | :construction: Not Started | — |
 
 ---
 
@@ -36,7 +36,7 @@
 
 ### Phase 2: Implementation :construction: IN PROGRESS
 
-- [ ] **Parser Implementation** — Recursive descent or ANTLR/Lex/Yacc
+- [x] **Parser Implementation** — TypeScript recursive descent parser (`src/parser/`)
 - [ ] **Bridge Compiler** — Compile `.asxr` to optimized JS + `.d.ts`
 - [ ] **Interop Runtime** — JS adapter API for mounting ASX-R components
 - [ ] **Core Plugins** — `control-flow`, `jsx-syntax`, `vue-syntax`
