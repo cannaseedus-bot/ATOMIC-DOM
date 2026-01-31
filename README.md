@@ -19,6 +19,7 @@
 | **Projection Renderer** | :white_check_mark: Complete | `src/projection/` |
 | **Core Plugins** | :white_check_mark: Complete | `src/plugins/` |
 | **Testing Framework** | :white_check_mark: Complete | `src/testing/` |
+| **Language Server (LSP)** | :white_check_mark: Complete | `src/lsp/` |
 
 ---
 
@@ -50,9 +51,9 @@
 ### Phase 3: Ecosystem :construction: IN PROGRESS
 
 - [x] **Testing Framework** — Test runner, assertions, snapshots (`src/testing/`)
-- [ ] TypeScript-friendly decorators and AST transforms
-- [ ] Language Server Protocol (LSP) implementation
+- [x] **Language Server (LSP)** — Editor integration with diagnostics, completion, hover (`src/lsp/`)
 - [ ] Editor extensions (VS Code, Vim, Emacs)
+- [ ] TypeScript-friendly decorators and AST transforms
 - [ ] Documentation site and playground
 - [ ] Community plugin registry
 
