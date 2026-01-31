@@ -17,6 +17,7 @@
 | **Interop Runtime** | :white_check_mark: Complete | `src/runtime/` |
 | **Validation Engine** | :white_check_mark: Complete | `src/validator/` |
 | **Projection Renderer** | :white_check_mark: Complete | `src/projection/` |
+| **Core Plugins** | :white_check_mark: Complete | `src/plugins/` |
 
 ---
 
@@ -36,14 +37,14 @@
 - [x] Control plane grammar (pre-semantic layer)
 - [x] Shell inference grammar (bash, dom, sql, python)
 
-### Phase 2: Implementation :construction: IN PROGRESS
+### Phase 2: Implementation :white_check_mark: COMPLETE
 
 - [x] **Parser Implementation** — TypeScript recursive descent parser (`src/parser/`)
 - [x] **Bridge Compiler** — Compile `.asxr` to optimized JS + `.d.ts` (`src/compiler/`)
 - [x] **Interop Runtime** — JS adapter API for mounting ASX-R components (`src/runtime/`)
 - [x] **Validation Engine** — Schema and law constraint verification (`src/validator/`)
 - [x] **Projection Renderer** — DOM, ANSI, SVG output targets (`src/projection/`)
-- [ ] **Core Plugins** — `control-flow`, `jsx-syntax`, `vue-syntax`
+- [x] **Core Plugins** — `control-flow`, `jsx-syntax`, `vue-syntax` (`src/plugins/`)
 
 ### Phase 3: Ecosystem :hourglass_flowing_sand: PLANNED
 
