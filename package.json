@@ -28,6 +28,14 @@
     "./projection": {
       "types": "./dist/projection/index.d.ts",
       "import": "./dist/projection/index.js"
+    },
+    "./plugins": {
+      "types": "./dist/plugins/index.d.ts",
+      "import": "./dist/plugins/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "import": "./dist/testing/index.js"
     }
   },
   "scripts": {

@@ -4,12 +4,15 @@
  * Compiles .asxr files to JavaScript
  */
 
-import { readFileSync, writeFileSync, existsSync, watch } from 'fs';
+import { readFileSync, writeFileSync, existsSync, watch, readdirSync, statSync } from 'fs';
 import { parse, Parser } from './parser/parser.js';
 import { generate, CodeGenOptions } from './compiler/codegen.js';
 import { validate, formatDiagnostics } from './validator/index.js';
+import { TestRunner, describe, ConsoleReporter, JSONReporter, TAPReporter } from './testing/index.js';
+import type { TestReporter } from './testing/types.js';
 
 interface CLIOptions {
+  command: 'compile' | 'test';
   input: string;
   output?: string;
   format: 'esm' | 'cjs';
@@ -18,34 +21,53 @@ interface CLIOptions {
   check: boolean;
   strict: boolean;
   help: boolean;
+  // Test options
+  reporter: 'console' | 'json' | 'tap';
+  filter?: string;
+  updateSnapshots: boolean;
+  verbose: boolean;
 }
 
 function printHelp(): void {
   console.log(`
-ASXR Compiler - Compile .asxr files to JavaScript
+ASXR CLI - Compile and test .asxr files
 
-Usage: asxr [options] <input.asxr>
+Usage: asxr [command] [options] <input>
 
-Options:
+Commands:
+  compile (default)      Compile .asxr files to JavaScript
+  test                   Run tests on .asxr files
+
+Compile Options:
   -o, --output <file>    Output file (default: <input>.js)
   -f, --format <type>    Output format: esm | cjs (default: esm)
   -m, --minify           Minify output
   -c, --check            Validate only, don't compile
   -s, --strict           Strict mode (treat warnings as errors)
   -w, --watch            Watch for changes
+
+Test Options:
+  --reporter <type>      Reporter: console | json | tap (default: console)
+  --filter <pattern>     Filter tests by name pattern
+  --update-snapshots     Update snapshots instead of comparing
+  --verbose              Show detailed output
+
+General:
   -h, --help             Show this help message
 
 Examples:
   asxr app.asxr                    # Compile to app.js
   asxr app.asxr -o dist/app.js     # Compile to specific output
-  asxr app.asxr -f cjs             # Output CommonJS format
   asxr app.asxr -c                 # Check for errors only
-  asxr app.asxr -w                 # Watch mode
+  asxr test tests/                 # Run tests in directory
+  asxr test app.test.asxr          # Run single test file
+  asxr test --reporter json        # Output JSON results
 `);
 }
 
 function parseArgs(args: string[]): CLIOptions {
   const options: CLIOptions = {
+    command: 'compile',
     input: '',
     format: 'esm',
     minify: false,
@@ -53,9 +75,25 @@ function parseArgs(args: string[]): CLIOptions {
     check: false,
     strict: false,
     help: false,
+    reporter: 'console',
+    updateSnapshots: false,
+    verbose: false,
   };
 
-  for (let i = 0; i < args.length; i++) {
+  let i = 0;
+
+  // Check for command
+  if (args[0] && !args[0].startsWith('-')) {
+    if (args[0] === 'test') {
+      options.command = 'test';
+      i = 1;
+    } else if (args[0] === 'compile') {
+      options.command = 'compile';
+      i = 1;
+    }
+  }
+
+  for (; i < args.length; i++) {
     const arg = args[i];
 
     if (arg === '-h' || arg === '--help') {
@@ -77,6 +115,19 @@ function parseArgs(args: string[]): CLIOptions {
       options.strict = true;
     } else if (arg === '-w' || arg === '--watch') {
       options.watch = true;
+    } else if (arg === '--reporter') {
+      const reporter = args[++i];
+      if (reporter === 'console' || reporter === 'json' || reporter === 'tap') {
+        options.reporter = reporter;
+      } else {
+        console.error(`Invalid reporter: ${reporter}. Use 'console', 'json', or 'tap'.`);
+      }
+    } else if (arg === '--filter') {
+      options.filter = args[++i];
+    } else if (arg === '--update-snapshots' || arg === '-u') {
+      options.updateSnapshots = true;
+    } else if (arg === '--verbose' || arg === '-v') {
+      options.verbose = true;
     } else if (!arg.startsWith('-')) {
       options.input = arg;
     }
@@ -198,12 +249,98 @@ function toVarName(name: string): string {
     .replace(/[^a-zA-Z0-9_]/g, '_');
 }
 
+/**
+ * Run tests on ASXR files
+ */
+async function runTestCommand(options: CLIOptions): Promise<boolean> {
+  // Create reporter
+  let reporter: TestReporter;
+  switch (options.reporter) {
+    case 'json':
+      reporter = new JSONReporter();
+      break;
+    case 'tap':
+      reporter = new TAPReporter();
+      break;
+    default:
+      reporter = new ConsoleReporter({ colors: true, verbose: options.verbose });
+  }
+
+  const runner = new TestRunner({
+    reporter,
+    updateSnapshots: options.updateSnapshots,
+    filter: options.filter ? new RegExp(options.filter) : undefined,
+  });
+
+  // Find test files
+  const testFiles = findTestFiles(options.input);
+
+  if (testFiles.length === 0) {
+    console.error('No test files found');
+    return false;
+  }
+
+  // Create test suites from files
+  for (const file of testFiles) {
+    const source = readFileSync(file, 'utf-8');
+    const suite = describe(file, (s) => {
+      s.test('parses and compiles', source);
+    });
+    runner.addSuite(suite);
+  }
+
+  // Run tests
+  const result = await runner.run();
+
+  return result.totalFailed === 0;
+}
+
+/**
+ * Find test files in a path
+ */
+function findTestFiles(path: string): string[] {
+  if (!existsSync(path)) {
+    console.error(`Path not found: ${path}`);
+    return [];
+  }
+
+  const stat = statSync(path);
+
+  if (stat.isFile()) {
+    return [path];
+  }
+
+  if (stat.isDirectory()) {
+    const files: string[] = [];
+    const entries = readdirSync(path, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = `${path}/${entry.name}`;
+      if (entry.isDirectory()) {
+        files.push(...findTestFiles(fullPath));
+      } else if (entry.name.endsWith('.asxr') || entry.name.endsWith('.test.asxr')) {
+        files.push(fullPath);
+      }
+    }
+
+    return files;
+  }
+
+  return [];
+}
+
 // Main
 const args = process.argv.slice(2);
 const options = parseArgs(args);
 
 if (options.help || !options.input) {
   printHelp();
+} else if (options.command === 'test') {
+  runTestCommand(options).then((success) => {
+    if (!success) {
+      process.exit(1);
+    }
+  });
 } else if (options.watch) {
   console.log(`Watching ${options.input}...`);
   // Initial compile

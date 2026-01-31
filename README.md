@@ -18,6 +18,7 @@
 | **Validation Engine** | :white_check_mark: Complete | `src/validator/` |
 | **Projection Renderer** | :white_check_mark: Complete | `src/projection/` |
 | **Core Plugins** | :white_check_mark: Complete | `src/plugins/` |
+| **Testing Framework** | :white_check_mark: Complete | `src/testing/` |
 
 ---
 
@@ -46,12 +47,12 @@
 - [x] **Projection Renderer** — DOM, ANSI, SVG output targets (`src/projection/`)
 - [x] **Core Plugins** — `control-flow`, `jsx-syntax`, `vue-syntax` (`src/plugins/`)
 
-### Phase 3: Ecosystem :hourglass_flowing_sand: PLANNED
+### Phase 3: Ecosystem :construction: IN PROGRESS
 
+- [x] **Testing Framework** — Test runner, assertions, snapshots (`src/testing/`)
 - [ ] TypeScript-friendly decorators and AST transforms
 - [ ] Language Server Protocol (LSP) implementation
 - [ ] Editor extensions (VS Code, Vim, Emacs)
-- [ ] Testing framework for atomic blocks
 - [ ] Documentation site and playground
 - [ ] Community plugin registry
 

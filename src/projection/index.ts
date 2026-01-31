@@ -30,6 +30,9 @@ export {
 } from './svg.js';
 
 import type { DomNode, Block } from '../runtime/index.js';
+import { renderToString as _renderToString } from './dom.js';
+import { createANSIRenderer as _createANSIRenderer } from './ansi.js';
+import { createSVGRenderer as _createSVGRenderer } from './svg.js';
 
 /**
  * Projection target types
@@ -55,18 +58,17 @@ export function project(node: DomNode | Block, options: ProjectOptions): string 
   switch (options.target) {
     case 'dom':
     case 'html':
-      const { renderToString } = require('./dom.js');
-      return renderToString(domNode);
+      return _renderToString(domNode);
 
-    case 'ansi':
-      const { createANSIRenderer } = require('./ansi.js');
-      const ansiRenderer = createANSIRenderer(options.ansi);
+    case 'ansi': {
+      const ansiRenderer = _createANSIRenderer(options.ansi);
       return ansiRenderer.render(domNode);
+    }
 
-    case 'svg':
-      const { createSVGRenderer } = require('./svg.js');
-      const svgRenderer = createSVGRenderer(options.svg);
+    case 'svg': {
+      const svgRenderer = _createSVGRenderer(options.svg);
       return svgRenderer.render(domNode);
+    }
 
     default:
       throw new Error(`Unknown projection target: ${options.target}`);
