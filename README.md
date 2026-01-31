@@ -2,6 +2,62 @@
 
 <img src="https://github.com/cannaseedus-bot/ATOMIC-DOM/blob/main/atomic-dom.svg" alt="Atomic DOM logo" />
 
+---
+
+## Project Status
+
+| Component | Status | Document |
+|-----------|--------|----------|
+| **Core Language Grammar** | :lock: LOCKED | `ASXR_GRAMMAR_EBNF.md` (v2.0) |
+| **Complete Grammar Spec** | :lock: LOCKED | `ASXR_GRAMMAR_EBNF_COMPLETE.md` (v3.0) |
+| **Atomic Block Language** | :lock: LOCKED | `atomic/ATOMIC_BLOCK_LANGUAGE_SPEC.md` |
+| **Plugin Architecture** | :white_check_mark: Designed | Embedded in grammar specs |
+| **Parser (Lexer + AST)** | :white_check_mark: Complete | `src/lexer/`, `src/parser/` |
+| **Bridge Compiler** | :white_check_mark: Complete | `src/compiler/`, `src/cli.ts` |
+| **Interop Runtime** | :white_check_mark: Complete | `src/runtime/` |
+| **Validation Engine** | :white_check_mark: Complete | `src/validator/` |
+| **Projection Renderer** | :white_check_mark: Complete | `src/projection/` |
+| **Core Plugins** | :white_check_mark: Complete | `src/plugins/` |
+| **Testing Framework** | :white_check_mark: Complete | `src/testing/` |
+
+---
+
+## Roadmap
+
+### Phase 1: Specification & Design :white_check_mark: COMPLETE
+
+- [x] Core runtime language EBNF grammar
+- [x] Atomic Block Language formal specification
+- [x] State transition and proposal system
+- [x] Plugin-based syntax extension architecture
+- [x] Dual JSON/CBOR serialization with STX/ETX framing
+- [x] ANSI/Unicode projection controls
+- [x] Microcontroller "Tiny" dialect (<2KB RAM)
+- [x] CSS atomic grammar with class generation
+- [x] Server call functions and binary triggers
+- [x] Control plane grammar (pre-semantic layer)
+- [x] Shell inference grammar (bash, dom, sql, python)
+
+### Phase 2: Implementation :white_check_mark: COMPLETE
+
+- [x] **Parser Implementation** — TypeScript recursive descent parser (`src/parser/`)
+- [x] **Bridge Compiler** — Compile `.asxr` to optimized JS + `.d.ts` (`src/compiler/`)
+- [x] **Interop Runtime** — JS adapter API for mounting ASX-R components (`src/runtime/`)
+- [x] **Validation Engine** — Schema and law constraint verification (`src/validator/`)
+- [x] **Projection Renderer** — DOM, ANSI, SVG output targets (`src/projection/`)
+- [x] **Core Plugins** — `control-flow`, `jsx-syntax`, `vue-syntax` (`src/plugins/`)
+
+### Phase 3: Ecosystem :construction: IN PROGRESS
+
+- [x] **Testing Framework** — Test runner, assertions, snapshots (`src/testing/`)
+- [ ] TypeScript-friendly decorators and AST transforms
+- [ ] Language Server Protocol (LSP) implementation
+- [ ] Editor extensions (VS Code, Vim, Emacs)
+- [ ] Documentation site and playground
+- [ ] Community plugin registry
+
+---
+
 ## Why Atomic DOM
 
 The DOM is *not* transactional. Multiple changes can trigger multiple style/layout recalculations unless you batch them deliberately. ATOMIC-DOM documents a declarative, transactional approach to DOM updates that:
@@ -424,3 +480,44 @@ output_spec      = "{",
 - Keep the **core minimal**, with features added via plugins.
 - Provide a **unified grammar** for batching, patching, and extensible syntax.
 - Enable **multi-shell authoring** without sacrificing performance.
+
+---
+
+## What's Next
+
+The language specification phase is **complete**. All grammars are locked and canonical. The project is now ready for implementation.
+
+### Immediate Priorities
+
+1. **Parser Implementation**
+   - Choose parser strategy: recursive descent (interpreter), ANTLR/Yacc (generated), or parser combinators
+   - Target LL(1) deterministic parsing as specified in the grammar
+   - Support both full and tiny dialect variants
+
+2. **Bridge Compiler MVP**
+   - Input: `.asxr` files
+   - Output: Optimized JavaScript (ESM/CJS) + TypeScript declarations
+   - Initial targets: atomic blocks, state proposals, DOM operations
+
+3. **Core Plugin Bootstrap**
+   - `control-flow` plugin: `@if`, `@for`, `@while`, `@switch`
+   - `jsx-syntax` plugin: JSX element transformation
+   - Plugin conflict resolution system
+
+### Architecture Decisions Made
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| **ECMAScript Strategy** | Bridge Language | Maximum optimization freedom while providing JS interop |
+| **Control Flow** | Plugin-based | Keeps core minimal; syntax extensions via `@use plugin` |
+| **Serialization** | JSON + CBOR | JSON for debugging, CBOR for performance |
+| **Projection Mode** | Runtime-selectable | Single build, multiple deployment strategies |
+
+### Contributing
+
+The specification documents are **locked** — contributions should focus on:
+- Parser and compiler implementation
+- Plugin development
+- Tooling (editor support, LSP)
+- Documentation and examples
+- Test suites and validation
