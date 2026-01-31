@@ -13,8 +13,8 @@
 | **Atomic Block Language** | :lock: LOCKED | `atomic/ATOMIC_BLOCK_LANGUAGE_SPEC.md` |
 | **Plugin Architecture** | :white_check_mark: Designed | Embedded in grammar specs |
 | **Parser (Lexer + AST)** | :white_check_mark: Complete | `src/lexer/`, `src/parser/` |
-| **Bridge Compiler** | :construction: Not Started | — |
-| **Interop Runtime** | :construction: Not Started | — |
+| **Bridge Compiler** | :white_check_mark: Complete | `src/compiler/`, `src/cli.ts` |
+| **Interop Runtime** | :white_check_mark: Complete | `src/runtime/` |
 
 ---
 
@@ -37,8 +37,8 @@
 ### Phase 2: Implementation :construction: IN PROGRESS
 
 - [x] **Parser Implementation** — TypeScript recursive descent parser (`src/parser/`)
-- [ ] **Bridge Compiler** — Compile `.asxr` to optimized JS + `.d.ts`
-- [ ] **Interop Runtime** — JS adapter API for mounting ASX-R components
+- [x] **Bridge Compiler** — Compile `.asxr` to optimized JS + `.d.ts` (`src/compiler/`)
+- [x] **Interop Runtime** — JS adapter API for mounting ASX-R components (`src/runtime/`)
 - [ ] **Core Plugins** — `control-flow`, `jsx-syntax`, `vue-syntax`
 - [ ] **Validation Engine** — Schema and law constraint verification
 - [ ] **Projection Renderer** — DOM, ANSI, SVG output targets
