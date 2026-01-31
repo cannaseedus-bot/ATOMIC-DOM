@@ -41,6 +41,10 @@
     "./lsp": {
       "types": "./dist/lsp/index.d.ts",
       "import": "./dist/lsp/index.js"
+    },
+    "./typescript": {
+      "types": "./dist/typescript/index.d.ts",
+      "import": "./dist/typescript/index.js"
     }
   },
   "scripts": {

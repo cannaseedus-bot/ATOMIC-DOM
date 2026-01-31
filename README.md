@@ -21,6 +21,7 @@
 | **Testing Framework** | :white_check_mark: Complete | `src/testing/` |
 | **Language Server (LSP)** | :white_check_mark: Complete | `src/lsp/` |
 | **VS Code Extension** | :white_check_mark: Complete | `editors/vscode/` |
+| **TypeScript Integration** | :white_check_mark: Complete | `src/typescript/` |
 
 ---
 
@@ -54,7 +55,7 @@
 - [x] **Testing Framework** — Test runner, assertions, snapshots (`src/testing/`)
 - [x] **Language Server (LSP)** — Editor integration with diagnostics, completion, hover (`src/lsp/`)
 - [x] **VS Code Extension** — Syntax highlighting, snippets, LSP client (`editors/vscode/`)
-- [ ] TypeScript-friendly decorators and AST transforms
+- [x] **TypeScript Integration** — Decorators, AST transforms, type generators (`src/typescript/`)
 - [ ] Documentation site and playground
 - [ ] Community plugin registry
 
