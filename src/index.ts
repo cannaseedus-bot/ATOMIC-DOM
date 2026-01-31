@@ -107,6 +107,27 @@ export {
   type LawResult,
 } from './validator/index.js';
 
+// Projection exports
+export {
+  project,
+  DOMRenderer,
+  createDOMRenderer,
+  renderToString,
+  ANSIRenderer,
+  createANSIRenderer,
+  ANSI,
+  SVGRenderer,
+  createSVGRenderer,
+  createBarChart,
+  type ProjectionTarget,
+  type ProjectOptions,
+  type DOMRendererOptions,
+  type RenderResult,
+  type ANSIRendererOptions,
+  type ANSIStyle,
+  type SVGRendererOptions,
+} from './projection/index.js';
+
 // Re-export parse as parseASXR for convenience
 export { parse as parseASXR } from './parser/parser.js';
 

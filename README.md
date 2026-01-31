@@ -16,6 +16,7 @@
 | **Bridge Compiler** | :white_check_mark: Complete | `src/compiler/`, `src/cli.ts` |
 | **Interop Runtime** | :white_check_mark: Complete | `src/runtime/` |
 | **Validation Engine** | :white_check_mark: Complete | `src/validator/` |
+| **Projection Renderer** | :white_check_mark: Complete | `src/projection/` |
 
 ---
 
@@ -41,8 +42,8 @@
 - [x] **Bridge Compiler** — Compile `.asxr` to optimized JS + `.d.ts` (`src/compiler/`)
 - [x] **Interop Runtime** — JS adapter API for mounting ASX-R components (`src/runtime/`)
 - [x] **Validation Engine** — Schema and law constraint verification (`src/validator/`)
+- [x] **Projection Renderer** — DOM, ANSI, SVG output targets (`src/projection/`)
 - [ ] **Core Plugins** — `control-flow`, `jsx-syntax`, `vue-syntax`
-- [ ] **Projection Renderer** — DOM, ANSI, SVG output targets
 
 ### Phase 3: Ecosystem :hourglass_flowing_sand: PLANNED
 
