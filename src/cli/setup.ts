@@ -5,6 +5,10 @@
  */
 
 import * as readline from 'readline';
+import * as http from 'http';
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 
 // ============================================================================
 // Logo & Branding
@@ -481,12 +485,14 @@ export function printHelp(): void {
   console.log('Commands:');
   console.log('  init              Interactive project setup');
   console.log('  init --quick      Quick setup with defaults');
+  console.log('  playground        Launch interactive playground');
   console.log('  build             Compile .asxr files');
   console.log('  dev               Start development server');
   console.log('  test              Run tests');
   console.log('  lsp               Start language server');
   console.log();
   console.log('Options:');
+  console.log('  --port <port>     Port for playground/dev server (default: 3000)');
   console.log('  --mode <mode>     Set projection mode (dynamic|static|prebuilt)');
   console.log('  --config <file>   Use custom config file');
   console.log('  --help, -h        Show this help');
@@ -497,6 +503,80 @@ export function printHelp(): void {
   console.log('  static            Stateless projection');
   console.log('  prebuilt          Compile-time output');
   console.log();
+}
+
+// ============================================================================
+// Playground Server
+// ============================================================================
+
+export async function startPlayground(port: number = 3000): Promise<void> {
+  // Find playground directory relative to this file
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const playgroundDir = path.resolve(__dirname, '../../playground');
+
+  const mimeTypes: Record<string, string> = {
+    '.html': 'text/html',
+    '.js': 'application/javascript',
+    '.css': 'text/css',
+    '.json': 'application/json',
+    '.png': 'image/png',
+    '.svg': 'image/svg+xml',
+  };
+
+  const server = http.createServer((req, res) => {
+    let filePath = path.join(playgroundDir, req.url === '/' ? 'index.html' : req.url || '');
+
+    // Security: prevent directory traversal
+    if (!filePath.startsWith(playgroundDir)) {
+      res.writeHead(403);
+      res.end('Forbidden');
+      return;
+    }
+
+    const ext = path.extname(filePath);
+    const contentType = mimeTypes[ext] || 'text/plain';
+
+    fs.readFile(filePath, (err, content) => {
+      if (err) {
+        if (err.code === 'ENOENT') {
+          // Try index.html for SPA routing
+          fs.readFile(path.join(playgroundDir, 'index.html'), (err2, indexContent) => {
+            if (err2) {
+              res.writeHead(404);
+              res.end('Not found');
+            } else {
+              res.writeHead(200, { 'Content-Type': 'text/html' });
+              res.end(indexContent);
+            }
+          });
+        } else {
+          res.writeHead(500);
+          res.end('Server error');
+        }
+      } else {
+        res.writeHead(200, { 'Content-Type': contentType });
+        res.end(content);
+      }
+    });
+  });
+
+  server.listen(port, () => {
+    printLogo();
+    console.log(colorize('  Playground server started!', 'green'));
+    console.log();
+    console.log(`  ${colorize('Local:', 'bright')}   http://localhost:${port}`);
+    console.log();
+    console.log(colorize('  Press Ctrl+C to stop', 'dim'));
+    console.log();
+  });
+
+  // Handle graceful shutdown
+  process.on('SIGINT', () => {
+    console.log(colorize('\n  Shutting down...', 'yellow'));
+    server.close();
+    process.exit(0);
+  });
 }
 
 export function printVersion(): void {
@@ -527,6 +607,10 @@ async function main(): Promise<void> {
     } else {
       await runSetup();
     }
+  } else if (command === 'playground') {
+    const portIndex = args.indexOf('--port');
+    const port = portIndex !== -1 ? parseInt(args[portIndex + 1], 10) : 3000;
+    await startPlayground(port);
   } else if (command === '--help' || command === '-h') {
     printHelp();
   } else if (command === '--version' || command === '-v') {

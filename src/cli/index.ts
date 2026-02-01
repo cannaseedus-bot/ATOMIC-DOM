@@ -12,6 +12,7 @@ export {
   SetupWizard,
   COLORS,
   colorize,
+  startPlayground,
 } from './setup.js';
 
 export type { AtomicConfig, ProjectionMode } from './setup.js';
