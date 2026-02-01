@@ -59,3 +59,16 @@ export {
   type CLICommand,
   type CLIResult,
 } from './inference.js';
+
+// Training Spec (MoE Architecture)
+export {
+  MODEL_SPEC,
+  EXPERT_TAXONOMY,
+  DEFAULT_TRAINING_CONFIG,
+  getExpertCounts,
+  getAllExperts,
+  getExpertById,
+  getExpertsByParent,
+  type ExpertSpec,
+  type TrainingConfig,
+} from './training-spec.js';
