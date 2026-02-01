@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATOMIC-DOM Playground</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-primary: #1a1a2e;
+      --bg-secondary: #16213e;
+      --bg-tertiary: #0f3460;
+      --accent: #e94560;
+      --accent-light: #ff6b6b;
+      --text-primary: #eaeaea;
+      --text-secondary: #a0a0a0;
+      --border: #2a2a4a;
+      --success: #4ade80;
+      --warning: #fbbf24;
+      --error: #f87171;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .logo-sub {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-light);
+      border-color: var(--accent-light);
+    }
+
+    /* Main Layout */
+    .main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Editor Panel */
+    .editor-panel {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+    }
+
+    .panel-header {
+      background: var(--bg-secondary);
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+    }
+
+    .editor-container {
+      flex: 1;
+      position: relative;
+    }
+
+    #editor {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border: none;
+      padding: 16px;
+      font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+      tab-size: 2;
+    }
+
+    /* Preview Panel */
+    .preview-panel {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tabs {
+      display: flex;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.875rem;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab:hover {
+      color: var(--text-primary);
+    }
+
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-content {
+      flex: 1;
+      display: none;
+      overflow: auto;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Preview */
+    #preview {
+      padding: 20px;
+      background: #fff;
+      color: #333;
+      height: 100%;
+    }
+
+    /* AST Viewer */
+    #ast-view {
+      padding: 16px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      color: var(--text-secondary);
+    }
+
+    .ast-node {
+      margin-left: 16px;
+    }
+
+    .ast-key {
+      color: var(--accent);
+    }
+
+    .ast-string {
+      color: var(--success);
+    }
+
+    .ast-number {
+      color: var(--warning);
+    }
+
+    .ast-boolean {
+      color: #a78bfa;
+    }
+
+    /* Compiled Output */
+    #compiled-view {
+      padding: 16px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      color: var(--text-primary);
+    }
+
+    /* Errors */
+    #errors {
+      padding: 16px;
+    }
+
+    .error-item {
+      background: rgba(248, 113, 113, 0.1);
+      border-left: 3px solid var(--error);
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .error-title {
+      color: var(--error);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .error-message {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .no-errors {
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 6px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .status-dot.error {
+      background: var(--error);
+    }
+
+    /* Examples Dropdown */
+    .examples-dropdown {
+      position: relative;
+    }
+
+    .examples-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      min-width: 200px;
+      display: none;
+      z-index: 100;
+      margin-top: 4px;
+    }
+
+    .examples-dropdown:hover .examples-menu {
+      display: block;
+    }
+
+    .example-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+
+    .example-item:last-child {
+      border-bottom: none;
+    }
+
+    .example-item:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .example-name {
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .example-desc {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    /* Syntax highlighting classes */
+    .token-keyword { color: #c678dd; }
+    .token-string { color: #98c379; }
+    .token-number { color: #d19a66; }
+    .token-comment { color: #5c6370; font-style: italic; }
+    .token-operator { color: #56b6c2; }
+    .token-punctuation { color: #abb2bf; }
+    .token-identifier { color: #e5c07b; }
+    .token-at { color: #e94560; font-weight: bold; }
+
+    /* Resizable */
+    .resizer {
+      width: 4px;
+      background: var(--border);
+      cursor: col-resize;
+      transition: background 0.2s;
+    }
+
+    .resizer:hover {
+      background: var(--accent);
+    }
+
+    /* Mode indicator */
+    .mode-badge {
+      background: var(--bg-tertiary);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .mode-badge.dynamic { border-left: 3px solid var(--success); }
+    .mode-badge.static { border-left: 3px solid var(--warning); }
+    .mode-badge.prebuilt { border-left: 3px solid #a78bfa; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <div>
+        <div class="logo-text">ATOMIC-DOM</div>
+        <div class="logo-sub">Playground</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <select id="mode-select" class="btn">
+        <option value="dynamic">Dynamic Mode</option>
+        <option value="static">Static Mode</option>
+        <option value="prebuilt">Prebuilt Mode</option>
+      </select>
+
+      <div class="examples-dropdown">
+        <button class="btn">Examples</button>
+        <div class="examples-menu">
+          <div class="example-item" onclick="loadExample('hello')">
+            <div class="example-name">Hello World</div>
+            <div class="example-desc">Basic atomic block</div>
+          </div>
+          <div class="example-item" onclick="loadExample('counter')">
+            <div class="example-name">Counter</div>
+            <div class="example-desc">State and reactivity</div>
+          </div>
+          <div class="example-item" onclick="loadExample('todo')">
+            <div class="example-name">Todo List</div>
+            <div class="example-desc">DOM manipulation</div>
+          </div>
+          <div class="example-item" onclick="loadExample('component')">
+            <div class="example-name">Component</div>
+            <div class="example-desc">Reusable component</div>
+          </div>
+          <div class="example-item" onclick="loadExample('plugin')">
+            <div class="example-name">Plugins</div>
+            <div class="example-desc">Control flow plugin</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="formatCode()">Format</button>
+      <button class="btn" onclick="shareCode()">Share</button>
+      <button class="btn btn-primary" onclick="runCode()">Run</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="editor-panel">
+      <div class="panel-header">
+        <span class="panel-title">ASXR Editor</span>
+        <span class="mode-badge dynamic" id="mode-badge">Dynamic</span>
+      </div>
+      <div class="editor-container">
+        <textarea id="editor" spellcheck="false">// Welcome to ATOMIC-DOM Playground!
+// Try editing this code and see live results.
+
+@atomic [greeting] {
+  @dom .message {
+    prop: text = "Hello, ATOMIC-DOM!";
+    prop: color = "#e94560";
+    prop: fontSize = "24px";
+    prop: fontWeight = "bold";
+  }
+}
+
+@state counter = 0;
+
+@atomic [increment] {
+  @propose { counter: counter + 1 }
+
+  @dom .counter-display {
+    prop: text = "Count: " + {{counter}};
+  }
+}
+
+@component Button {
+  @prop label = "Click me";
+  @prop onClick = null;
+
+  @dom button.btn {
+    prop: text = {{label}};
+    event: click = {{onClick}};
+  }
+}</textarea>
+      </div>
+    </div>
+
+    <div class="resizer" id="resizer"></div>
+
+    <div class="preview-panel">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('preview')">Preview</button>
+        <button class="tab" onclick="switchTab('ast')">AST</button>
+        <button class="tab" onclick="switchTab('compiled')">Compiled</button>
+        <button class="tab" onclick="switchTab('errors')">Errors</button>
+      </div>
+
+      <div class="tab-content active" id="preview-tab">
+        <div id="preview">
+          <div class="message"></div>
+          <div class="counter-display"></div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="ast-tab">
+        <div id="ast-view"></div>
+      </div>
+
+      <div class="tab-content" id="compiled-tab">
+        <div id="compiled-view"></div>
+      </div>
+
+      <div class="tab-content" id="errors-tab">
+        <div id="errors">
+          <div class="no-errors">
+            <span>&#10003;</span> No errors
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="status-bar">
+    <div class="status-item">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">Ready</span>
+    </div>
+    <div class="status-item">
+      <span id="parse-time">Parse: 0ms</span>
+      <span style="margin: 0 8px;">|</span>
+      <span id="compile-time">Compile: 0ms</span>
+    </div>
+  </footer>
+
+  <script>
+    // ========================================================================
+    // ASXR Lexer (Browser Version)
+    // ========================================================================
+
+    const TokenType = {
+      // Keywords
+      AT_ATOMIC: 'AT_ATOMIC',
+      AT_DOM: 'AT_DOM',
+      AT_STATE: 'AT_STATE',
+      AT_PROPOSE: 'AT_PROPOSE',
+      AT_COMPONENT: 'AT_COMPONENT',
+      AT_PROP: 'AT_PROP',
+      AT_USE: 'AT_USE',
+      AT_PLUGIN: 'AT_PLUGIN',
+      AT_IF: 'AT_IF',
+      AT_ELSE: 'AT_ELSE',
+      AT_FOR: 'AT_FOR',
+      AT_WHILE: 'AT_WHILE',
+
+      // Literals
+      IDENTIFIER: 'IDENTIFIER',
+      STRING: 'STRING',
+      NUMBER: 'NUMBER',
+
+      // Operators
+      EQUALS: 'EQUALS',
+      PLUS: 'PLUS',
+      MINUS: 'MINUS',
+      STAR: 'STAR',
+      SLASH: 'SLASH',
+      COLON: 'COLON',
+      SEMICOLON: 'SEMICOLON',
+      COMMA: 'COMMA',
+      DOT: 'DOT',
+
+      // Brackets
+      LBRACE: 'LBRACE',
+      RBRACE: 'RBRACE',
+      LBRACKET: 'LBRACKET',
+      RBRACKET: 'RBRACKET',
+      LPAREN: 'LPAREN',
+      RPAREN: 'RPAREN',
+
+      // Special
+      REFERENCE: 'REFERENCE',
+      COMMENT: 'COMMENT',
+      EOF: 'EOF',
+    };
+
+    function tokenize(source) {
+      const tokens = [];
+      let pos = 0;
+      let line = 1;
+      let column = 1;
+
+      const keywords = {
+        '@atomic': TokenType.AT_ATOMIC,
+        '@dom': TokenType.AT_DOM,
+        '@state': TokenType.AT_STATE,
+        '@propose': TokenType.AT_PROPOSE,
+        '@component': TokenType.AT_COMPONENT,
+        '@prop': TokenType.AT_PROP,
+        '@use': TokenType.AT_USE,
+        '@plugin': TokenType.AT_PLUGIN,
+        '@if': TokenType.AT_IF,
+        '@else': TokenType.AT_ELSE,
+        '@for': TokenType.AT_FOR,
+        '@while': TokenType.AT_WHILE,
+      };
+
+      while (pos < source.length) {
+        const char = source[pos];
+
+        // Whitespace
+        if (/\s/.test(char)) {
+          if (char === '\n') {
+            line++;
+            column = 1;
+          } else {
+            column++;
+          }
+          pos++;
+          continue;
+        }
+
+        // Comments
+        if (char === '/' && source[pos + 1] === '/') {
+          const start = pos;
+          while (pos < source.length && source[pos] !== '\n') pos++;
+          tokens.push({ type: TokenType.COMMENT, value: source.slice(start, pos), line, column });
+          continue;
+        }
+
+        // @ keywords
+        if (char === '@') {
+          const start = pos;
+          pos++;
+          while (pos < source.length && /[a-zA-Z]/.test(source[pos])) pos++;
+          const value = source.slice(start, pos);
+          const type = keywords[value] || TokenType.IDENTIFIER;
+          tokens.push({ type, value, line, column });
+          column += value.length;
+          continue;
+        }
+
+        // References {{...}}
+        if (char === '{' && source[pos + 1] === '{') {
+          const start = pos;
+          pos += 2;
+          while (pos < source.length && !(source[pos] === '}' && source[pos + 1] === '}')) pos++;
+          pos += 2;
+          tokens.push({ type: TokenType.REFERENCE, value: source.slice(start, pos), line, column });
+          column += pos - start;
+          continue;
+        }
+
+        // Strings
+        if (char === '"' || char === "'") {
+          const quote = char;
+          const start = pos;
+          pos++;
+          while (pos < source.length && source[pos] !== quote) {
+            if (source[pos] === '\\') pos++;
+            pos++;
+          }
+          pos++;
+          tokens.push({ type: TokenType.STRING, value: source.slice(start, pos), line, column });
+          column += pos - start;
+          continue;
+        }
+
+        // Numbers
+        if (/[0-9]/.test(char)) {
+          const start = pos;
+          while (pos < source.length && /[0-9.]/.test(source[pos])) pos++;
+          tokens.push({ type: TokenType.NUMBER, value: source.slice(start, pos), line, column });
+          column += pos - start;
+          continue;
+        }
+
+        // Identifiers
+        if (/[a-zA-Z_]/.test(char)) {
+          const start = pos;
+          while (pos < source.length && /[a-zA-Z0-9_.-]/.test(source[pos])) pos++;
+          tokens.push({ type: TokenType.IDENTIFIER, value: source.slice(start, pos), line, column });
+          column += pos - start;
+          continue;
+        }
+
+        // Single char tokens
+        const singleChars = {
+          '{': TokenType.LBRACE,
+          '}': TokenType.RBRACE,
+          '[': TokenType.LBRACKET,
+          ']': TokenType.RBRACKET,
+          '(': TokenType.LPAREN,
+          ')': TokenType.RPAREN,
+          '=': TokenType.EQUALS,
+          '+': TokenType.PLUS,
+          '-': TokenType.MINUS,
+          '*': TokenType.STAR,
+          '/': TokenType.SLASH,
+          ':': TokenType.COLON,
+          ';': TokenType.SEMICOLON,
+          ',': TokenType.COMMA,
+          '.': TokenType.DOT,
+        };
+
+        if (singleChars[char]) {
+          tokens.push({ type: singleChars[char], value: char, line, column });
+          pos++;
+          column++;
+          continue;
+        }
+
+        // Skip unknown
+        pos++;
+        column++;
+      }
+
+      tokens.push({ type: TokenType.EOF, value: '', line, column });
+      return tokens;
+    }
+
+    // ========================================================================
+    // ASXR Parser (Simplified Browser Version)
+    // ========================================================================
+
+    function parse(source) {
+      const tokens = tokenize(source);
+      let current = 0;
+
+      function peek() {
+        return tokens[current];
+      }
+
+      function advance() {
+        return tokens[current++];
+      }
+
+      function match(...types) {
+        if (types.includes(peek().type)) {
+          return advance();
+        }
+        return null;
+      }
+
+      function expect(type, message) {
+        if (peek().type === type) {
+          return advance();
+        }
+        throw new Error(`${message} at line ${peek().line}, column ${peek().column}`);
+      }
+
+      function parseProgram() {
+        const body = [];
+
+        while (peek().type !== TokenType.EOF) {
+          // Skip comments
+          if (peek().type === TokenType.COMMENT) {
+            advance();
+            continue;
+          }
+
+          const node = parseStatement();
+          if (node) body.push(node);
+        }
+
+        return { type: 'Program', body };
+      }
+
+      function parseStatement() {
+        const token = peek();
+
+        switch (token.type) {
+          case TokenType.AT_ATOMIC:
+            return parseAtomicBlock();
+          case TokenType.AT_DOM:
+            return parseDomBlock();
+          case TokenType.AT_STATE:
+            return parseStateDefinition();
+          case TokenType.AT_PROPOSE:
+            return parseProposal();
+          case TokenType.AT_COMPONENT:
+            return parseComponent();
+          case TokenType.AT_PROP:
+            return parseProp();
+          case TokenType.AT_USE:
+            return parsePluginDirective();
+          case TokenType.AT_IF:
+            return parseIfStatement();
+          case TokenType.AT_FOR:
+            return parseForStatement();
+          case TokenType.IDENTIFIER:
+            return parsePropertyOrExpression();
+          default:
+            advance();
+            return null;
+        }
+      }
+
+      function parseAtomicBlock() {
+        advance(); // @atomic
+
+        let id = null;
+        if (match(TokenType.LBRACKET)) {
+          id = expect(TokenType.IDENTIFIER, 'Expected block id').value;
+          expect(TokenType.RBRACKET, 'Expected ]');
+        }
+
+        expect(TokenType.LBRACE, 'Expected {');
+        const body = [];
+
+        while (peek().type !== TokenType.RBRACE && peek().type !== TokenType.EOF) {
+          if (peek().type === TokenType.COMMENT) {
+            advance();
+            continue;
+          }
+          const stmt = parseStatement();
+          if (stmt) body.push(stmt);
+        }
+
+        expect(TokenType.RBRACE, 'Expected }');
+
+        return { type: 'AtomicBlock', id, body };
+      }
+
+      function parseDomBlock() {
+        advance(); // @dom
+
+        const selector = expect(TokenType.IDENTIFIER, 'Expected selector').value;
+        expect(TokenType.LBRACE, 'Expected {');
+
+        const properties = [];
+        while (peek().type !== TokenType.RBRACE && peek().type !== TokenType.EOF) {
+          if (peek().type === TokenType.COMMENT) {
+            advance();
+            continue;
+          }
+          if (peek().type === TokenType.IDENTIFIER) {
+            const prop = parseProperty();
+            if (prop) properties.push(prop);
+          } else {
+            advance();
+          }
+        }
+
+        expect(TokenType.RBRACE, 'Expected }');
+
+        return { type: 'DomBlock', selector, properties };
+      }
+
+      function parseProperty() {
+        const name = advance().value;
+        expect(TokenType.COLON, 'Expected :');
+
+        const key = expect(TokenType.IDENTIFIER, 'Expected property key').value;
+        expect(TokenType.EQUALS, 'Expected =');
+
+        const value = parseExpression();
+        match(TokenType.SEMICOLON);
+
+        return { type: 'Property', category: name, key, value };
+      }
+
+      function parseExpression() {
+        let left = parsePrimary();
+
+        while (match(TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.SLASH)) {
+          const operator = tokens[current - 1].value;
+          const right = parsePrimary();
+          left = { type: 'BinaryExpression', operator, left, right };
+        }
+
+        return left;
+      }
+
+      function parsePrimary() {
+        const token = peek();
+
+        if (token.type === TokenType.STRING) {
+          advance();
+          return { type: 'Literal', value: token.value.slice(1, -1), raw: token.value };
+        }
+
+        if (token.type === TokenType.NUMBER) {
+          advance();
+          return { type: 'Literal', value: parseFloat(token.value), raw: token.value };
+        }
+
+        if (token.type === TokenType.REFERENCE) {
+          advance();
+          const inner = token.value.slice(2, -2).trim();
+          return { type: 'Reference', name: inner };
+        }
+
+        if (token.type === TokenType.IDENTIFIER) {
+          advance();
+          if (token.value === 'true' || token.value === 'false') {
+            return { type: 'Literal', value: token.value === 'true', raw: token.value };
+          }
+          if (token.value === 'null') {
+            return { type: 'Literal', value: null, raw: 'null' };
+          }
+          return { type: 'Identifier', name: token.value };
+        }
+
+        advance();
+        return { type: 'Unknown', token };
+      }
+
+      function parseStateDefinition() {
+        advance(); // @state
+        const name = expect(TokenType.IDENTIFIER, 'Expected state name').value;
+        expect(TokenType.EQUALS, 'Expected =');
+        const value = parseExpression();
+        match(TokenType.SEMICOLON);
+
+        return { type: 'StateDefinition', name, value };
+      }
+
+      function parseProposal() {
+        advance(); // @propose
+        expect(TokenType.LBRACE, 'Expected {');
+
+        const changes = [];
+        while (peek().type !== TokenType.RBRACE && peek().type !== TokenType.EOF) {
+          if (peek().type === TokenType.IDENTIFIER) {
+            const name = advance().value;
+            expect(TokenType.COLON, 'Expected :');
+            const value = parseExpression();
+            match(TokenType.COMMA);
+            changes.push({ name, value });
+          } else {
+            advance();
+          }
+        }
+
+        expect(TokenType.RBRACE, 'Expected }');
+
+        return { type: 'Proposal', changes };
+      }
+
+      function parseComponent() {
+        advance(); // @component
+        const name = expect(TokenType.IDENTIFIER, 'Expected component name').value;
+        expect(TokenType.LBRACE, 'Expected {');
+
+        const body = [];
+        while (peek().type !== TokenType.RBRACE && peek().type !== TokenType.EOF) {
+          if (peek().type === TokenType.COMMENT) {
+            advance();
+            continue;
+          }
+          const stmt = parseStatement();
+          if (stmt) body.push(stmt);
+        }
+
+        expect(TokenType.RBRACE, 'Expected }');
+
+        return { type: 'Component', name, body };
+      }
+
+      function parseProp() {
+        advance(); // @prop
+        const name = expect(TokenType.IDENTIFIER, 'Expected prop name').value;
+        expect(TokenType.EQUALS, 'Expected =');
+        const defaultValue = parseExpression();
+        match(TokenType.SEMICOLON);
+
+        return { type: 'PropDefinition', name, defaultValue };
+      }
+
+      function parsePluginDirective() {
+        advance(); // @use
+        expect(TokenType.IDENTIFIER, 'Expected plugin'); // 'plugin'
+        const name = expect(TokenType.STRING, 'Expected plugin name').value.slice(1, -1);
+
+        let from = null;
+        if (peek().type === TokenType.IDENTIFIER && peek().value === 'from') {
+          advance();
+          from = expect(TokenType.STRING, 'Expected from path').value.slice(1, -1);
+        }
+
+        match(TokenType.SEMICOLON);
+
+        return { type: 'PluginDirective', name, from };
+      }
+
+      function parseIfStatement() {
+        advance(); // @if
+        expect(TokenType.LPAREN, 'Expected (');
+        const condition = parseExpression();
+        expect(TokenType.RPAREN, 'Expected )');
+        expect(TokenType.LBRACE, 'Expected {');
+
+        const body = [];
+        while (peek().type !== TokenType.RBRACE && peek().type !== TokenType.EOF) {
+          if (peek().type === TokenType.COMMENT) {
+            advance();
+            continue;
+          }
+          const stmt = parseStatement();
+          if (stmt) body.push(stmt);
+        }
+        expect(TokenType.RBRACE, 'Expected }');
+
+        let elseBody = null;
+        if (peek().type === TokenType.AT_ELSE) {
+          advance();
+          expect(TokenType.LBRACE, 'Expected {');
+          elseBody = [];
+          while (peek().type !== TokenType.RBRACE && peek().type !== TokenType.EOF) {
+            const stmt = parseStatement();
+            if (stmt) elseBody.push(stmt);
+          }
+          expect(TokenType.RBRACE, 'Expected }');
+        }
+
+        return { type: 'IfStatement', condition, body, elseBody };
+      }
+
+      function parseForStatement() {
+        advance(); // @for
+        expect(TokenType.LPAREN, 'Expected (');
+        const variable = expect(TokenType.IDENTIFIER, 'Expected variable').value;
+        expect(TokenType.IDENTIFIER, 'Expected in'); // 'in' or 'of'
+        const iterable = parseExpression();
+        expect(TokenType.RPAREN, 'Expected )');
+        expect(TokenType.LBRACE, 'Expected {');
+
+        const body = [];
+        while (peek().type !== TokenType.RBRACE && peek().type !== TokenType.EOF) {
+          const stmt = parseStatement();
+          if (stmt) body.push(stmt);
+        }
+        expect(TokenType.RBRACE, 'Expected }');
+
+        return { type: 'ForStatement', variable, iterable, body };
+      }
+
+      function parsePropertyOrExpression() {
+        const name = advance().value;
+
+        if (match(TokenType.COLON)) {
+          const key = expect(TokenType.IDENTIFIER, 'Expected key').value;
+          expect(TokenType.EQUALS, 'Expected =');
+          const value = parseExpression();
+          match(TokenType.SEMICOLON);
+          return { type: 'Property', category: name, key, value };
+        }
+
+        return { type: 'Identifier', name };
+      }
+
+      return parseProgram();
+    }
+
+    // ========================================================================
+    // Code Generator
+    // ========================================================================
+
+    function generate(ast, mode = 'dynamic') {
+      const lines = [];
+
+      lines.push(`// Generated by ATOMIC-DOM Compiler`);
+      lines.push(`// Mode: ${mode}`);
+      lines.push('');
+
+      for (const node of ast.body) {
+        lines.push(generateNode(node, mode));
+      }
+
+      return lines.join('\n');
+    }
+
+    function generateNode(node, mode, indent = 0) {
+      const pad = '  '.repeat(indent);
+
+      switch (node.type) {
+        case 'AtomicBlock':
+          return generateAtomicBlock(node, mode, pad);
+        case 'DomBlock':
+          return generateDomBlock(node, pad);
+        case 'StateDefinition':
+          return `${pad}const ${node.name} = reactive(${generateExpr(node.value)});`;
+        case 'Proposal':
+          return generateProposal(node, pad);
+        case 'Component':
+          return generateComponent(node, mode, pad);
+        case 'PropDefinition':
+          return `${pad}  ${node.name}: ${generateExpr(node.defaultValue)},`;
+        case 'PluginDirective':
+          return `${pad}// @use plugin "${node.name}"${node.from ? ` from "${node.from}"` : ''}`;
+        case 'IfStatement':
+          return generateIfStatement(node, mode, pad);
+        case 'ForStatement':
+          return generateForStatement(node, mode, pad);
+        default:
+          return `${pad}// Unknown node: ${node.type}`;
+      }
+    }
+
+    function generateAtomicBlock(node, mode, pad) {
+      const id = node.id || 'anonymous';
+      const bodyCode = node.body.map(n => generateNode(n, mode, 1)).join('\n');
+
+      if (mode === 'dynamic') {
+        return `${pad}atomic('${id}', () => {\n${bodyCode}\n${pad}});`;
+      } else if (mode === 'static') {
+        return `${pad}staticBlock('${id}', () => {\n${bodyCode}\n${pad}});`;
+      } else {
+        return `${pad}// Prebuilt: ${id}\n${bodyCode}`;
+      }
+    }
+
+    function generateDomBlock(node, pad) {
+      const props = node.properties.map(p => {
+        if (p.category === 'prop') {
+          return `${pad}    ${p.key}: ${generateExpr(p.value)},`;
+        } else if (p.category === 'event') {
+          return `${pad}    on${p.key[0].toUpperCase() + p.key.slice(1)}: ${generateExpr(p.value)},`;
+        }
+        return `${pad}    ${p.key}: ${generateExpr(p.value)},`;
+      }).join('\n');
+
+      return `${pad}  dom('${node.selector}', {\n${props}\n${pad}  });`;
+    }
+
+    function generateProposal(node, pad) {
+      const changes = node.changes.map(c => `${c.name}: ${generateExpr(c.value)}`).join(', ');
+      return `${pad}  propose({ ${changes} });`;
+    }
+
+    function generateComponent(node, mode, pad) {
+      const props = node.body.filter(n => n.type === 'PropDefinition');
+      const rest = node.body.filter(n => n.type !== 'PropDefinition');
+
+      const propsCode = props.length ?
+        `${pad}  props: {\n${props.map(p => generateNode(p, mode, 2)).join('\n')}\n${pad}  },` : '';
+
+      const renderCode = rest.map(n => generateNode(n, mode, 2)).join('\n');
+
+      return `${pad}defineComponent('${node.name}', {\n${propsCode}\n${pad}  render() {\n${renderCode}\n${pad}  }\n${pad}});`;
+    }
+
+    function generateIfStatement(node, mode, pad) {
+      const condition = generateExpr(node.condition);
+      const body = node.body.map(n => generateNode(n, mode, 1)).join('\n');
+      let code = `${pad}if (${condition}) {\n${body}\n${pad}}`;
+
+      if (node.elseBody) {
+        const elseCode = node.elseBody.map(n => generateNode(n, mode, 1)).join('\n');
+        code += ` else {\n${elseCode}\n${pad}}`;
+      }
+
+      return code;
+    }
+
+    function generateForStatement(node, mode, pad) {
+      const body = node.body.map(n => generateNode(n, mode, 1)).join('\n');
+      return `${pad}for (const ${node.variable} of ${generateExpr(node.iterable)}) {\n${body}\n${pad}}`;
+    }
+
+    function generateExpr(node) {
+      if (!node) return 'undefined';
+
+      switch (node.type) {
+        case 'Literal':
+          if (typeof node.value === 'string') return `"${node.value}"`;
+          return String(node.value);
+        case 'Reference':
+          return node.name;
+        case 'Identifier':
+          return node.name;
+        case 'BinaryExpression':
+          return `${generateExpr(node.left)} ${node.operator} ${generateExpr(node.right)}`;
+        default:
+          return 'null';
+      }
+    }
+
+    // ========================================================================
+    // AST Formatter
+    // ========================================================================
+
+    function formatAST(ast, indent = 0) {
+      const pad = '  '.repeat(indent);
+
+      if (Array.isArray(ast)) {
+        if (ast.length === 0) return '[]';
+        const items = ast.map(item => formatAST(item, indent + 1)).join(',\n');
+        return `[\n${items}\n${pad}]`;
+      }
+
+      if (ast === null) return '<span class="ast-boolean">null</span>';
+      if (typeof ast === 'boolean') return `<span class="ast-boolean">${ast}</span>`;
+      if (typeof ast === 'number') return `<span class="ast-number">${ast}</span>`;
+      if (typeof ast === 'string') return `<span class="ast-string">"${ast}"</span>`;
+
+      if (typeof ast === 'object') {
+        const entries = Object.entries(ast);
+        if (entries.length === 0) return '{}';
+
+        const props = entries.map(([key, value]) => {
+          return `${pad}  <span class="ast-key">${key}</span>: ${formatAST(value, indent + 1)}`;
+        }).join(',\n');
+
+        return `{\n${props}\n${pad}}`;
+      }
+
+      return String(ast);
+    }
+
+    // ========================================================================
+    // UI Logic
+    // ========================================================================
+
+    let currentErrors = [];
+    let debounceTimer = null;
+
+    const editor = document.getElementById('editor');
+    const preview = document.getElementById('preview');
+    const astView = document.getElementById('ast-view');
+    const compiledView = document.getElementById('compiled-view');
+    const errorsView = document.getElementById('errors');
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+    const parseTimeEl = document.getElementById('parse-time');
+    const compileTimeEl = document.getElementById('compile-time');
+    const modeSelect = document.getElementById('mode-select');
+    const modeBadge = document.getElementById('mode-badge');
+
+    function runCode() {
+      const source = editor.value;
+      const mode = modeSelect.value;
+      currentErrors = [];
+
+      try {
+        // Parse
+        const parseStart = performance.now();
+        const ast = parse(source);
+        const parseTime = (performance.now() - parseStart).toFixed(2);
+        parseTimeEl.textContent = `Parse: ${parseTime}ms`;
+
+        // Generate
+        const compileStart = performance.now();
+        const compiled = generate(ast, mode);
+        const compileTime = (performance.now() - compileStart).toFixed(2);
+        compileTimeEl.textContent = `Compile: ${compileTime}ms`;
+
+        // Update views
+        astView.innerHTML = formatAST(ast);
+        compiledView.textContent = compiled;
+
+        // Update preview
+        updatePreview(ast);
+
+        // Success
+        statusDot.className = 'status-dot';
+        statusText.textContent = 'Compiled successfully';
+        updateErrors();
+
+      } catch (error) {
+        currentErrors.push({
+          title: 'Parse Error',
+          message: error.message
+        });
+        statusDot.className = 'status-dot error';
+        statusText.textContent = 'Compilation failed';
+        updateErrors();
+      }
+    }
+
+    function updatePreview(ast) {
+      // Simple preview: apply DOM block properties
+      for (const node of ast.body) {
+        if (node.type === 'AtomicBlock') {
+          for (const child of node.body) {
+            applyDomBlock(child);
+          }
+        } else {
+          applyDomBlock(node);
+        }
+      }
+    }
+
+    function applyDomBlock(node) {
+      if (node.type !== 'DomBlock') return;
+
+      const selector = node.selector.startsWith('.') ? node.selector : `.${node.selector}`;
+      const element = preview.querySelector(selector);
+
+      if (!element) {
+        // Create element if it doesn't exist
+        const newEl = document.createElement('div');
+        newEl.className = node.selector.replace('.', '');
+        preview.appendChild(newEl);
+        applyProperties(newEl, node.properties);
+      } else {
+        applyProperties(element, node.properties);
+      }
+    }
+
+    function applyProperties(element, properties) {
+      for (const prop of properties) {
+        if (prop.category === 'prop') {
+          const value = evaluateExpr(prop.value);
+          if (prop.key === 'text') {
+            element.textContent = value;
+          } else {
+            element.style[prop.key] = value;
+          }
+        }
+      }
+    }
+
+    function evaluateExpr(node) {
+      if (!node) return '';
+
+      switch (node.type) {
+        case 'Literal':
+          return node.value;
+        case 'Reference':
+          return `{{${node.name}}}`;
+        case 'Identifier':
+          return node.name;
+        case 'BinaryExpression':
+          const left = evaluateExpr(node.left);
+          const right = evaluateExpr(node.right);
+          if (node.operator === '+' && (typeof left === 'string' || typeof right === 'string')) {
+            return String(left) + String(right);
+          }
+          return eval(`${left} ${node.operator} ${right}`);
+        default:
+          return '';
+      }
+    }
+
+    function updateErrors() {
+      if (currentErrors.length === 0) {
+        errorsView.innerHTML = '<div class="no-errors"><span>&#10003;</span> No errors</div>';
+      } else {
+        errorsView.innerHTML = currentErrors.map(err => `
+          <div class="error-item">
+            <div class="error-title">${err.title}</div>
+            <div class="error-message">${err.message}</div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+      event.target.classList.add('active');
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+    }
+
+    function formatCode() {
+      // Basic formatting (indent atomic blocks)
+      const source = editor.value;
+      const lines = source.split('\n');
+      let indent = 0;
+      const formatted = lines.map(line => {
+        const trimmed = line.trim();
+        if (trimmed.endsWith('}')) indent = Math.max(0, indent - 1);
+        const result = '  '.repeat(indent) + trimmed;
+        if (trimmed.endsWith('{')) indent++;
+        return result;
+      }).join('\n');
+      editor.value = formatted;
+      runCode();
+    }
+
+    function shareCode() {
+      const source = editor.value;
+      const encoded = btoa(encodeURIComponent(source));
+      const url = `${location.origin}${location.pathname}#code=${encoded}`;
+      navigator.clipboard.writeText(url).then(() => {
+        statusText.textContent = 'Share URL copied to clipboard!';
+        setTimeout(() => runCode(), 2000);
+      });
+    }
+
+    // Examples
+    const examples = {
+      hello: `// Hello World Example
+@atomic [greeting] {
+  @dom .message {
+    prop: text = "Hello, ATOMIC-DOM!";
+    prop: color = "#e94560";
+    prop: fontSize = "32px";
+    prop: fontWeight = "bold";
+  }
+}`,
+      counter: `// Counter with State
+@state counter = 0;
+
+@atomic [counter-app] {
+  @dom .counter-display {
+    prop: text = "Count: " + {{counter}};
+    prop: fontSize = "24px";
+    prop: fontWeight = "bold";
+  }
+
+  @propose { counter: counter + 1 }
+}`,
+      todo: `// Todo List Example
+@state todos = [];
+@state newTodo = "";
+
+@atomic [todo-list] {
+  @dom .todo-input {
+    prop: placeholder = "Add a todo...";
+    prop: padding = "8px";
+    prop: border = "1px solid #ccc";
+  }
+
+  @dom .todo-items {
+    prop: marginTop = "16px";
+  }
+}
+
+@atomic [add-todo] {
+  @propose {
+    todos: todos.concat(newTodo),
+    newTodo: ""
+  }
+}`,
+      component: `// Reusable Component
+@component Button {
+  @prop label = "Click me";
+  @prop variant = "primary";
+  @prop onClick = null;
+
+  @dom button.btn {
+    prop: text = {{label}};
+    prop: padding = "10px 20px";
+    prop: borderRadius = "6px";
+    prop: cursor = "pointer";
+    event: click = {{onClick}};
+  }
+}
+
+@component Card {
+  @prop title = "Card Title";
+  @prop content = "Card content here";
+
+  @dom .card {
+    prop: padding = "16px";
+    prop: border = "1px solid #ddd";
+    prop: borderRadius = "8px";
+  }
+
+  @dom .card-title {
+    prop: text = {{title}};
+    prop: fontSize = "18px";
+    prop: fontWeight = "bold";
+  }
+}`,
+      plugin: `// Using Plugins with Control Flow
+@use plugin "control-flow" from "asxr-plugins/stdlib";
+
+@state isLoggedIn = false;
+@state username = "Guest";
+
+@atomic [auth-display] {
+  @if ({{isLoggedIn}}) {
+    @dom .welcome {
+      prop: text = "Welcome, " + {{username}} + "!";
+      prop: color = "#4ade80";
+    }
+  } @else {
+    @dom .login-prompt {
+      prop: text = "Please log in";
+      prop: color = "#fbbf24";
+    }
+  }
+}
+
+@atomic [user-list] {
+  @for (user in {{users}}) {
+    @dom .user-item {
+      prop: text = {{user.name}};
+    }
+  }
+}`
+    };
+
+    function loadExample(name) {
+      if (examples[name]) {
+        editor.value = examples[name];
+        runCode();
+      }
+    }
+
+    // Mode change
+    modeSelect.addEventListener('change', () => {
+      const mode = modeSelect.value;
+      modeBadge.textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
+      modeBadge.className = `mode-badge ${mode}`;
+      runCode();
+    });
+
+    // Auto-run on input
+    editor.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(runCode, 300);
+    });
+
+    // Tab key support
+    editor.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        editor.value = editor.value.substring(0, start) + '  ' + editor.value.substring(end);
+        editor.selectionStart = editor.selectionEnd = start + 2;
+      }
+    });
+
+    // Resizer
+    const resizer = document.getElementById('resizer');
+    const editorPanel = document.querySelector('.editor-panel');
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', () => {
+      isResizing = true;
+      document.body.style.cursor = 'col-resize';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+      const containerWidth = document.querySelector('.main').offsetWidth;
+      const newWidth = (e.clientX / containerWidth) * 100;
+      if (newWidth > 20 && newWidth < 80) {
+        editorPanel.style.width = `${newWidth}%`;
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isResizing = false;
+      document.body.style.cursor = '';
+    });
+
+    // Load from URL hash
+    function loadFromHash() {
+      const hash = location.hash;
+      if (hash.startsWith('#code=')) {
+        try {
+          const encoded = hash.slice(6);
+          const source = decodeURIComponent(atob(encoded));
+          editor.value = source;
+        } catch (e) {
+          console.error('Failed to load code from URL');
+        }
+      }
+    }
+
+    // Initialize
+    loadFromHash();
+    runCode();
+  </script>
+</body>
+</html>
