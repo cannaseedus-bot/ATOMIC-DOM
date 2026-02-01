@@ -1,0 +1,162 @@
+{
+  "$schema": "./datasets.schema.json",
+  "version": "1.0.0",
+  "description": "K'UHUL MoE Training Dataset Configuration",
+
+  "repositories": [
+    {
+      "id": "deep-planning",
+      "name": "DeepPlanning",
+      "source": "https://huggingface.co/datasets/Qwen/DeepPlanning",
+      "clone_cmd": "git clone https://huggingface.co/datasets/Qwen/DeepPlanning",
+      "experts": ["algo-dynamic", "algo-graph", "arch-patterns", "arch-ddd"],
+      "category": "algorithms",
+      "format": "parquet",
+      "features": ["planning", "reasoning", "multi-step"]
+    },
+    {
+      "id": "sft-code",
+      "name": "SFT Data Code",
+      "source": "https://huggingface.co/datasets/eth-dl-rewards/sft-data-code",
+      "clone_cmd": "git clone https://huggingface.co/datasets/eth-dl-rewards/sft-data-code",
+      "experts": ["lang-python", "lang-javascript", "lang-typescript", "lang-rust"],
+      "category": "languages",
+      "format": "parquet",
+      "features": ["supervised-finetuning", "code-generation"]
+    },
+    {
+      "id": "a1-code-apps",
+      "name": "A1 Code Apps Phi Annotated",
+      "source": "https://huggingface.co/datasets/mlfoundations-dev/a1_code_apps_phi_annotated",
+      "clone_cmd": "git clone https://huggingface.co/datasets/mlfoundations-dev/a1_code_apps_phi_annotated",
+      "experts": ["lang-python", "algo-complexity", "algo-dynamic"],
+      "category": "algorithms",
+      "format": "parquet",
+      "features": ["competitive-programming", "problem-solving"]
+    },
+    {
+      "id": "agent-tool-use",
+      "name": "Agent Tool Use Dialogue",
+      "source": "https://huggingface.co/datasets/Mgmgrand420/Agent-Tool-Use-Dialogue-Open-Dataset",
+      "clone_cmd": "git clone https://huggingface.co/datasets/Mgmgrand420/Agent-Tool-Use-Dialogue-Open-Dataset",
+      "experts": ["infra-cicd", "infra-docker", "web-api"],
+      "category": "infrastructure",
+      "format": "json",
+      "features": ["tool-use", "agent-dialogue", "function-calling"]
+    },
+    {
+      "id": "gpt5-codex",
+      "name": "GPT-5 Codex 1000x",
+      "source": "https://huggingface.co/datasets/Mgmgrand420/gpt-5-codex-1000x",
+      "clone_cmd": "git clone https://huggingface.co/datasets/Mgmgrand420/gpt-5-codex-1000x",
+      "experts": ["lang-python", "lang-javascript", "lang-typescript", "lang-go", "lang-rust"],
+      "category": "languages",
+      "format": "json",
+      "features": ["code-completion", "multi-language"]
+    },
+    {
+      "id": "deepthink-code",
+      "name": "DeepThink Code Lite",
+      "source": "https://huggingface.co/datasets/Mgmgrand420/DeepThink-Code-Lite",
+      "clone_cmd": "git clone https://huggingface.co/datasets/Mgmgrand420/DeepThink-Code-Lite",
+      "experts": ["algo-dynamic", "algo-graph", "math-discrete", "math-proofs"],
+      "category": "algorithms",
+      "format": "json",
+      "features": ["reasoning", "step-by-step", "chain-of-thought"]
+    },
+    {
+      "id": "dolphin-coder",
+      "name": "Dolphin Coder",
+      "source": "https://huggingface.co/datasets/Mgmgrand420/dolphin-coder",
+      "clone_cmd": "git clone https://huggingface.co/datasets/Mgmgrand420/dolphin-coder",
+      "experts": ["lang-python", "lang-javascript", "web-react", "web-api"],
+      "category": "languages",
+      "format": "json",
+      "features": ["instruction-following", "code-generation"]
+    },
+    {
+      "id": "code-feedback",
+      "name": "Code Feedback",
+      "source": "https://huggingface.co/datasets/Mgmgrand420/Code-Feedback",
+      "clone_cmd": "git clone https://huggingface.co/datasets/Mgmgrand420/Code-Feedback",
+      "experts": ["docs-comments", "docs-api", "resume-tech"],
+      "category": "docs",
+      "format": "json",
+      "features": ["code-review", "feedback", "improvement"]
+    }
+  ],
+
+  "expertMapping": {
+    "math": {
+      "datasets": ["deepthink-code"],
+      "experts": ["math-algebra", "math-calculus", "math-discrete", "math-proofs"],
+      "weight": 1.0
+    },
+    "languages": {
+      "datasets": ["sft-code", "gpt5-codex", "dolphin-coder"],
+      "experts": ["lang-python", "lang-typescript", "lang-javascript", "lang-rust", "lang-go"],
+      "weight": 1.5
+    },
+    "algorithms": {
+      "datasets": ["deep-planning", "a1-code-apps", "deepthink-code"],
+      "experts": ["algo-dynamic", "algo-graph", "algo-complexity", "algo-search"],
+      "weight": 1.2
+    },
+    "web": {
+      "datasets": ["dolphin-coder", "agent-tool-use"],
+      "experts": ["web-react", "web-api", "web-nextjs"],
+      "weight": 1.0
+    },
+    "infrastructure": {
+      "datasets": ["agent-tool-use"],
+      "experts": ["infra-docker", "infra-kubernetes", "infra-cicd"],
+      "weight": 0.8
+    },
+    "docs": {
+      "datasets": ["code-feedback"],
+      "experts": ["docs-api", "docs-comments", "docs-readme"],
+      "weight": 0.6
+    }
+  },
+
+  "training": {
+    "baseModel": "Qwen/Qwen2.5-0.5B",
+    "outputDir": "./output/kuhul-moe-v1",
+    "mixedPrecision": "bf16",
+    "gradientCheckpointing": true,
+
+    "hyperparameters": {
+      "learningRate": 2e-5,
+      "batchSize": 4,
+      "gradientAccumulationSteps": 8,
+      "epochs": 3,
+      "warmupRatio": 0.1,
+      "weightDecay": 0.01,
+      "maxGradNorm": 1.0
+    },
+
+    "moe": {
+      "numExperts": 108,
+      "numActiveExperts": 4,
+      "expertCapacity": 1.25,
+      "routerAuxLossCoef": 0.01,
+      "routerZLossCoef": 0.001
+    },
+
+    "lora": {
+      "enabled": true,
+      "rank": 64,
+      "alpha": 128,
+      "dropout": 0.05,
+      "targetModules": ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+    }
+  },
+
+  "preprocessing": {
+    "maxSequenceLength": 2048,
+    "packSequences": true,
+    "shuffleSeed": 42,
+    "validationSplit": 0.05,
+    "contextTemplate": "<|im_start|>system\nYou are K'UHUL, an expert coding assistant.<|im_end|>\n<|im_start|>user\n{instruction}<|im_end|>\n<|im_start|>assistant\n{response}<|im_end|>"
+  }
+}

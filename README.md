@@ -29,6 +29,7 @@
 | **Interactive Playground** | :white_check_mark: Complete | `playground/` |
 | **K'UHUL MicroAtomics** | :white_check_mark: Complete | `src/kuhul/` |
 | **Cluster Runtime** | :white_check_mark: Complete | `cluster/` |
+| **MoE Training** | :white_check_mark: Complete | `training/` |
 
 ---
 
@@ -70,6 +71,7 @@
 - [x] **Interactive Playground** — Browser-based ASXR editor with live preview (`playground/`)
 - [x] **K'UHUL MicroAtomics** — Orchestration layer with context detection and action words (`src/kuhul/`)
 - [x] **GPU Cluster Runtime** — JSON cluster config and Python model builder with 2-4 byte quantization (`cluster/`)
+- [x] **MoE Training Pipeline** — Dataset loading, expert mapping, and LoRA fine-tuning (`training/`)
 - [ ] Community plugin registry
 
 ---
@@ -715,6 +717,79 @@ With INT4 quantization:
 - **108 Experts**: ~162 MB
 - **Router**: ~256 KB
 - **Total Model**: ~165 MB (vs ~660 MB at FP32)
+
+---
+
+## MoE Training Pipeline
+
+The `training/` directory provides a complete pipeline for training the K'UHUL MoE model on coding datasets.
+
+### Training Datasets
+
+| Dataset | Source | Experts | Features |
+|---------|--------|---------|----------|
+| DeepPlanning | Qwen | algo-*, arch-* | Planning, reasoning |
+| SFT Data Code | eth-dl-rewards | lang-* | Supervised fine-tuning |
+| A1 Code Apps | mlfoundations | algo-*, lang-python | Competitive programming |
+| Agent Tool Use | Mgmgrand420 | infra-*, web-api | Tool use, function calling |
+| GPT-5 Codex | Mgmgrand420 | lang-* (5 languages) | Multi-language code |
+| DeepThink Code | Mgmgrand420 | algo-*, math-* | Chain-of-thought reasoning |
+| Dolphin Coder | Mgmgrand420 | lang-*, web-* | Instruction following |
+| Code Feedback | Mgmgrand420 | docs-*, resume-tech | Code review |
+
+### Quick Start
+
+```bash
+# Install dependencies
+pip install -r training/requirements.txt
+
+# Download datasets
+./training/download_datasets.sh
+
+# View expert coverage
+python training/expert_mapping.py coverage
+
+# Train model
+python training/train.py --config training/datasets.json
+```
+
+### Training Configuration
+
+```json
+{
+  "training": {
+    "baseModel": "Qwen/Qwen2.5-0.5B",
+    "epochs": 3,
+    "batchSize": 4,
+    "gradientAccumulationSteps": 8,
+    "moe": {
+      "numExperts": 108,
+      "numActiveExperts": 4,
+      "routerAuxLossCoef": 0.01
+    },
+    "lora": {
+      "enabled": true,
+      "rank": 64,
+      "alpha": 128
+    }
+  }
+}
+```
+
+### Expert Coverage
+
+```
+ CATEGORY COVERAGE
+   math         ████░░░░░░░░░░░░░░░░  20.0% (2/10)
+   languages    ████████████░░░░░░░░  53.3% (8/15)
+   web          ████████░░░░░░░░░░░░  33.3% (4/12)
+   algorithms   ████████████░░░░░░░░  50.0% (4/8)
+   infra        ████░░░░░░░░░░░░░░░░  25.0% (3/12)
+   docs         ██████░░░░░░░░░░░░░░  33.3% (2/6)
+   reserved     ░░░░░░░░░░░░░░░░░░░░   0.0% (0/19)
+```
+
+Reserved experts (19 slots) are available for domain-specific fine-tuning.
 
 ---
 
