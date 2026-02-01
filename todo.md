@@ -31,6 +31,7 @@
 - [x] Splash Runtime — Boot screen, progress tracking, lifecycle hooks
 - [x] Documentation Site — Interactive docs with Legacy/Modern version toggle
 - [x] Performance Benchmarks — DOM comparison benchmarks
+- [x] CLI Setup Wizard — Interactive project setup with projection modes
 
 ## In Progress
 

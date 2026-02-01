@@ -25,6 +25,7 @@
 | **Splash Runtime** | :white_check_mark: Complete | `src/splash/` |
 | **Documentation Site** | :white_check_mark: Complete | `docs/index.html` |
 | **Performance Benchmarks** | :white_check_mark: Complete | `benchmarks/` |
+| **CLI Setup Wizard** | :white_check_mark: Complete | `src/cli/` |
 
 ---
 
@@ -62,6 +63,7 @@
 - [x] **Splash Runtime** — Boot screen, progress tracking, lifecycle hooks (`src/splash/`)
 - [x] **Documentation Site** — Interactive docs with Legacy/Modern version toggle (`docs/`)
 - [x] **Performance Benchmarks** — DOM comparison benchmarks (`benchmarks/`)
+- [x] **CLI Setup Wizard** — Interactive project setup with projection modes (`src/cli/`)
 - [ ] Interactive playground
 - [ ] Community plugin registry
 
