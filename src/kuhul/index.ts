@@ -72,3 +72,25 @@ export {
   type ExpertSpec,
   type TrainingConfig,
 } from './training-spec.js';
+
+// Inference Backend
+export {
+  // Pipeline
+  InferencePipeline,
+  ExpertRouter,
+  router,
+  createMockPipeline,
+  createWebGPUPipeline,
+  createRemotePipeline,
+  runCLIInference,
+  // Backends
+  MockInferenceBackend,
+  WebGPUInferenceBackend,
+  RemoteInferenceBackend,
+  // Types
+  type InferenceBackend,
+  type InferenceOptions,
+  type InferenceResult,
+  type PipelineResult,
+  type RemoteBackendConfig,
+} from './backend.js';

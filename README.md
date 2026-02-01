@@ -579,6 +579,59 @@ See the [documentation site](docs/index.html) for a side-by-side comparison with
 
 ---
 
+## K'UHUL MoE Architecture
+
+ATOMIC-DOM includes a **Mixture of Experts (MoE)** inference architecture with 108 specialized expert modules.
+
+```
+Input → Context Router → Top-K Expert Selection → Weighted Merge → Output
+            │                    │
+       detectContext()    ┌──────┴──────┐
+                          │ 89 Defined  │
+                          │ 19 Reserved │
+                          └─────────────┘
+```
+
+### Expert Categories
+
+| Category | Experts | Parent MicroAtomic |
+|----------|---------|-------------------|
+| Mathematics | 10 | MathMicroAtomic |
+| Languages | 15 | ProgrammingMicroAtomic |
+| Web | 12 | WebMicroAtomic |
+| Data/ML | 10 | CodeGenMicroAtomic |
+| Infrastructure | 12 | CodeGenMicroAtomic |
+| Resume | 8 | ResumeMicroAtomic |
+| Algorithms | 8 | ProgrammingMicroAtomic |
+| Architecture | 8 | ProgrammingMicroAtomic |
+| Documentation | 6 | OutputMicroAtomic |
+| **Reserved** | **19** | Fine-tuning slots |
+
+### Model Specs
+
+- **Architecture**: Sparse MoE with top-4 routing
+- **Experts**: 108 total (89 defined + 19 reserved for fine-tuning)
+- **Dimensions**: 512 expert / 1024 shared
+- **Router**: Context-gated (uses `detectContext()`)
+
+### Reserved Experts (Fine-tuning)
+
+19 expert slots are reserved for personalized fine-tuning:
+
+```typescript
+const customExpert = {
+  id: 'custom-01',
+  name: 'My Company API Expert',
+  parent: 'CodeGenMicroAtomic',
+  trainingDataPath: './data/my-api-docs/',
+  inheritFrom: 'web-api',  // Extend existing expert
+};
+```
+
+See [`KUHUL_MOE_EXPERT_TAXONOMY.md`](./KUHUL_MOE_EXPERT_TAXONOMY.md) for complete documentation.
+
+---
+
 ## What's Next
 
 The language specification phase is **complete**. All grammars are locked and canonical. The project is now ready for implementation.
