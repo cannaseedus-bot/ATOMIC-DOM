@@ -86,6 +86,89 @@
     }
   ],
 
+  "customRLHF": {
+    "enabled": true,
+    "description": "Personal RLHF data from AI conversation exports",
+    "importPath": "./rlhf_data",
+    "weight": 2.0,
+
+    "sources": [
+      {
+        "id": "openai",
+        "name": "OpenAI/ChatGPT Exports",
+        "exportPath": "./exports/openai/",
+        "formats": ["conversations.json", "*.jsonl"],
+        "priority": "high",
+        "features": ["advanced-coding", "multi-turn", "tool-use"]
+      },
+      {
+        "id": "claude",
+        "name": "Claude/Anthropic Exports",
+        "exportPath": "./exports/claude/",
+        "formats": ["*.json", "*.jsonl"],
+        "priority": "high",
+        "features": ["advanced-coding", "reasoning", "long-context"]
+      },
+      {
+        "id": "mistral",
+        "name": "Mistral Exports",
+        "exportPath": "./exports/mistral/",
+        "formats": ["*.json"],
+        "priority": "medium",
+        "features": ["code-generation", "instruction-following"]
+      },
+      {
+        "id": "deepseek",
+        "name": "DeepSeek Exports",
+        "exportPath": "./exports/deepseek/",
+        "formats": ["*.json", "*.jsonl"],
+        "priority": "high",
+        "features": ["deep-reasoning", "code-generation", "chain-of-thought"]
+      },
+      {
+        "id": "gemini",
+        "name": "Google Gemini Exports",
+        "exportPath": "./exports/gemini/",
+        "formats": ["*.json"],
+        "priority": "medium",
+        "features": ["multi-modal", "code-generation"]
+      },
+      {
+        "id": "copilot",
+        "name": "GitHub Copilot Logs",
+        "exportPath": "./exports/copilot/",
+        "formats": ["*.json", "*.log"],
+        "priority": "high",
+        "features": ["code-completion", "inline-suggestions"]
+      }
+    ],
+
+    "processing": {
+      "minMessageLength": 50,
+      "minConversationTurns": 2,
+      "filterCodeOnly": true,
+      "deduplication": true,
+      "anonymization": {
+        "removeEmails": true,
+        "removeApiKeys": true,
+        "removePersonalNames": false
+      }
+    },
+
+    "expertAutoDetection": {
+      "enabled": true,
+      "fallbackExpert": "lang-python",
+      "codePatterns": {
+        "python": ["def ", "class ", "import ", "from ", "@", "print("],
+        "javascript": ["const ", "let ", "function ", "=>", "require("],
+        "typescript": ["interface ", "type ", ": string", ": number", "<T>"],
+        "rust": ["fn ", "let mut", "impl ", "pub fn", "use "],
+        "go": ["func ", "package ", "import (", ":="],
+        "sql": ["SELECT", "FROM", "WHERE", "INSERT", "UPDATE"]
+      }
+    }
+  },
+
   "expertMapping": {
     "math": {
       "datasets": ["deepthink-code"],
@@ -116,6 +199,12 @@
       "datasets": ["code-feedback"],
       "experts": ["docs-api", "docs-comments", "docs-readme"],
       "weight": 0.6
+    },
+    "rlhf": {
+      "datasets": ["custom-rlhf"],
+      "experts": ["all"],
+      "weight": 2.0,
+      "description": "High-quality personal conversation data with expert auto-detection"
     }
   },
 

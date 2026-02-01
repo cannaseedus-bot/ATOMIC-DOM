@@ -303,13 +303,42 @@ class DataProcessor:
 
         return None
 
+    def load_rlhf_data(self, rlhf_path: Path) -> List[Dict[str, Any]]:
+        """Load custom RLHF data from processed exports"""
+        samples = []
+        rlhf_file = rlhf_path / "rlhf_samples.jsonl"
+
+        if not rlhf_file.exists():
+            logger.warning(f"No RLHF data found at {rlhf_file}")
+            return samples
+
+        with open(rlhf_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.strip():
+                    try:
+                        sample = json.loads(line)
+                        samples.append({
+                            'instruction': sample.get('instruction', ''),
+                            'response': sample.get('response', ''),
+                            'dataset': f"rlhf-{sample.get('source', 'unknown')}",
+                            'experts': sample.get('experts', ['lang-python']),
+                            'category': 'rlhf',
+                        })
+                    except json.JSONDecodeError:
+                        continue
+
+        logger.info(f"Loaded {len(samples)} RLHF samples from {rlhf_file}")
+        return samples
+
     def prepare_dataset(
         self,
-        datasets: Dict[str, Tuple[Path, DatasetConfig]]
+        datasets: Dict[str, Tuple[Path, DatasetConfig]],
+        rlhf_path: Optional[Path] = None
     ) -> Tuple[List[Dict], List[Dict]]:
         """Prepare all datasets for training"""
         all_samples = []
 
+        # Load HuggingFace datasets
         for dataset_id, (path, config) in datasets.items():
             raw_samples = self.load_dataset(path, config.format)
 
@@ -320,6 +349,14 @@ class DataProcessor:
                     formatted['experts'] = config.experts
                     formatted['category'] = config.category
                     all_samples.append(formatted)
+
+        # Load custom RLHF data (higher weight)
+        if rlhf_path and rlhf_path.exists():
+            rlhf_samples = self.load_rlhf_data(rlhf_path)
+            # RLHF data gets 2x weight by duplicating
+            all_samples.extend(rlhf_samples)
+            all_samples.extend(rlhf_samples)  # 2x weight
+            logger.info(f"Added {len(rlhf_samples)} RLHF samples (2x weighted)")
 
         # Shuffle
         import random
@@ -596,6 +633,16 @@ def main():
         action="store_true",
         help="Show what would be done without doing it"
     )
+    parser.add_argument(
+        "--rlhf",
+        default="./rlhf_data",
+        help="Path to RLHF data directory"
+    )
+    parser.add_argument(
+        "--rlhf-only",
+        action="store_true",
+        help="Train only on RLHF data (skip HuggingFace datasets)"
+    )
 
     args = parser.parse_args()
 
@@ -617,6 +664,7 @@ def main():
 
     output_dir = Path(training_config.output_dir)
     datasets_dir = Path("datasets")
+    rlhf_dir = Path(args.rlhf)
 
     # Print config summary
     print("\n" + "=" * 60)
@@ -630,6 +678,8 @@ def main():
     print(f"  LoRA Rank:      {training_config.lora_rank}")
     print(f"  Epochs:         {training_config.epochs}")
     print(f"  Batch Size:     {training_config.batch_size} x {training_config.gradient_accumulation_steps}")
+    print(f"  RLHF Data:      {rlhf_dir if rlhf_dir.exists() else 'Not found'}")
+    print(f"  RLHF Only:      {args.rlhf_only}")
     print("=" * 60 + "\n")
 
     if args.dry_run:
@@ -654,11 +704,14 @@ def main():
 
     # Build dataset map
     dataset_map = {}
-    for dataset in datasets:
-        if dataset.id in dataset_paths:
-            dataset_map[dataset.id] = (dataset_paths[dataset.id], dataset)
+    if not args.rlhf_only:
+        for dataset in datasets:
+            if dataset.id in dataset_paths:
+                dataset_map[dataset.id] = (dataset_paths[dataset.id], dataset)
 
-    train_samples, val_samples = processor.prepare_dataset(dataset_map)
+    # Prepare datasets with optional RLHF data
+    rlhf_path = rlhf_dir if rlhf_dir.exists() else None
+    train_samples, val_samples = processor.prepare_dataset(dataset_map, rlhf_path=rlhf_path)
 
     if not train_samples:
         logger.error("No training samples found!")
