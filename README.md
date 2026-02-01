@@ -28,6 +28,7 @@
 | **CLI Setup Wizard** | :white_check_mark: Complete | `src/cli/` |
 | **Interactive Playground** | :white_check_mark: Complete | `playground/` |
 | **K'UHUL MicroAtomics** | :white_check_mark: Complete | `src/kuhul/` |
+| **Cluster Runtime** | :white_check_mark: Complete | `cluster/` |
 
 ---
 
@@ -68,6 +69,7 @@
 - [x] **CLI Setup Wizard** — Interactive project setup with projection modes (`src/cli/`)
 - [x] **Interactive Playground** — Browser-based ASXR editor with live preview (`playground/`)
 - [x] **K'UHUL MicroAtomics** — Orchestration layer with context detection and action words (`src/kuhul/`)
+- [x] **GPU Cluster Runtime** — JSON cluster config and Python model builder with 2-4 byte quantization (`cluster/`)
 - [ ] Community plugin registry
 
 ---
@@ -629,6 +631,90 @@ const customExpert = {
 ```
 
 See [`KUHUL_MOE_EXPERT_TAXONOMY.md`](./KUHUL_MOE_EXPERT_TAXONOMY.md) for complete documentation.
+
+---
+
+## GPU Cluster Runtime
+
+The `cluster/` directory provides infrastructure for deploying MoE models with low-byte quantization (2-4 bytes per parameter).
+
+### Configuration
+
+```json
+{
+  "model": {
+    "totalExperts": 108,
+    "activeExperts": 4,
+    "quantization": {
+      "precision": "int4",
+      "expertPrecision": "int8",
+      "routerPrecision": "fp16"
+    }
+  },
+  "cluster": {
+    "nodes": [
+      { "id": "node-0", "role": "router", "gpu": { "device": "cuda:0" } },
+      { "id": "node-1", "role": "expert-host", "experts": ["math-*", "lang-*"] }
+    ]
+  }
+}
+```
+
+### Model Builder CLI
+
+```bash
+# Generate deployment plan
+python cluster/model_builder.py build --config cluster/runtime.json
+
+# Generate quantization kernels
+python cluster/model_builder.py quantize --precision int4
+
+# Generate all CUDA kernels
+python cluster/model_builder.py kernels --config cluster/runtime.json
+
+# Export to ONNX/safetensors
+python cluster/model_builder.py export --format onnx
+
+# Show model info
+python cluster/model_builder.py info --config cluster/runtime.json
+```
+
+### Quantization Precision
+
+| Format | Bits | Bytes/Element | Use Case |
+|--------|------|---------------|----------|
+| INT2 | 2 | 0.25 | Ultra-compressed experts |
+| INT4 | 4 | 0.5 | Default expert weights |
+| INT8 | 8 | 1.0 | High-precision experts |
+| FP16 | 16 | 2.0 | Router weights |
+| FP32 | 32 | 4.0 | Accumulation buffers |
+
+### GPU Kernel Generation
+
+The model builder generates optimized CUDA kernels:
+
+- **Dequantization**: INT2/INT4/INT8 → FP32 unpacking
+- **Expert Forward**: Gated Linear Unit with SiLU activation
+- **Top-K Router**: Softmax + sparse expert selection
+
+```cuda
+// Generated INT4 dequantization kernel
+__global__ void dequant_int4_kernel(
+    const uint8_t* input,
+    float* output,
+    float scale,
+    int zero_point,
+    int num_elements
+);
+```
+
+### Memory Footprint
+
+With INT4 quantization:
+- **Per Expert**: ~1.5 MB (512×2048×2 projections)
+- **108 Experts**: ~162 MB
+- **Router**: ~256 KB
+- **Total Model**: ~165 MB (vs ~660 MB at FP32)
 
 ---
 
