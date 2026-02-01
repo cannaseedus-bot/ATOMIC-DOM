@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATOMIC-DOM Performance Benchmark</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .result-bar {
+      transition: width 0.5s ease-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen p-8">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-2">ATOMIC-DOM Performance Benchmark</h1>
+    <p class="text-slate-400 mb-8">Comparing DOM manipulation strategies - lower is better</p>
+
+    <!-- Test Controls -->
+    <div class="bg-slate-800 rounded-xl p-6 mb-8 border border-slate-700">
+      <div class="flex flex-wrap gap-4 items-center">
+        <div>
+          <label class="text-sm text-slate-400">Elements:</label>
+          <select id="elementCount" class="bg-slate-700 border border-slate-600 rounded px-3 py-2 ml-2">
+            <option value="100">100</option>
+            <option value="500">500</option>
+            <option value="1000" selected>1,000</option>
+            <option value="5000">5,000</option>
+            <option value="10000">10,000</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm text-slate-400">Iterations:</label>
+          <select id="iterations" class="bg-slate-700 border border-slate-600 rounded px-3 py-2 ml-2">
+            <option value="10">10</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <button id="runBenchmark" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-6 rounded-lg transition-colors">
+          Run Benchmark
+        </button>
+        <span id="status" class="text-slate-400 text-sm"></span>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="space-y-4">
+      <!-- Naive DOM -->
+      <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div class="flex justify-between items-center mb-2">
+          <div>
+            <span class="font-semibold">Naive DOM</span>
+            <span class="text-slate-400 text-sm ml-2">Individual property changes</span>
+          </div>
+          <span id="naive-time" class="font-mono text-red-400">--</span>
+        </div>
+        <div class="h-4 bg-slate-700 rounded-full overflow-hidden">
+          <div id="naive-bar" class="result-bar h-full bg-red-500 rounded-full" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- cssText -->
+      <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div class="flex justify-between items-center mb-2">
+          <div>
+            <span class="font-semibold">cssText</span>
+            <span class="text-slate-400 text-sm ml-2">Batched style string</span>
+          </div>
+          <span id="csstext-time" class="font-mono text-orange-400">--</span>
+        </div>
+        <div class="h-4 bg-slate-700 rounded-full overflow-hidden">
+          <div id="csstext-bar" class="result-bar h-full bg-orange-500 rounded-full" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- DocumentFragment -->
+      <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div class="flex justify-between items-center mb-2">
+          <div>
+            <span class="font-semibold">DocumentFragment</span>
+            <span class="text-slate-400 text-sm ml-2">Batched DOM insertion</span>
+          </div>
+          <span id="fragment-time" class="font-mono text-yellow-400">--</span>
+        </div>
+        <div class="h-4 bg-slate-700 rounded-full overflow-hidden">
+          <div id="fragment-bar" class="result-bar h-full bg-yellow-500 rounded-full" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- requestAnimationFrame -->
+      <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div class="flex justify-between items-center mb-2">
+          <div>
+            <span class="font-semibold">requestAnimationFrame</span>
+            <span class="text-slate-400 text-sm ml-2">Frame-batched updates</span>
+          </div>
+          <span id="raf-time" class="font-mono text-blue-400">--</span>
+        </div>
+        <div class="h-4 bg-slate-700 rounded-full overflow-hidden">
+          <div id="raf-bar" class="result-bar h-full bg-blue-500 rounded-full" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- ATOMIC-DOM -->
+      <div class="bg-slate-800 rounded-xl p-4 border border-cyan-500/50">
+        <div class="flex justify-between items-center mb-2">
+          <div>
+            <span class="font-semibold text-cyan-400">ATOMIC-DOM</span>
+            <span class="text-slate-400 text-sm ml-2">Transactional batching</span>
+          </div>
+          <span id="atomic-time" class="font-mono text-cyan-400">--</span>
+        </div>
+        <div class="h-4 bg-slate-700 rounded-full overflow-hidden">
+          <div id="atomic-bar" class="result-bar h-full bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-full" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Virtual DOM (simulated) -->
+      <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div class="flex justify-between items-center mb-2">
+          <div>
+            <span class="font-semibold">Virtual DOM (simulated)</span>
+            <span class="text-slate-400 text-sm ml-2">Diff + patch approach</span>
+          </div>
+          <span id="vdom-time" class="font-mono text-purple-400">--</span>
+        </div>
+        <div class="h-4 bg-slate-700 rounded-full overflow-hidden">
+          <div id="vdom-bar" class="result-bar h-full bg-purple-500 rounded-full" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div id="summary" class="mt-8 bg-slate-800 rounded-xl p-6 border border-slate-700 hidden">
+      <h2 class="text-xl font-bold mb-4">Summary</h2>
+      <div id="summary-content" class="text-slate-300"></div>
+    </div>
+
+    <!-- Test Container (hidden) -->
+    <div id="testContainer" class="fixed -left-[9999px] top-0"></div>
+  </div>
+
+  <script>
+    // Benchmark utilities
+    function measureTime(fn, iterations = 50) {
+      const times = [];
+      for (let i = 0; i < iterations; i++) {
+        const start = performance.now();
+        fn();
+        times.push(performance.now() - start);
+      }
+      // Remove outliers and average
+      times.sort((a, b) => a - b);
+      const trimmed = times.slice(Math.floor(times.length * 0.1), Math.floor(times.length * 0.9));
+      return trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
+    }
+
+    async function measureTimeAsync(fn, iterations = 50) {
+      const times = [];
+      for (let i = 0; i < iterations; i++) {
+        const start = performance.now();
+        await fn();
+        times.push(performance.now() - start);
+      }
+      times.sort((a, b) => a - b);
+      const trimmed = times.slice(Math.floor(times.length * 0.1), Math.floor(times.length * 0.9));
+      return trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
+    }
+
+    // Test implementations
+    const container = document.getElementById('testContainer');
+
+    function setupElements(count) {
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const div = document.createElement('div');
+        div.id = `el-${i}`;
+        div.className = 'test-element';
+        div.textContent = `Element ${i}`;
+        container.appendChild(div);
+      }
+    }
+
+    // 1. Naive DOM - individual property changes
+    function testNaiveDOM(count) {
+      for (let i = 0; i < count; i++) {
+        const el = document.getElementById(`el-${i}`);
+        el.style.width = '100px';
+        el.style.height = '50px';
+        el.style.backgroundColor = '#333';
+        el.style.color = '#fff';
+        el.style.padding = '10px';
+        el.style.margin = '5px';
+        el.style.borderRadius = '4px';
+        el.style.display = 'inline-block';
+        // Force reflow between elements (worst case)
+        void el.offsetHeight;
+      }
+    }
+
+    // 2. cssText - batched style string
+    function testCssText(count) {
+      for (let i = 0; i < count; i++) {
+        const el = document.getElementById(`el-${i}`);
+        el.style.cssText = 'width: 100px; height: 50px; background-color: #333; color: #fff; padding: 10px; margin: 5px; border-radius: 4px; display: inline-block;';
+      }
+    }
+
+    // 3. DocumentFragment - batched DOM insertion
+    function testDocumentFragment(count) {
+      const fragment = document.createDocumentFragment();
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const div = document.createElement('div');
+        div.id = `el-${i}`;
+        div.className = 'test-element';
+        div.style.cssText = 'width: 100px; height: 50px; background-color: #333; color: #fff; padding: 10px; margin: 5px; border-radius: 4px; display: inline-block;';
+        div.textContent = `Element ${i}`;
+        fragment.appendChild(div);
+      }
+      container.appendChild(fragment);
+    }
+
+    // 4. requestAnimationFrame - frame batching
+    function testRAF(count) {
+      return new Promise(resolve => {
+        requestAnimationFrame(() => {
+          for (let i = 0; i < count; i++) {
+            const el = document.getElementById(`el-${i}`);
+            el.style.width = '100px';
+            el.style.height = '50px';
+            el.style.backgroundColor = '#333';
+            el.style.color = '#fff';
+            el.style.padding = '10px';
+            el.style.margin = '5px';
+            el.style.borderRadius = '4px';
+            el.style.display = 'inline-block';
+          }
+          resolve();
+        });
+      });
+    }
+
+    // 5. ATOMIC-DOM style - transactional batching
+    function testAtomicDOM(count) {
+      // Collect all changes first (planning phase)
+      const changes = [];
+      for (let i = 0; i < count; i++) {
+        changes.push({
+          id: `el-${i}`,
+          styles: {
+            width: '100px',
+            height: '50px',
+            backgroundColor: '#333',
+            color: '#fff',
+            padding: '10px',
+            margin: '5px',
+            borderRadius: '4px',
+            display: 'inline-block'
+          }
+        });
+      }
+
+      // Apply all changes in a single batch (commit phase)
+      // This mimics how ATOMIC-DOM would batch mutations
+      requestAnimationFrame(() => {
+        for (const change of changes) {
+          const el = document.getElementById(change.id);
+          Object.assign(el.style, change.styles);
+        }
+      });
+
+      // Synchronous version for fair comparison
+      for (const change of changes) {
+        const el = document.getElementById(change.id);
+        Object.assign(el.style, change.styles);
+      }
+    }
+
+    // 6. Virtual DOM (simulated) - diff and patch
+    function testVirtualDOM(count) {
+      // Build virtual tree
+      const vdom = [];
+      for (let i = 0; i < count; i++) {
+        vdom.push({
+          id: `el-${i}`,
+          type: 'div',
+          props: {
+            style: {
+              width: '100px',
+              height: '50px',
+              backgroundColor: '#333',
+              color: '#fff',
+              padding: '10px',
+              margin: '5px',
+              borderRadius: '4px',
+              display: 'inline-block'
+            }
+          }
+        });
+      }
+
+      // Diff phase (simulated - compare with previous)
+      const patches = vdom.map(node => ({
+        type: 'UPDATE_STYLE',
+        id: node.id,
+        styles: node.props.style
+      }));
+
+      // Patch phase - apply changes
+      for (const patch of patches) {
+        const el = document.getElementById(patch.id);
+        Object.assign(el.style, patch.styles);
+      }
+    }
+
+    // Run benchmark
+    async function runBenchmark() {
+      const count = parseInt(document.getElementById('elementCount').value);
+      const iterations = parseInt(document.getElementById('iterations').value);
+      const status = document.getElementById('status');
+      const runBtn = document.getElementById('runBenchmark');
+
+      runBtn.disabled = true;
+      runBtn.classList.add('opacity-50');
+
+      const results = {};
+
+      // Test 1: Naive DOM
+      status.textContent = 'Testing Naive DOM...';
+      setupElements(count);
+      await new Promise(r => setTimeout(r, 100));
+      results.naive = measureTime(() => testNaiveDOM(count), iterations);
+
+      // Test 2: cssText
+      status.textContent = 'Testing cssText...';
+      setupElements(count);
+      await new Promise(r => setTimeout(r, 100));
+      results.csstext = measureTime(() => testCssText(count), iterations);
+
+      // Test 3: DocumentFragment
+      status.textContent = 'Testing DocumentFragment...';
+      await new Promise(r => setTimeout(r, 100));
+      results.fragment = measureTime(() => testDocumentFragment(count), iterations);
+
+      // Test 4: requestAnimationFrame
+      status.textContent = 'Testing requestAnimationFrame...';
+      setupElements(count);
+      await new Promise(r => setTimeout(r, 100));
+      results.raf = await measureTimeAsync(() => testRAF(count), iterations);
+
+      // Test 5: ATOMIC-DOM
+      status.textContent = 'Testing ATOMIC-DOM...';
+      setupElements(count);
+      await new Promise(r => setTimeout(r, 100));
+      results.atomic = measureTime(() => testAtomicDOM(count), iterations);
+
+      // Test 6: Virtual DOM
+      status.textContent = 'Testing Virtual DOM...';
+      setupElements(count);
+      await new Promise(r => setTimeout(r, 100));
+      results.vdom = measureTime(() => testVirtualDOM(count), iterations);
+
+      // Display results
+      const maxTime = Math.max(...Object.values(results));
+
+      const displayResult = (id, time, maxTime) => {
+        document.getElementById(`${id}-time`).textContent = `${time.toFixed(2)}ms`;
+        document.getElementById(`${id}-bar`).style.width = `${(time / maxTime) * 100}%`;
+      };
+
+      displayResult('naive', results.naive, maxTime);
+      displayResult('csstext', results.csstext, maxTime);
+      displayResult('fragment', results.fragment, maxTime);
+      displayResult('raf', results.raf, maxTime);
+      displayResult('atomic', results.atomic, maxTime);
+      displayResult('vdom', results.vdom, maxTime);
+
+      // Show summary
+      const summary = document.getElementById('summary');
+      const summaryContent = document.getElementById('summary-content');
+      summary.classList.remove('hidden');
+
+      const fastest = Object.entries(results).sort((a, b) => a[1] - b[1])[0];
+      const naiveVsAtomic = ((results.naive - results.atomic) / results.naive * 100).toFixed(1);
+      const vdomVsAtomic = ((results.vdom - results.atomic) / results.vdom * 100).toFixed(1);
+
+      summaryContent.innerHTML = `
+        <p class="mb-2"><strong>Fastest:</strong> ${fastest[0].toUpperCase()} at ${fastest[1].toFixed(2)}ms</p>
+        <p class="mb-2"><strong>ATOMIC-DOM vs Naive:</strong> ${naiveVsAtomic}% faster</p>
+        <p class="mb-2"><strong>ATOMIC-DOM vs Virtual DOM:</strong> ${vdomVsAtomic}% ${parseFloat(vdomVsAtomic) > 0 ? 'faster' : 'slower'}</p>
+        <p class="text-sm text-slate-400 mt-4">
+          Tested with ${count.toLocaleString()} elements over ${iterations} iterations.
+          Results may vary based on browser and hardware.
+        </p>
+      `;
+
+      status.textContent = 'Complete!';
+      runBtn.disabled = false;
+      runBtn.classList.remove('opacity-50');
+    }
+
+    document.getElementById('runBenchmark').addEventListener('click', runBenchmark);
+  </script>
+</body>
+</html>
