@@ -27,6 +27,7 @@
 | **Performance Benchmarks** | :white_check_mark: Complete | `benchmarks/` |
 | **CLI Setup Wizard** | :white_check_mark: Complete | `src/cli/` |
 | **Interactive Playground** | :white_check_mark: Complete | `playground/` |
+| **K'UHUL MicroAtomics** | :white_check_mark: Complete | `src/kuhul/` |
 
 ---
 
@@ -66,6 +67,7 @@
 - [x] **Performance Benchmarks** — DOM comparison benchmarks (`benchmarks/`)
 - [x] **CLI Setup Wizard** — Interactive project setup with projection modes (`src/cli/`)
 - [x] **Interactive Playground** — Browser-based ASXR editor with live preview (`playground/`)
+- [x] **K'UHUL MicroAtomics** — Orchestration layer with context detection and action words (`src/kuhul/`)
 - [ ] Community plugin registry
 
 ---
@@ -574,6 +576,59 @@ See the [documentation site](docs/index.html) for a side-by-side comparison with
 - Keep the **core minimal**, with features added via plugins.
 - Provide a **unified grammar** for batching, patching, and extensible syntax.
 - Enable **multi-shell authoring** without sacrificing performance.
+
+---
+
+## K'UHUL MoE Architecture
+
+ATOMIC-DOM includes a **Mixture of Experts (MoE)** inference architecture with 108 specialized expert modules.
+
+```
+Input → Context Router → Top-K Expert Selection → Weighted Merge → Output
+            │                    │
+       detectContext()    ┌──────┴──────┐
+                          │ 89 Defined  │
+                          │ 19 Reserved │
+                          └─────────────┘
+```
+
+### Expert Categories
+
+| Category | Experts | Parent MicroAtomic |
+|----------|---------|-------------------|
+| Mathematics | 10 | MathMicroAtomic |
+| Languages | 15 | ProgrammingMicroAtomic |
+| Web | 12 | WebMicroAtomic |
+| Data/ML | 10 | CodeGenMicroAtomic |
+| Infrastructure | 12 | CodeGenMicroAtomic |
+| Resume | 8 | ResumeMicroAtomic |
+| Algorithms | 8 | ProgrammingMicroAtomic |
+| Architecture | 8 | ProgrammingMicroAtomic |
+| Documentation | 6 | OutputMicroAtomic |
+| **Reserved** | **19** | Fine-tuning slots |
+
+### Model Specs
+
+- **Architecture**: Sparse MoE with top-4 routing
+- **Experts**: 108 total (89 defined + 19 reserved for fine-tuning)
+- **Dimensions**: 512 expert / 1024 shared
+- **Router**: Context-gated (uses `detectContext()`)
+
+### Reserved Experts (Fine-tuning)
+
+19 expert slots are reserved for personalized fine-tuning:
+
+```typescript
+const customExpert = {
+  id: 'custom-01',
+  name: 'My Company API Expert',
+  parent: 'CodeGenMicroAtomic',
+  trainingDataPath: './data/my-api-docs/',
+  inheritFrom: 'web-api',  // Extend existing expert
+};
+```
+
+See [`KUHUL_MOE_EXPERT_TAXONOMY.md`](./KUHUL_MOE_EXPERT_TAXONOMY.md) for complete documentation.
 
 ---
 

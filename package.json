@@ -54,6 +54,10 @@
     "./cli": {
       "types": "./dist/cli/index.d.ts",
       "import": "./dist/cli/index.js"
+    },
+    "./kuhul": {
+      "types": "./dist/kuhul/index.d.ts",
+      "import": "./dist/kuhul/index.js"
     }
   },
   "scripts": {
