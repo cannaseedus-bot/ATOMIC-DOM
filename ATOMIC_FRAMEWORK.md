@@ -473,7 +473,7 @@ Only one of these removes **imperative authority**.
 Atomic Framework is the structural layer of the K'UHUL system:
 
 ```
-K'UHUL MoE Architecture
+K'UHUL Atomic Expert Architecture
     ↓
 Atomic Framework (structure + law)
     ↓
@@ -540,7 +540,7 @@ Atomic Framework fills the gap the internet always needed:
 |----------|---------|
 | `ATOMIC_FRAMEWORK.md` | This file — framework specification |
 | `ARCHITECTURE_LAYERS.md` | Why K'UHUL exists — the cognitive foundation |
-| `KUHUL_MOE_EXPERT_TAXONOMY.md` | MoE expert system documentation |
+| `KUHUL_ATOMIC_EXPERTS.md` | Atomic Expert system documentation |
 
 ---
 

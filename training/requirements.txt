@@ -1,4 +1,4 @@
-# K'UHUL MoE Training Requirements
+# K'UHUL Atomic Expert Training Requirements
 # Install with: pip install -r requirements.txt
 
 # Core ML

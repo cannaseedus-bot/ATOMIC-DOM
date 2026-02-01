@@ -8,9 +8,9 @@
 // ============================================================================
 
 export const MODEL_SPEC = {
-  name: 'kuhul-moe-v1',
-  architecture: 'mixture-of-experts',
-  totalExperts: 118,       // 108 base + 10 Atomic Framework experts
+  name: 'kuhul-v1',
+  architecture: 'atomic-experts',
+  totalExperts: 118,       // 99 defined + 19 reserved
   activeExperts: 4,        // top-k routing
   expertDimension: 512,    // per-expert hidden dim
   sharedDimension: 1024,   // shared layers dim

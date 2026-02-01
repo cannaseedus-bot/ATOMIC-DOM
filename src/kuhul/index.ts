@@ -60,7 +60,7 @@ export {
   type CLIResult,
 } from './inference.js';
 
-// Training Spec (MoE Architecture)
+// Training Spec (Atomic Expert Architecture)
 export {
   MODEL_SPEC,
   EXPERT_TAXONOMY,

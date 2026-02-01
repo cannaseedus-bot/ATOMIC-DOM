@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# K'UHUL MoE Dataset Downloader
+# K'UHUL Atomic Expert Dataset Downloader
 # Downloads all training datasets from Hugging Face
 #
 
@@ -11,7 +11,7 @@ mkdir -p "$DATASETS_DIR"
 cd "$DATASETS_DIR"
 
 echo "=================================================="
-echo " K'UHUL MoE Dataset Downloader"
+echo " K'UHUL Atomic Expert Dataset Downloader"
 echo "=================================================="
 echo " Target directory: $DATASETS_DIR"
 echo "=================================================="

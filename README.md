@@ -29,7 +29,7 @@
 | **Interactive Playground** | :white_check_mark: Complete | `playground/` |
 | **K'UHUL MicroAtomics** | :white_check_mark: Complete | `src/kuhul/` |
 | **Cluster Runtime** | :white_check_mark: Complete | `cluster/` |
-| **MoE Training** | :white_check_mark: Complete | `training/` |
+| **Atomic Expert Training** | :white_check_mark: Complete | `training/` |
 
 ---
 
@@ -71,7 +71,7 @@
 - [x] **Interactive Playground** — Browser-based ASXR editor with live preview (`playground/`)
 - [x] **K'UHUL MicroAtomics** — Orchestration layer with context detection and action words (`src/kuhul/`)
 - [x] **GPU Cluster Runtime** — JSON cluster config and Python model builder with 2-4 byte quantization (`cluster/`)
-- [x] **MoE Training Pipeline** — Dataset loading, expert mapping, and LoRA fine-tuning (`training/`)
+- [x] **Atomic Expert Training Pipeline** — Dataset loading, expert mapping, and LoRA fine-tuning (`training/`)
 - [ ] Community plugin registry
 
 ---
@@ -583,15 +583,17 @@ See the [documentation site](docs/index.html) for a side-by-side comparison with
 
 ---
 
-## K'UHUL MoE Architecture
+## K'UHUL Atomic Expert Architecture
 
-ATOMIC-DOM includes a **Mixture of Experts (MoE)** inference architecture with 108 specialized expert modules.
+ATOMIC-DOM includes an **Atomic Expert** inference architecture with 118 specialized expert modules.
+
+> **Note**: Atomic Experts are NOT code modules. They are declarative taxonomy entries defined by objects (JSON/TypeScript), not executable JS/TS agents. This distinguishes them from traditional MoE architectures.
 
 ```
 Input → Context Router → Top-K Expert Selection → Weighted Merge → Output
             │                    │
        detectContext()    ┌──────┴──────┐
-                          │ 89 Defined  │
+                          │ 99 Defined  │
                           │ 19 Reserved │
                           └─────────────┘
 ```
@@ -613,8 +615,8 @@ Input → Context Router → Top-K Expert Selection → Weighted Merge → Outpu
 
 ### Model Specs
 
-- **Architecture**: Sparse MoE with top-4 routing
-- **Experts**: 108 total (89 defined + 19 reserved for fine-tuning)
+- **Architecture**: Atomic Experts with top-4 routing
+- **Experts**: 118 total (99 defined + 19 reserved for fine-tuning)
 - **Dimensions**: 512 expert / 1024 shared
 - **Router**: Context-gated (uses `detectContext()`)
 
@@ -632,13 +634,13 @@ const customExpert = {
 };
 ```
 
-See [`KUHUL_MOE_EXPERT_TAXONOMY.md`](./KUHUL_MOE_EXPERT_TAXONOMY.md) for complete documentation.
+See [`KUHUL_ATOMIC_EXPERTS.md`](./KUHUL_ATOMIC_EXPERTS.md) for complete documentation.
 
 ---
 
 ## GPU Cluster Runtime
 
-The `cluster/` directory provides infrastructure for deploying MoE models with low-byte quantization (2-4 bytes per parameter).
+The `cluster/` directory provides infrastructure for deploying Atomic Expert models with low-byte quantization (2-4 bytes per parameter).
 
 ### Configuration
 
@@ -720,9 +722,9 @@ With INT4 quantization:
 
 ---
 
-## MoE Training Pipeline
+## Atomic Expert Training Pipeline
 
-The `training/` directory provides a complete pipeline for training the K'UHUL MoE model on coding datasets.
+The `training/` directory provides a complete pipeline for training the K'UHUL Atomic Expert model on coding datasets.
 
 ### Training Datasets
 
@@ -762,8 +764,8 @@ python training/train.py --config training/datasets.json
     "epochs": 3,
     "batchSize": 4,
     "gradientAccumulationSteps": 8,
-    "moe": {
-      "numExperts": 108,
+    "atomicExperts": {
+      "numExperts": 118,
       "numActiveExperts": 4,
       "routerAuxLossCoef": 0.01
     },

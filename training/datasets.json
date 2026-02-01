@@ -1,7 +1,7 @@
 {
   "$schema": "./datasets.schema.json",
   "version": "1.0.0",
-  "description": "K'UHUL MoE Training Dataset Configuration",
+  "description": "K'UHUL Atomic Expert Training Dataset Configuration",
 
   "repositories": [
     {
@@ -210,7 +210,7 @@
 
   "training": {
     "baseModel": "Qwen/Qwen2.5-0.5B",
-    "outputDir": "./output/kuhul-moe-v1",
+    "outputDir": "./output/kuhul-v1",
     "mixedPrecision": "bf16",
     "gradientCheckpointing": true,
 
@@ -224,7 +224,7 @@
       "maxGradNorm": 1.0
     },
 
-    "moe": {
+    "atomicExperts": {
       "numExperts": 108,
       "numActiveExperts": 4,
       "expertCapacity": 1.25,
