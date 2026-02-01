@@ -6,6 +6,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
+    "atomic-dom": "dist/cli/setup.js",
     "asxr": "dist/cli.js",
     "asxr-lsp": "dist/lsp-server.js"
   },
@@ -49,6 +50,10 @@
     "./typescript": {
       "types": "./dist/typescript/index.d.ts",
       "import": "./dist/typescript/index.js"
+    },
+    "./cli": {
+      "types": "./dist/cli/index.d.ts",
+      "import": "./dist/cli/index.js"
     }
   },
   "scripts": {

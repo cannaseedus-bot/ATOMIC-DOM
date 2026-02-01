@@ -159,6 +159,20 @@ export {
   type SplashRuntime,
 } from './splash/index.js';
 
+// CLI exports
+export {
+  runSetup,
+  quickSetup,
+  printHelp,
+  printVersion,
+  printLogo,
+  SetupWizard,
+  COLORS,
+  colorize,
+  type AtomicConfig,
+  type ProjectionMode,
+} from './cli/index.js';
+
 // Re-export parse as parseASXR for convenience
 export { parse as parseASXR } from './parser/parser.js';
 
