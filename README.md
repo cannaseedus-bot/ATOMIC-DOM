@@ -27,6 +27,7 @@
 | **Performance Benchmarks** | :white_check_mark: Complete | `benchmarks/` |
 | **CLI Setup Wizard** | :white_check_mark: Complete | `src/cli/` |
 | **Interactive Playground** | :white_check_mark: Complete | `playground/` |
+| **K'UHUL MicroAtomics** | :white_check_mark: Complete | `src/kuhul/` |
 
 ---
 
@@ -66,6 +67,7 @@
 - [x] **Performance Benchmarks** — DOM comparison benchmarks (`benchmarks/`)
 - [x] **CLI Setup Wizard** — Interactive project setup with projection modes (`src/cli/`)
 - [x] **Interactive Playground** — Browser-based ASXR editor with live preview (`playground/`)
+- [x] **K'UHUL MicroAtomics** — Orchestration layer with context detection and action words (`src/kuhul/`)
 - [ ] Community plugin registry
 
 ---
