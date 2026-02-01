@@ -135,6 +135,29 @@ export const CONTEXT_INDICATORS: Record<ContextType, ContextIndicators> = {
     patterns: [],
     weight: 1.0,
   },
+
+  atomic: {
+    keywords: [
+      'atomic', 'object server', 'object.json', 'descriptor', 'payload',
+      'projection', 'invariant', 'authority', 'escalation', 'capability',
+      'atomic blocks', 'header', 'body', 'sidebars', 'footer', 'template',
+      'micronaut', 'perception', 'layout', 'theme', 'motion', 'density',
+      'visibility', 'slot', 'placeholder', 'kuhul', 'toml', 'cluster',
+      'object://', 'hash', 'sha256', 'canonical', 'immutable', 'inert',
+      'no_execution', 'projection_only', 'block', 'structural', 'semantic',
+    ],
+    patterns: [
+      /object:\/\//,                            // Object URI
+      /sha256:[a-f0-9]+/i,                      // Hash reference
+      /@micronaut\s+\w+/,                       // Micronaut declaration
+      /<header>|<body>|<sidebars>|<footer>/,   // Atomic blocks
+      /\{\{[\w.]+\}\}/,                         // Slot syntax
+      /"authority"\s*:\s*"(none|read|write|execute)"/,  // Authority declaration
+      /"invariants"\s*:\s*\[/,                  // Invariants array
+      /"projections"\s*:\s*\{/,                 // Projections object
+    ],
+    weight: 1.4,
+  },
 };
 
 // ============================================================================
@@ -291,6 +314,7 @@ export function getContextDescription(type: ContextType): string {
     code: 'Programming, algorithms, and software development',
     resume: 'Professional experience, achievements, and career development',
     web: 'Web development, HTML/CSS/JavaScript, and frontend design',
+    atomic: 'Atomic Framework, Object Server, blocks, micronauts, and projections',
     general: 'General purpose assistance',
   };
   return descriptions[type];
@@ -302,6 +326,7 @@ export function getContextEmoji(type: ContextType): string {
     code: '💻',
     resume: '📄',
     web: '🌐',
+    atomic: '⚛️',
     general: '💬',
   };
   return emojis[type];
