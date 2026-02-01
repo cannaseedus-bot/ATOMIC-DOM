@@ -22,6 +22,9 @@
 | **Language Server (LSP)** | :white_check_mark: Complete | `src/lsp/` |
 | **VS Code Extension** | :white_check_mark: Complete | `editors/vscode/` |
 | **TypeScript Integration** | :white_check_mark: Complete | `src/typescript/` |
+| **Splash Runtime** | :white_check_mark: Complete | `src/splash/` |
+| **Documentation Site** | :white_check_mark: Complete | `docs/index.html` |
+| **Performance Benchmarks** | :white_check_mark: Complete | `benchmarks/` |
 
 ---
 
@@ -56,7 +59,10 @@
 - [x] **Language Server (LSP)** — Editor integration with diagnostics, completion, hover (`src/lsp/`)
 - [x] **VS Code Extension** — Syntax highlighting, snippets, LSP client (`editors/vscode/`)
 - [x] **TypeScript Integration** — Decorators, AST transforms, type generators (`src/typescript/`)
-- [ ] Documentation site and playground
+- [x] **Splash Runtime** — Boot screen, progress tracking, lifecycle hooks (`src/splash/`)
+- [x] **Documentation Site** — Interactive docs with Legacy/Modern version toggle (`docs/`)
+- [x] **Performance Benchmarks** — DOM comparison benchmarks (`benchmarks/`)
+- [ ] Interactive playground
 - [ ] Community plugin registry
 
 ---
@@ -477,6 +483,88 @@ output_spec      = "{",
 }
 ```
 
+---
+
+## Legacy v3: Atomic HTML (Static Runtime)
+
+ATOMIC-DOM v3 was a static HTML runtime that enabled reactive behavior without a build step. It's now marked as legacy and superseded by the modern ASXR compiler, but remains useful for simple static sites and quick prototypes.
+
+### Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **No Build Step** | Works directly in the browser with vanilla HTML |
+| **Data Binding** | `data-bind` attribute for reactive DOM updates |
+| **SCX/Cipher** | String transformation and encryption utilities |
+| **Effects System** | Built-in visual effects (fade, slide, pulse) |
+| **File Inference** | Automatic file type detection and routing |
+
+### Basic Usage
+
+```html
+<!-- Include the legacy runtime -->
+<script src="atomic-v3.js"></script>
+
+<!-- Reactive binding -->
+<div data-bind="message">Hello World</div>
+
+<!-- Update via API -->
+<script>
+  atomicHTML.set('message', 'Updated!');
+</script>
+```
+
+### Reactive Bindings
+
+```html
+<!-- Text binding -->
+<span data-bind="user.name"></span>
+
+<!-- Class binding -->
+<div data-class="isActive ? 'active' : ''"></div>
+
+<!-- Style binding -->
+<div data-style="color: {{theme.primary}}"></div>
+
+<!-- Event binding -->
+<button data-on="click: handleClick">Click Me</button>
+```
+
+### SCX/Cipher System
+
+```javascript
+// String cipher for obfuscation
+const encoded = atomicHTML.scx.encode('sensitive-data');
+const decoded = atomicHTML.scx.decode(encoded);
+
+// Template interpolation
+const result = atomicHTML.scx.template('Hello {{name}}!', { name: 'World' });
+```
+
+### Effects API
+
+```javascript
+// Built-in effects
+atomicHTML.effects.fade('#element', { duration: 300 });
+atomicHTML.effects.slide('#element', { direction: 'left' });
+atomicHTML.effects.pulse('#element', { count: 3 });
+```
+
+### Migration to Modern ATOMIC-DOM
+
+Legacy v3 code can be gradually migrated to modern ASXR:
+
+| Legacy v3 | Modern ASXR |
+|-----------|-------------|
+| `data-bind="key"` | `@state key = value` |
+| `data-on="click: fn"` | `@on click { ... }` |
+| `atomicHTML.set(k, v)` | State proposals in atomic blocks |
+| Effects API | CSS transitions + `@dom` blocks |
+
+See the [documentation site](docs/index.html) for a side-by-side comparison with version toggle.
+
+---
+
 ## Goals
 
 - Make **atomic DOM updates** the default, not the optimization.
@@ -524,3 +612,43 @@ The specification documents are **locked** — contributions should focus on:
 - Tooling (editor support, LSP)
 - Documentation and examples
 - Test suites and validation
+
+---
+
+## Future Updates & Roadmap
+
+### Planned for v0.2.0
+
+| Feature | Priority | Description |
+|---------|----------|-------------|
+| **Interactive Playground** | High | Browser-based ASXR editor with live preview |
+| **Plugin Registry** | High | Community plugin discovery and installation |
+| **WASM Compilation** | Medium | Compile ASXR to WebAssembly for performance-critical apps |
+| **Server-Side Rendering** | Medium | Full SSR support with hydration |
+| **Dev Tools Extension** | Medium | Browser devtools panel for debugging atomic blocks |
+
+### Proposed for v0.3.0
+
+| Feature | Priority | Description |
+|---------|----------|-------------|
+| **Hot Module Replacement** | High | HMR support for ASXR files in development |
+| **Native Mobile Runtime** | Medium | React Native / Capacitor integration |
+| **Visual Block Editor** | Medium | Drag-and-drop editor for atomic blocks |
+| **AI-Assisted Generation** | Low | LLM integration for generating ASXR from descriptions |
+| **Binary AST Format** | Low | Optimized binary AST for faster parsing |
+
+### Long-Term Vision
+
+- **TC39 Proposal**: Explore standardizing atomic DOM operations in ECMAScript
+- **Browser Integration**: Work with browser vendors on native transaction support
+- **Cross-Platform**: Extend ASXR beyond web to native desktop and embedded systems
+- **Universal Runtime**: Single runtime targeting DOM, Canvas, WebGL, and terminal
+
+### Suggested Community Contributions
+
+1. **Framework Adapters** — Create plugins for popular frameworks (Svelte, Solid, Qwik)
+2. **Build Tool Plugins** — Vite, Webpack, Rollup, esbuild integrations
+3. **Linting Rules** — ESLint/Biome rules for ASXR best practices
+4. **Benchmarks** — Real-world performance comparisons with existing solutions
+5. **Tutorials** — Step-by-step guides for common use cases
+6. **Translations** — Documentation in other languages
