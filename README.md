@@ -4,6 +4,57 @@
 
 ---
 
+## Core Concept: Tags as Semantic Coordinates
+
+**K'UHUL tags are NOT syntax sugar.** They are **tensor coordinates** in semantic space—a navigable map for AI inference.
+
+```
+Traditional markup:  <div class="math">x² + y²</div>     ← Human label
+K'UHUL mapping:      @atomic [math-geometry-circle] {}   ← AI coordinate
+```
+
+### The Three Mapping Techniques
+
+| Technique | Analogy | Function |
+|-----------|---------|----------|
+| **Tensor Mapping** | GPS coordinates | Position in multi-dimensional semantic space |
+| **Encryption Mapping** | Key-value cipher | Tag = key that unlocks exact meaning |
+| **Matrix Inference** | Geometric transforms | Relations between blocks → execution flow |
+
+### How AI Uses the Map
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    SEMANTIC SPACE                           │
+│                                                             │
+│     @atomic [math-calc-derivative]                          │
+│              ↓                                              │
+│     Position: (math=0.9, calc=0.8, derivative=0.95)        │
+│              ↓                                              │
+│     AI NAVIGATES to this coordinate                         │
+│              ↓                                              │
+│     Activates experts in that region                        │
+│              ↓                                              │
+│     Generates from EXACT semantic location                  │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**The AI doesn't "understand" your code—it LOCATES it in semantic space and activates the experts stationed at those coordinates.**
+
+### Geometric Relations → Execution Semantics
+
+| Geometry | Relation | Execution |
+|----------|----------|-----------|
+| Adjacent blocks | `A ⊣ B` | Sequential: `A; B` |
+| Nested blocks | `A ⊃ B` | Scoped: `A { B }` |
+| Symmetric blocks | `A ≅ B` | Bidirectional: `A ↔ B` |
+| Parallel blocks | `A ∥ B` | Concurrent: `A \|\| B` |
+
+This is why π-Geometric Calculus is the foundation: **all inference is navigation in π-modulated space**.
+
+---
+
 ## Project Status
 
 | Component | Status | Document |
