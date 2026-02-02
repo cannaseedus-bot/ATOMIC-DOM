@@ -4,6 +4,57 @@
 
 ---
 
+## Core Concept: Tags as Semantic Coordinates
+
+**K'UHUL tags are NOT syntax sugar.** They are **tensor coordinates** in semantic space—a navigable map for AI inference.
+
+```
+Traditional markup:  <div class="math">x² + y²</div>     ← Human label
+K'UHUL mapping:      @atomic [math-geometry-circle] {}   ← AI coordinate
+```
+
+### The Three Mapping Techniques
+
+| Technique | Analogy | Function |
+|-----------|---------|----------|
+| **Tensor Mapping** | GPS coordinates | Position in multi-dimensional semantic space |
+| **Encryption Mapping** | Key-value cipher | Tag = key that unlocks exact meaning |
+| **Matrix Inference** | Geometric transforms | Relations between blocks → execution flow |
+
+### How AI Uses the Map
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    SEMANTIC SPACE                           │
+│                                                             │
+│     @atomic [math-calc-derivative]                          │
+│              ↓                                              │
+│     Position: (math=0.9, calc=0.8, derivative=0.95)        │
+│              ↓                                              │
+│     AI NAVIGATES to this coordinate                         │
+│              ↓                                              │
+│     Activates experts in that region                        │
+│              ↓                                              │
+│     Generates from EXACT semantic location                  │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**The AI doesn't "understand" your code—it LOCATES it in semantic space and activates the experts stationed at those coordinates.**
+
+### Geometric Relations → Execution Semantics
+
+| Geometry | Relation | Execution |
+|----------|----------|-----------|
+| Adjacent blocks | `A ⊣ B` | Sequential: `A; B` |
+| Nested blocks | `A ⊃ B` | Scoped: `A { B }` |
+| Symmetric blocks | `A ≅ B` | Bidirectional: `A ↔ B` |
+| Parallel blocks | `A ∥ B` | Concurrent: `A \|\| B` |
+
+This is why π-Geometric Calculus is the foundation: **all inference is navigation in π-modulated space**.
+
+---
+
 ## Project Status
 
 | Component | Status | Document |
@@ -34,6 +85,8 @@
 | **Object Server Spec** | :white_check_mark: Complete | `OBJECT_SERVER_SPEC.md` |
 | **Architecture Layers** | :white_check_mark: Complete | `ARCHITECTURE_LAYERS.md` |
 | **Atomic Blocks Grammar** | :white_check_mark: Complete | `ATOMIC_BLOCKS_GRAMMAR.ebnf` |
+| **π-Geometric Calculus** | :white_check_mark: Complete | `src/kuhul/pi-geometric.ts` |
+| **Unified Inference API** | :white_check_mark: Complete | `src/kuhul/api-server.ts` |
 
 ---
 
@@ -81,6 +134,8 @@
 - [x] **Object Server Spec** — Server behavior defined by objects, not code (`OBJECT_SERVER_SPEC.md`)
 - [x] **Architecture Layers** — Cognitive foundation: DNS→HTTP→JSON→Runtime→Projection (`ARCHITECTURE_LAYERS.md`)
 - [x] **Atomic Blocks Grammar** — 4 indivisible structural units + Micronauts (`ATOMIC_BLOCKS_GRAMMAR.ebnf`)
+- [x] **π-Geometric Calculus** — Tensor algebra with π-modulation, matrix inference engine (`src/kuhul/pi-geometric.ts`)
+- [x] **Unified Inference API** — Single entry point for text/glyph/hybrid inference (`src/kuhul/api-server.ts`)
 - [ ] Community plugin registry
 
 ---
@@ -825,6 +880,215 @@ python training/train.py --config training/datasets.json --rlhf ./rlhf_data
 | DeepSeek | Settings → Export | `*.json` |
 
 See [`training/RLHF_IMPORT_GUIDE.md`](./training/RLHF_IMPORT_GUIDE.md) for detailed instructions.
+
+---
+
+## π-Geometric Calculus Foundation
+
+The `src/kuhul/pi-geometric.ts` module implements the mathematical foundation where **all geometry is π-modulated**.
+
+### Core Axiom
+
+> "All curvature is π-modulated"
+
+Every geometric operation in the system uses π as the fundamental unit:
+- **Position**: `P = (x·π, y·π, z·π)`
+- **Orientation**: `θ = nπ/k` for integers n, k
+- **Curvature**: `κ = π/r` for radius r
+
+### Tensor Algebra
+
+```typescript
+import { PiTensor, PI } from './src/kuhul';
+
+const tensor = new PiTensor({
+  position: [1, 2, 0],      // Will be π-scaled
+  orientation: PI / 4,       // 45° = π/4
+  curvature: PI / 10,       // Circle with radius 10
+});
+
+// Compose tensors
+const combined = tensor1.compose(tensor2, 0.5);
+
+// Transform operations
+const rotated = tensor.rotate(4);  // Rotate by π/4
+const scaled = tensor.scaleBy(2);  // Scale by factor of 2
+```
+
+### Matrix Inference Engine
+
+Geometric relations map to execution semantics:
+
+| Geometry | Relation | Execution |
+|----------|----------|-----------|
+| Adjacent | `A ⊣ B` | Sequential: `A; B` |
+| Contained | `A ⊃ B` | Scoped: `A { B }` |
+| Symmetric | `A ≅ B` | Dual: `A ↔ B` |
+| Tangent | `A ◯ B` | Dependency: `B ← A` |
+| Parallel | `A ∥ B` | Concurrent: `A \|\| B` |
+
+```typescript
+import { MatrixInference, AGLPipeline } from './src/kuhul';
+
+const inference = new MatrixInference();
+
+// Register glyphs with geometric relations
+inference.register({
+  id: 'glyph-A',
+  type: 'primitive',
+  position: [0, 0, 0],
+  orientation: 0,
+  relations: [
+    { type: 'adjacent', target: 'glyph-B', weight: 0.9 }
+  ]
+});
+
+// Run inference to get execution semantics
+const results = inference.infer();
+// → [{ rule: 'adjacency_to_sequence', target: 'glyph-A; glyph-B', ... }]
+```
+
+### AGL Pipeline
+
+The AGL (A Glyph Language) pipeline converts visual glyphs to executable programs:
+
+```typescript
+import { AGLPipeline } from './src/kuhul';
+
+const pipeline = new AGLPipeline();
+const program = pipeline.process([
+  { id: 'init', position: [0, 0, 0], relations: [{ type: 'adjacent', target: 'compute' }] },
+  { id: 'compute', position: [1, 0, 0], relations: [{ type: 'contained', target: 'output' }] },
+  { id: 'output', position: [1, 0.5, 0] }
+]);
+
+// program.executionPlan contains ordered steps:
+// 1. dependency resolution
+// 2. concurrent operations
+// 3. scoped execution
+// 4. sequential flow
+```
+
+---
+
+## Unified Inference API Server
+
+The `src/kuhul/api-server.ts` provides a **single entry point** for all inference operations.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  UnifiedInferenceServer                      │
+├─────────────────────────────────────────────────────────────┤
+│  Request Types:                                              │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐                      │
+│  │  text   │  │  glyph  │  │ hybrid  │                      │
+│  └────┬────┘  └────┬────┘  └────┬────┘                      │
+│       │            │            │                            │
+│       ▼            ▼            ▼                            │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              Expert Router (Top-K)                   │    │
+│  │         detectContext() → routingScores              │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                          │                                   │
+│       ┌──────────────────┼──────────────────┐               │
+│       ▼                  ▼                  ▼               │
+│  ┌─────────┐      ┌─────────────┐     ┌──────────┐         │
+│  │ Backend │      │ π-Geometric │     │ Action   │         │
+│  │Inference│      │  Analysis   │     │  Words   │         │
+│  └─────────┘      └─────────────┘     └──────────┘         │
+│                          │                                   │
+│                          ▼                                   │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              UnifiedResponse                         │    │
+│  │  { text, context, experts, geometric, tokens }       │    │
+│  └─────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Quick Start
+
+```typescript
+import { createMockServer, UnifiedInferenceServer } from './src/kuhul';
+
+// Create server (mock backend for testing)
+const server = createMockServer();
+await server.initialize();
+
+// Text inference
+const response = await server.infer({
+  input: 'Explain the quadratic formula',
+  type: 'text',
+  geometric: true  // Include π-geometric analysis
+});
+
+console.log(response.data.text);
+console.log(response.data.experts);    // Activated experts
+console.log(response.data.geometric);  // Tensor analysis
+console.log(response.timing);          // Performance metrics
+```
+
+### Request Types
+
+| Type | Input | Use Case |
+|------|-------|----------|
+| `text` | String prompt | Standard inference |
+| `glyph` | `GlyphInput[]` | AGL program execution |
+| `hybrid` | String + geometric | Text with tensor analysis |
+
+### HTTP Integration
+
+```typescript
+import { handleHTTPRequest, inferenceServer } from './src/kuhul';
+
+// Initialize once
+await inferenceServer.initialize();
+
+// Handle requests (Express-compatible)
+app.post('/api/v1/infer', async (req, res) => {
+  const response = await handleHTTPRequest(inferenceServer, {
+    method: req.method,
+    path: req.path,
+    body: req.body,
+  });
+  res.status(response.status).json(response.body);
+});
+```
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/infer` | POST | Run inference (text/glyph/hybrid) |
+| `/api/v1/route` | POST | Route-only (no inference) |
+| `/api/v1/health` | GET | Server health check |
+| `/api/v1/stats` | GET | Server statistics |
+
+### Response Format
+
+```typescript
+interface UnifiedResponse {
+  id: string;
+  success: boolean;
+  data: {
+    text: string;                    // Generated response
+    context: ContextType;            // Detected context
+    experts: ExpertInfo[];           // Activated experts
+    routing: Record<string, number>; // Expert scores
+    actionWords: ActionWordInfo[];   // Extracted action words
+    suggestions: ActionWordInfo[];   // Stronger alternatives
+    geometric?: GeometricData;       // π-Geometric analysis
+    tokens: TokenUsage;              // Token counts
+  };
+  timing: {
+    total: number;
+    routing: number;
+    inference: number;
+    geometric?: number;
+  };
+}
+```
 
 ---
 
