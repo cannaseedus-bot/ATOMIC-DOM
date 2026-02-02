@@ -30,6 +30,10 @@
 | **K'UHUL MicroAtomics** | :white_check_mark: Complete | `src/kuhul/` |
 | **Cluster Runtime** | :white_check_mark: Complete | `cluster/` |
 | **Atomic Expert Training** | :white_check_mark: Complete | `training/` |
+| **Atomic Framework Spec** | :white_check_mark: Complete | `ATOMIC_FRAMEWORK.md` |
+| **Object Server Spec** | :white_check_mark: Complete | `OBJECT_SERVER_SPEC.md` |
+| **Architecture Layers** | :white_check_mark: Complete | `ARCHITECTURE_LAYERS.md` |
+| **Atomic Blocks Grammar** | :white_check_mark: Complete | `ATOMIC_BLOCKS_GRAMMAR.ebnf` |
 
 ---
 
@@ -72,6 +76,11 @@
 - [x] **K'UHUL MicroAtomics** — Orchestration layer with context detection and action words (`src/kuhul/`)
 - [x] **GPU Cluster Runtime** — JSON cluster config and Python model builder with 2-4 byte quantization (`cluster/`)
 - [x] **Atomic Expert Training Pipeline** — Dataset loading, expert mapping, and LoRA fine-tuning (`training/`)
+- [x] **RLHF Data Import** — Personal conversation import from OpenAI, Claude, Mistral, DeepSeek (`training/rlhf_importer.py`)
+- [x] **Atomic Framework Spec** — Object-first framework where behavior requires explicit declaration (`ATOMIC_FRAMEWORK.md`)
+- [x] **Object Server Spec** — Server behavior defined by objects, not code (`OBJECT_SERVER_SPEC.md`)
+- [x] **Architecture Layers** — Cognitive foundation: DNS→HTTP→JSON→Runtime→Projection (`ARCHITECTURE_LAYERS.md`)
+- [x] **Atomic Blocks Grammar** — 4 indivisible structural units + Micronauts (`ATOMIC_BLOCKS_GRAMMAR.ebnf`)
 - [ ] Community plugin registry
 
 ---
@@ -611,6 +620,7 @@ Input → Context Router → Top-K Expert Selection → Weighted Merge → Outpu
 | Algorithms | 8 | ProgrammingMicroAtomic |
 | Architecture | 8 | ProgrammingMicroAtomic |
 | Documentation | 6 | OutputMicroAtomic |
+| **Atomic Framework** | **10** | AtomicMicroAtomic |
 | **Reserved** | **19** | Fine-tuning slots |
 
 ### Model Specs
@@ -647,7 +657,7 @@ The `cluster/` directory provides infrastructure for deploying Atomic Expert mod
 ```json
 {
   "model": {
-    "totalExperts": 108,
+    "totalExperts": 118,
     "activeExperts": 4,
     "quantization": {
       "precision": "int4",
@@ -792,6 +802,29 @@ python training/train.py --config training/datasets.json
 ```
 
 Reserved experts (19 slots) are available for domain-specific fine-tuning.
+
+### RLHF Data Import
+
+Import your personal AI conversations for training:
+
+```bash
+# Import conversations from multiple providers
+python training/rlhf_importer.py --provider openai --input ~/exports/openai/
+python training/rlhf_importer.py --provider claude --input ~/exports/claude/
+python training/rlhf_importer.py --provider mistral --input ~/exports/mistral/
+
+# Train with RLHF data (2x weight)
+python training/train.py --config training/datasets.json --rlhf ./rlhf_data
+```
+
+| Provider | Export Location | Format |
+|----------|-----------------|--------|
+| OpenAI/ChatGPT | Settings → Data controls → Export | `conversations.json` |
+| Claude | Settings → Export data | `conversations.json` |
+| Mistral | Settings → Export | `*.jsonl` |
+| DeepSeek | Settings → Export | `*.json` |
+
+See [`training/RLHF_IMPORT_GUIDE.md`](./training/RLHF_IMPORT_GUIDE.md) for detailed instructions.
 
 ---
 
