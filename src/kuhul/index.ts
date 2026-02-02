@@ -94,3 +94,60 @@ export {
   type PipelineResult,
   type RemoteBackendConfig,
 } from './backend.js';
+
+// π-Geometric Calculus
+export {
+  // Constants
+  PI,
+  TAU,
+  PHI,
+  // Tensor Classes
+  PiTensor,
+  MatrixInference,
+  AGLPipeline,
+  // Default Instances
+  matrixInference,
+  aglPipeline,
+  // Utility Functions
+  toPiFraction,
+  isPiHarmonic,
+  tensorDistance,
+  areAdjacent,
+  contains,
+  areSymmetric,
+  // Types
+  type PiTensorData,
+  type GlyphTensor,
+  type GlyphRelation,
+  type InferenceRule,
+  type InferenceResult as GeometricInferenceResult,
+  type MatrixCell,
+  type AGLProgram,
+  type ExecutionStep,
+  type GlyphInput,
+} from './pi-geometric.js';
+
+// Unified Inference API Server
+export {
+  // Server
+  UnifiedInferenceServer,
+  inferenceServer,
+  // Factory Functions
+  createMockServer,
+  createRemoteServer,
+  // HTTP Helpers
+  handleHTTPRequest,
+  // Types
+  type UnifiedRequest,
+  type UnifiedResponse,
+  type UnifiedResponseData,
+  type ServerConfig,
+  type ExpertInfo,
+  type ActionWordInfo,
+  type GeometricData,
+  type TensorInfo,
+  type TokenUsage,
+  type TimingInfo,
+  type HTTPRequest,
+  type HTTPResponse,
+} from './api-server.js';
