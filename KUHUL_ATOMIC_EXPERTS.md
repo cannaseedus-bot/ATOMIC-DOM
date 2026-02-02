@@ -1,11 +1,11 @@
-# K'UHUL MoE Expert Taxonomy
+# K'UHUL Atomic Expert Taxonomy
 
 ## Model Architecture Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                     K'UHUL MIXTURE OF EXPERTS                            │
-│                        kuhul-moe-v1                                      │
+│                     K'UHUL ATOMIC EXPERT SYSTEM                         │
+│                           kuhul-v1                                      │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
 │   Input Tokens                                                           │
@@ -24,10 +24,10 @@
 │        │                                                                 │
 │        ▼                                                                 │
 │   ┌──────────────────────────────────────────────────────────────┐      │
-│   │                   Expert Pool (108 slots)                     │      │
+│   │                   Expert Pool (118 slots)                     │      │
 │   │  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐    │      │
-│   │  │ E₁  │ │ E₂  │ │ E₃  │ │ E₄  │ │ ... │ │ E₈₉ │ │ Eᵣₑₛ│    │      │
-│   │  │Math │ │Code │ │ Web │ │Data │ │     │ │Docs │ │ 19  │    │      │
+│   │  │ E₁  │ │ E₂  │ │ E₃  │ │ E₄  │ │ ... │ │E₉₉ │ │ Eᵣₑₛ│    │      │
+│   │  │Math │ │Code │ │ Web │ │Data │ │     │ │Atom│ │ 19  │    │      │
 │   │  └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘    │      │
 │   │     └──────┴──────┴──────┴──────┴──────┴──────┘              │      │
 │   │                        │                                      │      │
@@ -48,12 +48,23 @@
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
+## What Are Atomic Experts?
+
+**Atomic Experts are NOT code modules.** They are:
+
+- **Declarative taxonomy entries** defined by objects (JSON/TypeScript)
+- **Domain knowledge definitions** with training data mappings
+- **Vocabulary bias configurations** that influence token generation
+- **Capacity and activation thresholds** for routing decisions
+
+> **Key Distinction**: Traditional MoE uses executable JS/TS agents. Atomic Experts are governed objects—they define behavior through data, not code.
+
 ## Model Specifications
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
-| **Architecture** | Mixture of Experts | Sparse activation |
-| **Total Experts** | 108 | 89 defined + 19 reserved |
+| **Architecture** | Atomic Experts | Object-defined, sparse activation |
+| **Total Experts** | 118 | 99 defined + 19 reserved |
 | **Active Experts** | 4 | Top-K routing per token |
 | **Expert Dimension** | 512 | Per-expert hidden size |
 | **Shared Dimension** | 1024 | Shared layer hidden size |
@@ -199,6 +210,21 @@
 | `docs-git` | Git Messages Expert | commits, PRs | feat:, fix:, docs: |
 | `docs-diagrams` | Diagrams Expert | Mermaid, PlantUML | flowchart, sequence |
 
+### Atomic Framework (10 Experts)
+
+| Expert ID | Name | Domains | Vocab Bias |
+|-----------|------|---------|------------|
+| `atomic-object-server` | Object Server Expert | loading, verification, projection | object, descriptor, payload |
+| `atomic-blocks` | Atomic Blocks Expert | header, body, sidebars, footer | template, slot, AtomicBlockSet |
+| `atomic-micronauts` | Micronauts Expert | perception, layout, theme, motion | @micronaut, layout:, theme: |
+| `atomic-projections` | Projections Expert | mapping, emit, representation | projection, emit, @payload |
+| `atomic-identity` | Object Identity Expert | hash, resolution, canonical | object://, sha256, resolve |
+| `atomic-invariants` | Invariants Expert | constraints, verification | invariant, immutable, deterministic |
+| `atomic-authority` | Authority Expert | escalation, permissions | authority, none, execute |
+| `atomic-slots` | Slots Expert | placeholders, interpolation | {{, }}, filter, default |
+| `atomic-events` | Lifecycle Events Expert | on_load, on_project, handlers | emit, event, lifecycle |
+| `atomic-kuhul` | K'UHUL Integration Expert | toml, cluster, policy | kuhul.toml, cluster, coordinator |
+
 ---
 
 ## Reserved Experts (19 Slots)
@@ -320,6 +346,8 @@ MicroAtomic Orchestrator
         │
         ├── ResumeMicroAtomic ──────────► resume-* (8 experts)
         │
+        ├── AtomicMicroAtomic ──────────► atomic-* (10 experts)
+        │
         └── OutputMicroAtomic ──────────► docs-* (6 experts)
 ```
 
@@ -338,9 +366,10 @@ MicroAtomic Orchestrator
 | Algorithms | 8 | Defined |
 | Architecture | 8 | Defined |
 | Documentation | 6 | Defined |
+| Atomic Framework | 10 | Defined |
 | **Reserved** | **19** | **Fine-tuning** |
-| **TOTAL** | **108** | |
+| **TOTAL** | **118** | |
 
 ---
 
-*K'UHUL MoE Expert Taxonomy v1.0 — ATOMIC-DOM*
+*K'UHUL Atomic Expert Taxonomy v1.1 — ATOMIC-DOM*

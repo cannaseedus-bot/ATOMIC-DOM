@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-K'UHUL MoE Model Builder
+K'UHUL Atomic Expert Model Builder
 GPU-accelerated model building with 2-4 byte quantization support
+
+Note: Atomic Experts are NOT code modules. They are declarative taxonomy entries
+defined by objects (JSON/TypeScript), not executable JS/TS agents.
 
 Usage:
     python model_builder.py build --config runtime.json
@@ -116,8 +119,8 @@ class ExpertTensor:
 # ============================================================================
 
 @dataclass
-class MoEConfig:
-    """MoE Model Configuration"""
+class AtomicExpertConfig:
+    """Atomic Expert Model Configuration"""
     total_experts: int = 108
     active_experts: int = 4
     expert_dim: int = 512
@@ -132,7 +135,7 @@ class MoEConfig:
     shared_precision: Precision = Precision.FP16
 
     @classmethod
-    def from_json(cls, config: Dict[str, Any]) -> "MoEConfig":
+    def from_json(cls, config: Dict[str, Any]) -> "AtomicExpertConfig":
         model = config.get("model", {})
         dims = model.get("dimensions", {})
         quant = model.get("quantization", {})
@@ -248,7 +251,7 @@ class QuantizationEngine:
 class ExpertBuilder:
     """Build expert tensors with quantization"""
 
-    def __init__(self, config: MoEConfig):
+    def __init__(self, config: AtomicExpertConfig):
         self.config = config
         self.quantizer = QuantizationEngine()
 
@@ -311,10 +314,10 @@ class NodeAllocation:
 class ClusterBuilder:
     """Build cluster allocation plan"""
 
-    def __init__(self, config: Dict[str, Any], moe_config: MoEConfig):
+    def __init__(self, config: Dict[str, Any], expert_config: AtomicExpertConfig):
         self.config = config
-        self.moe_config = moe_config
-        self.expert_builder = ExpertBuilder(moe_config)
+        self.expert_config = expert_config
+        self.expert_builder = ExpertBuilder(expert_config)
 
     def parse_memory(self, mem_str: str) -> int:
         """Parse memory string like '16GB' to bytes"""
@@ -374,16 +377,16 @@ class ClusterBuilder:
         plan = {
             "model": {
                 "config": {
-                    "total_experts": self.moe_config.total_experts,
-                    "active_experts": self.moe_config.active_experts,
-                    "expert_dim": self.moe_config.expert_dim,
-                    "shared_dim": self.moe_config.shared_dim,
-                    "hidden_dim": self.moe_config.hidden_dim,
+                    "total_experts": self.expert_config.total_experts,
+                    "active_experts": self.expert_config.active_experts,
+                    "expert_dim": self.expert_config.expert_dim,
+                    "shared_dim": self.expert_config.shared_dim,
+                    "hidden_dim": self.expert_config.hidden_dim,
                 },
                 "quantization": {
-                    "expert_precision": self.moe_config.expert_precision.value,
-                    "router_precision": self.moe_config.router_precision.value,
-                    "bytes_per_expert_element": self.moe_config.expert_precision.bytes_per_element,
+                    "expert_precision": self.expert_config.expert_precision.value,
+                    "router_precision": self.expert_config.router_precision.value,
+                    "bytes_per_expert_element": self.expert_config.expert_precision.bytes_per_element,
                 },
                 "router": router.to_dict(),
             },
@@ -503,7 +506,7 @@ __global__ void dequant_int2_kernel(
         return ""
 
     @staticmethod
-    def generate_expert_forward(config: MoEConfig) -> str:
+    def generate_expert_forward(config: AtomicExpertConfig) -> str:
         """Generate expert forward pass kernel"""
         return f'''
 // Expert Forward Pass (Gated Linear Unit)
@@ -553,7 +556,7 @@ __global__ void expert_forward_kernel(
 '''
 
     @staticmethod
-    def generate_router_kernel(config: MoEConfig) -> str:
+    def generate_router_kernel(config: AtomicExpertConfig) -> str:
         """Generate top-k router kernel"""
         return f'''
 // Top-K Router Kernel
@@ -632,14 +635,14 @@ __global__ void router_topk_kernel(
 class ModelExporter:
     """Export model to various formats"""
 
-    def __init__(self, config: MoEConfig):
+    def __init__(self, config: AtomicExpertConfig):
         self.config = config
 
     def export_safetensors_manifest(self, experts: List[ExpertTensor]) -> Dict[str, Any]:
         """Generate safetensors manifest"""
         manifest = {
             "__metadata__": {
-                "format": "kuhul-moe",
+                "format": "kuhul-atomic",
                 "version": "1.0",
                 "total_experts": self.config.total_experts,
                 "active_experts": self.config.active_experts,
@@ -683,12 +686,12 @@ class ModelExporter:
             "custom_ops": [
                 {
                     "name": "TopKRouter",
-                    "domain": "kuhul.moe",
+                    "domain": "kuhul.atomic",
                     "version": 1,
                 },
                 {
                     "name": "SparseExpertDispatch",
-                    "domain": "kuhul.moe",
+                    "domain": "kuhul.atomic",
                     "version": 1,
                 },
             ],
@@ -709,8 +712,8 @@ def cmd_build(args):
     with open(config_path) as f:
         config = json.load(f)
 
-    moe_config = MoEConfig.from_json(config)
-    cluster_builder = ClusterBuilder(config, moe_config)
+    expert_config = AtomicExpertConfig.from_json(config)
+    cluster_builder = ClusterBuilder(config, expert_config)
     plan = cluster_builder.generate_deployment_plan()
 
     output_path = Path(args.output) if args.output else config_path.with_suffix(".plan.json")
@@ -718,10 +721,10 @@ def cmd_build(args):
         json.dump(plan, f, indent=2)
 
     print(f"Deployment plan generated: {output_path}")
-    print(f"  Total experts: {moe_config.total_experts}")
-    print(f"  Active experts: {moe_config.active_experts}")
-    print(f"  Expert precision: {moe_config.expert_precision.value}")
-    print(f"  Bytes per element: {moe_config.expert_precision.bytes_per_element}")
+    print(f"  Total experts: {expert_config.total_experts}")
+    print(f"  Active experts: {expert_config.active_experts}")
+    print(f"  Expert precision: {expert_config.expert_precision.value}")
+    print(f"  Bytes per element: {expert_config.expert_precision.bytes_per_element}")
     print(f"  Cluster nodes: {len(plan['cluster']['nodes'])}")
 
     total_mb = plan['cluster']['total_memory_used'] / (1024 * 1024)
@@ -759,7 +762,7 @@ def cmd_kernels(args):
     with open(config_path) as f:
         config = json.load(f)
 
-    moe_config = MoEConfig.from_json(config)
+    expert_config = AtomicExpertConfig.from_json(config)
     kernel_gen = GPUKernelGenerator()
 
     output_dir = Path(args.output) if args.output else Path("kernels")
@@ -770,8 +773,8 @@ def cmd_kernels(args):
         "dequant_int4.cu": kernel_gen.generate_dequant_kernel(Precision.INT4),
         "dequant_int8.cu": kernel_gen.generate_dequant_kernel(Precision.INT8),
         "dequant_int2.cu": kernel_gen.generate_dequant_kernel(Precision.INT2),
-        "expert_forward.cu": kernel_gen.generate_expert_forward(moe_config),
-        "router_topk.cu": kernel_gen.generate_router_kernel(moe_config),
+        "expert_forward.cu": kernel_gen.generate_expert_forward(expert_config),
+        "router_topk.cu": kernel_gen.generate_router_kernel(expert_config),
     }
 
     for filename, content in kernels.items():
@@ -792,8 +795,8 @@ def cmd_export(args):
     with open(config_path) as f:
         config = json.load(f)
 
-    moe_config = MoEConfig.from_json(config)
-    exporter = ModelExporter(moe_config)
+    expert_config = AtomicExpertConfig.from_json(config)
+    exporter = ModelExporter(expert_config)
 
     format_type = args.format.lower()
     output_path = Path(args.output) if args.output else Path(f"export_{format_type}.json")
@@ -801,8 +804,8 @@ def cmd_export(args):
     if format_type == "onnx":
         manifest = exporter.export_onnx_config()
     elif format_type == "safetensors":
-        expert_builder = ExpertBuilder(moe_config)
-        experts = expert_builder.build_all_experts([f"expert-{i}" for i in range(moe_config.total_experts)])
+        expert_builder = ExpertBuilder(expert_config)
+        experts = expert_builder.build_all_experts([f"expert-{i}" for i in range(expert_config.total_experts)])
         manifest = exporter.export_safetensors_manifest(experts)
     else:
         print(f"Unknown format: {format_type}")
@@ -825,28 +828,28 @@ def cmd_info(args):
     with open(config_path) as f:
         config = json.load(f)
 
-    moe_config = MoEConfig.from_json(config)
-    expert_builder = ExpertBuilder(moe_config)
+    expert_config = AtomicExpertConfig.from_json(config)
+    expert_builder = ExpertBuilder(expert_config)
 
-    print("\n K'UHUL MoE Model Info")
+    print("\n K'UHUL Atomic Expert Model Info")
     print("=" * 50)
-    print(f"  Total Experts:     {moe_config.total_experts}")
-    print(f"  Active Experts:    {moe_config.active_experts}")
-    print(f"  Expert Dimension:  {moe_config.expert_dim}")
-    print(f"  Shared Dimension:  {moe_config.shared_dim}")
-    print(f"  Hidden Dimension:  {moe_config.hidden_dim}")
-    print(f"  Vocab Size:        {moe_config.vocab_size}")
+    print(f"  Total Experts:     {expert_config.total_experts}")
+    print(f"  Active Experts:    {expert_config.active_experts}")
+    print(f"  Expert Dimension:  {expert_config.expert_dim}")
+    print(f"  Shared Dimension:  {expert_config.shared_dim}")
+    print(f"  Hidden Dimension:  {expert_config.hidden_dim}")
+    print(f"  Vocab Size:        {expert_config.vocab_size}")
     print()
     print("Quantization:")
-    print(f"  Expert Precision:  {moe_config.expert_precision.value} ({moe_config.expert_precision.bytes_per_element} bytes)")
-    print(f"  Router Precision:  {moe_config.router_precision.value} ({moe_config.router_precision.bytes_per_element} bytes)")
+    print(f"  Expert Precision:  {expert_config.expert_precision.value} ({expert_config.expert_precision.bytes_per_element} bytes)")
+    print(f"  Router Precision:  {expert_config.router_precision.value} ({expert_config.router_precision.bytes_per_element} bytes)")
     print()
 
     # Calculate total size
     expert = expert_builder.build_expert("sample")
     router = expert_builder.build_router()
 
-    expert_size = expert.total_bytes * moe_config.total_experts
+    expert_size = expert.total_bytes * expert_config.total_experts
     router_size = router.size_bytes
 
     print("Memory Footprint:")
@@ -861,7 +864,7 @@ def cmd_info(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="K'UHUL MoE Model Builder - GPU-accelerated 2-4 byte quantization"
+        description="K'UHUL Atomic Expert Model Builder - GPU-accelerated 2-4 byte quantization"
     )
     subparsers = parser.add_subparsers(dest="command", help="Commands")
 

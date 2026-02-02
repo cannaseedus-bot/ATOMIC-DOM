@@ -1,10 +1,10 @@
 {
   "$schema": "./config.schema.json",
-  "name": "kuhul-moe-cluster",
+  "name": "kuhul-atomic-cluster",
   "version": "1.0.0",
 
   "model": {
-    "architecture": "sparse-moe",
+    "architecture": "atomic-experts",
     "totalExperts": 108,
     "activeExperts": 4,
     "routerType": "context-gated",

@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-K'UHUL MoE Training Script
-Train a Mixture of Experts model on coding datasets
+K'UHUL Atomic Expert Training Script
+Train an Atomic Expert model on coding datasets
+
+Note: Atomic Experts are NOT code modules. They are declarative taxonomy entries
+defined by objects (JSON/TypeScript), not executable JS/TS agents.
 
 Usage:
     python train.py --config datasets.json
@@ -71,7 +74,7 @@ class TrainingConfig:
     warmup_ratio: float
     weight_decay: float
     max_grad_norm: float
-    # MoE settings
+    # Atomic Expert settings
     num_experts: int
     num_active_experts: int
     expert_capacity: float
@@ -94,7 +97,7 @@ class TrainingConfig:
     def from_dict(cls, config: Dict[str, Any]) -> "TrainingConfig":
         t = config.get("training", {})
         hp = t.get("hyperparameters", {})
-        moe = t.get("moe", {})
+        atomic_experts = t.get("atomicExperts", {})
         lora = t.get("lora", {})
         pre = config.get("preprocessing", {})
 
@@ -110,11 +113,11 @@ class TrainingConfig:
             warmup_ratio=hp.get("warmupRatio", 0.1),
             weight_decay=hp.get("weightDecay", 0.01),
             max_grad_norm=hp.get("maxGradNorm", 1.0),
-            num_experts=moe.get("numExperts", 108),
-            num_active_experts=moe.get("numActiveExperts", 4),
-            expert_capacity=moe.get("expertCapacity", 1.25),
-            router_aux_loss_coef=moe.get("routerAuxLossCoef", 0.01),
-            router_z_loss_coef=moe.get("routerZLossCoef", 0.001),
+            num_experts=atomic_experts.get("numExperts", 118),
+            num_active_experts=atomic_experts.get("numActiveExperts", 4),
+            expert_capacity=atomic_experts.get("expertCapacity", 1.25),
+            router_aux_loss_coef=atomic_experts.get("routerAuxLossCoef", 0.01),
+            router_z_loss_coef=atomic_experts.get("routerZLossCoef", 0.001),
             lora_enabled=lora.get("enabled", True),
             lora_rank=lora.get("rank", 64),
             lora_alpha=lora.get("alpha", 128),
@@ -373,17 +376,17 @@ class DataProcessor:
 
 
 # ============================================================================
-# MoE Trainer
+# Atomic Expert Trainer
 # ============================================================================
 
-class MoETrainer:
-    """Train the MoE model"""
+class AtomicExpertTrainer:
+    """Train the Atomic Expert model"""
 
     def __init__(self, config: TrainingConfig):
         self.config = config
 
     def setup_model(self):
-        """Setup model with MoE and LoRA"""
+        """Setup model with Atomic Expert routing and LoRA"""
         try:
             from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
             from peft import LoraConfig, get_peft_model, TaskType
@@ -603,7 +606,7 @@ class ExpertRouterTrainer:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="K'UHUL MoE Training Script"
+        description="K'UHUL Atomic Expert Training Script"
     )
     parser.add_argument(
         "--config", "-c",
@@ -668,7 +671,7 @@ def main():
 
     # Print config summary
     print("\n" + "=" * 60)
-    print(" K'UHUL MoE Training")
+    print(" K'UHUL Atomic Expert Training")
     print("=" * 60)
     print(f"  Base Model:     {training_config.base_model}")
     print(f"  Output Dir:     {output_dir}")
@@ -726,7 +729,7 @@ def main():
 
     # Train model
     logger.info("Training model...")
-    trainer = MoETrainer(training_config)
+    trainer = AtomicExpertTrainer(training_config)
     trainer.train(
         train_samples,
         val_samples,

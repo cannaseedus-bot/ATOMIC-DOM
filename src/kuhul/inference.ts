@@ -151,6 +151,7 @@ export class InferenceEngine {
       code: 'coding_explanation',
       resume: 'resume_help',
       web: 'website_editing',
+      atomic: 'atomic_framework',
       general: 'general_query',
     };
 

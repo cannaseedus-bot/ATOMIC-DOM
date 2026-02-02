@@ -772,7 +772,7 @@ Event handlers MUST NOT:
 
 - [ATOMIC_FRAMEWORK.md](./ATOMIC_FRAMEWORK.md) — Framework specification
 - [ARCHITECTURE_LAYERS.md](./ARCHITECTURE_LAYERS.md) — Cognitive foundation
-- [KUHUL_MOE_EXPERT_TAXONOMY.md](./KUHUL_MOE_EXPERT_TAXONOMY.md) — Expert system
+- [KUHUL_ATOMIC_EXPERTS.md](./KUHUL_ATOMIC_EXPERTS.md) — Atomic Expert system
 
 ---
 

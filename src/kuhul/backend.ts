@@ -226,6 +226,7 @@ export class MockInferenceBackend implements InferenceBackend {
       code: `Here's the code solution:\n\n\`\`\`python\n# Implementation\ndef solution():\n    # Your code here\n    pass\n\`\`\`\n\n[Mock code response for: ${prompt.slice(0, 50)}...]`,
       resume: `For your resume:\n\n• Use strong action words like "engineered", "optimized"\n• Quantify achievements (e.g., "improved by 40%")\n• Focus on impact and results\n\n[Mock resume response for: ${prompt.slice(0, 50)}...]`,
       web: `Web development solution:\n\n\`\`\`html\n<div class="container">\n  <!-- Your component here -->\n</div>\n\`\`\`\n\n[Mock web response for: ${prompt.slice(0, 50)}...]`,
+      atomic: `Atomic Framework solution:\n\n\`\`\`json\n{\n  "id": "object://example",\n  "payload": { ... },\n  "authority": "none",\n  "projections": { ... }\n}\n\`\`\`\n\n[Mock atomic response for: ${prompt.slice(0, 50)}...]`,
       general: `Here's a helpful response:\n\n[Mock general response for: ${prompt.slice(0, 50)}...]`,
     };
 

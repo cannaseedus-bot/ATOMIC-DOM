@@ -8,9 +8,9 @@
 // ============================================================================
 
 export const MODEL_SPEC = {
-  name: 'kuhul-moe-v1',
-  architecture: 'mixture-of-experts',
-  totalExperts: 108,
+  name: 'kuhul-v1',
+  architecture: 'atomic-experts',
+  totalExperts: 118,       // 99 defined + 19 reserved
   activeExperts: 4,        // top-k routing
   expertDimension: 512,    // per-expert hidden dim
   sharedDimension: 1024,   // shared layers dim
@@ -1340,6 +1340,152 @@ export const EXPERT_TAXONOMY: Record<string, ExpertSpec[]> = {
       vocabBias: ['flowchart', 'sequence', 'class', 'entity', 'state', 'gantt', 'pie'],
       capacity: 0.65,
       minActivation: 0.45,
+    },
+  ],
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // ATOMIC FRAMEWORK (10 experts) - Object Server, Blocks, Micronauts
+  // ═══════════════════════════════════════════════════════════════════════
+  atomic: [
+    {
+      id: 'atomic-object-server',
+      name: 'Object Server Expert',
+      parent: 'AtomicMicroAtomic',
+      domains: ['object-server', 'object-loading', 'verification', 'projection'],
+      trainingDataSources: [
+        'atomic-framework-docs',
+        'object-server-spec',
+        'projection-patterns',
+      ],
+      vocabBias: ['object', 'descriptor', 'payload', 'projection', 'verify', 'invariant', 'authority'],
+      capacity: 0.9,
+      minActivation: 0.25,
+    },
+    {
+      id: 'atomic-blocks',
+      name: 'Atomic Blocks Expert',
+      parent: 'AtomicMicroAtomic',
+      domains: ['atomic-blocks', 'header', 'body', 'sidebars', 'footer', 'template'],
+      trainingDataSources: [
+        'atomic-blocks-grammar',
+        'template-examples',
+        'html-semantics',
+      ],
+      vocabBias: ['<header>', '<body>', '<sidebars>', '<footer>', 'AtomicBlockSet', 'slot', '{{'],
+      capacity: 0.9,
+      minActivation: 0.25,
+    },
+    {
+      id: 'atomic-micronauts',
+      name: 'Micronauts Expert',
+      parent: 'AtomicMicroAtomic',
+      domains: ['micronauts', 'perception', 'layout', 'theme', 'motion', 'density'],
+      trainingDataSources: [
+        'micronaut-grammar',
+        'css-perception',
+        'design-tokens',
+      ],
+      vocabBias: ['@micronaut', 'layout:', 'theme:', 'motion:', 'density:', 'visibility:', 'perception'],
+      capacity: 0.85,
+      minActivation: 0.3,
+    },
+    {
+      id: 'atomic-projections',
+      name: 'Projections Expert',
+      parent: 'AtomicMicroAtomic',
+      domains: ['projections', 'mapping', 'emit', 'response', 'representation'],
+      trainingDataSources: [
+        'projection-spec',
+        'data-mapping',
+        'response-formats',
+      ],
+      vocabBias: ['projection', 'emit', '@payload', 'mapping', 'representation', 'view'],
+      capacity: 0.85,
+      minActivation: 0.3,
+    },
+    {
+      id: 'atomic-identity',
+      name: 'Object Identity Expert',
+      parent: 'AtomicMicroAtomic',
+      domains: ['identity', 'hash', 'resolution', 'canonical', 'versioning'],
+      trainingDataSources: [
+        'identity-spec',
+        'content-addressable',
+        'hash-verification',
+      ],
+      vocabBias: ['object://', 'hash', 'sha256', 'identity', 'resolve', 'canonical'],
+      capacity: 0.8,
+      minActivation: 0.35,
+    },
+    {
+      id: 'atomic-invariants',
+      name: 'Invariants Expert',
+      parent: 'AtomicMicroAtomic',
+      domains: ['invariants', 'constraints', 'verification', 'immutability'],
+      trainingDataSources: [
+        'invariant-patterns',
+        'constraint-systems',
+        'verification-logic',
+      ],
+      vocabBias: ['invariant', 'immutable_payload', 'no_execution', 'deterministic', 'constraint'],
+      capacity: 0.8,
+      minActivation: 0.35,
+    },
+    {
+      id: 'atomic-authority',
+      name: 'Authority Expert',
+      parent: 'AtomicMicroAtomic',
+      domains: ['authority', 'escalation', 'permissions', 'execution-rights'],
+      trainingDataSources: [
+        'authority-spec',
+        'escalation-patterns',
+        'capability-systems',
+      ],
+      vocabBias: ['authority', 'none', 'read', 'write', 'execute', 'escalation', 'capability'],
+      capacity: 0.8,
+      minActivation: 0.35,
+    },
+    {
+      id: 'atomic-slots',
+      name: 'Slots Expert',
+      parent: 'AtomicMicroAtomic',
+      domains: ['slots', 'placeholders', 'interpolation', 'filters'],
+      trainingDataSources: [
+        'slot-syntax',
+        'template-interpolation',
+        'filter-patterns',
+      ],
+      vocabBias: ['{{', '}}', 'slot', 'placeholder', '|', 'filter', 'escape', 'default'],
+      capacity: 0.75,
+      minActivation: 0.35,
+    },
+    {
+      id: 'atomic-events',
+      name: 'Lifecycle Events Expert',
+      parent: 'AtomicMicroAtomic',
+      domains: ['events', 'lifecycle', 'on_load', 'on_project', 'handlers'],
+      trainingDataSources: [
+        'event-spec',
+        'lifecycle-patterns',
+        'handler-examples',
+      ],
+      vocabBias: ['on_load', 'on_project', 'on_error', 'emit', 'event', 'lifecycle', 'tick'],
+      capacity: 0.75,
+      minActivation: 0.35,
+    },
+    {
+      id: 'atomic-kuhul',
+      name: 'K\'UHUL Integration Expert',
+      parent: 'AtomicMicroAtomic',
+      domains: ['kuhul', 'toml', 'cluster', 'policy', 'coordination'],
+      trainingDataSources: [
+        'kuhul-spec',
+        'toml-config',
+        'cluster-patterns',
+      ],
+      vocabBias: ['kuhul.toml', 'cluster', 'policy', 'tools', 'plan', 'step', 'coordinator'],
+      capacity: 0.8,
+      minActivation: 0.35,
     },
   ],
 };

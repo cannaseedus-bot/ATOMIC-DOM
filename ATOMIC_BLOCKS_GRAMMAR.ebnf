@@ -1,0 +1,733 @@
+(* =========================================================
+   ATOMIC BLOCKS + MICRONAUTS GRAMMAR
+   Version: 1.0.0
+
+   Projection-only · Non-authoritative · Structure-locked
+
+   "Structure is finite and atomic; perception is infinite and optional."
+   ========================================================= *)
+
+(* ---------------------------------------------------------
+   ROOT
+   --------------------------------------------------------- *)
+
+Template
+  ::= AtomicBlockSet MicronautLayer? ;
+
+(* A template is:
+   - Exactly one AtomicBlockSet (required, indivisible)
+   - Zero or more Micronauts (optional, perception only) *)
+
+
+(* =========================================================
+   PART 1: ATOMIC BLOCK SET (INDIVISIBLE STRUCTURE)
+   ========================================================= *)
+
+AtomicBlockSet
+  ::= HeaderBlock
+      BodyBlock
+      SidebarsBlock
+      FooterBlock ;
+
+(* INVARIANT: Order is canonical.
+   INVARIANT: All four MUST exist.
+   INVARIANT: Partial templates are ILLEGAL.
+   INVARIANT: Reordering is ILLEGAL. *)
+
+(* ---------------------------------------------------------
+   1.1 ATOMIC BLOCK DEFINITIONS
+   --------------------------------------------------------- *)
+
+HeaderBlock
+  ::= "<header" BlockAttributes? ">"
+      BlockContent
+      "</header>" ;
+
+BodyBlock
+  ::= "<body" BlockAttributes? ">"
+      BlockContent
+      "</body>" ;
+
+SidebarsBlock
+  ::= "<sidebars" BlockAttributes? ">"
+      SidebarContent
+      "</sidebars>" ;
+
+FooterBlock
+  ::= "<footer" BlockAttributes? ">"
+      BlockContent
+      "</footer>" ;
+
+(* Blocks define STRUCTURE ONLY.
+   No behavior. No execution. No authority. *)
+
+(* ---------------------------------------------------------
+   1.2 BLOCK ATTRIBUTES
+   --------------------------------------------------------- *)
+
+BlockAttributes
+  ::= Attribute+ ;
+
+Attribute
+  ::= AttributeName "=" AttributeValue ;
+
+AttributeName
+  ::= "id"
+    | "class"
+    | "data-" IDENTIFIER ;
+
+AttributeValue
+  ::= '"' TEXT '"'
+    | "'" TEXT "'" ;
+
+(* Attributes are DECLARATIVE, not behavioral.
+   No event handlers. No scripts. *)
+
+(* ---------------------------------------------------------
+   1.3 BLOCK CONTENT
+   --------------------------------------------------------- *)
+
+BlockContent
+  ::= (StructuralNode | TextNode | Slot | Comment)* ;
+
+SidebarContent
+  ::= (SidebarLeft? SidebarRight?)
+    | (SidebarRight? SidebarLeft?) ;
+
+SidebarLeft
+  ::= "<aside" SidebarAttributes? "class=\"left\""? ">"
+      BlockContent
+      "</aside>" ;
+
+SidebarRight
+  ::= "<aside" SidebarAttributes? "class=\"right\""? ">"
+      BlockContent
+      "</aside>" ;
+
+SidebarAttributes
+  ::= Attribute+ ;
+
+(* ---------------------------------------------------------
+   1.4 STRUCTURAL NODES
+   --------------------------------------------------------- *)
+
+StructuralNode
+  ::= SectionNode
+    | ArticleNode
+    | NavNode
+    | DivNode
+    | AsideNode
+    | MainNode ;
+
+SectionNode
+  ::= "<section" BlockAttributes? ">"
+      BlockContent
+      "</section>" ;
+
+ArticleNode
+  ::= "<article" BlockAttributes? ">"
+      BlockContent
+      "</article>" ;
+
+NavNode
+  ::= "<nav" BlockAttributes? ">"
+      BlockContent
+      "</nav>" ;
+
+DivNode
+  ::= "<div" BlockAttributes? ">"
+      BlockContent
+      "</div>" ;
+
+AsideNode
+  ::= "<aside" BlockAttributes? ">"
+      BlockContent
+      "</aside>" ;
+
+MainNode
+  ::= "<main" BlockAttributes? ">"
+      BlockContent
+      "</main>" ;
+
+(* ---------------------------------------------------------
+   1.5 TEXT AND SLOTS
+   --------------------------------------------------------- *)
+
+TextNode
+  ::= TEXT ;
+
+Slot
+  ::= "{{" SlotName SlotModifiers? "}}" ;
+
+SlotName
+  ::= IDENTIFIER
+    | IDENTIFIER "." SlotName ;
+
+SlotModifiers
+  ::= "|" SlotFilter SlotModifiers?
+    | ":" SlotDefault ;
+
+SlotFilter
+  ::= "escape"
+    | "uppercase"
+    | "lowercase"
+    | "trim"
+    | "json" ;
+
+SlotDefault
+  ::= TEXT ;
+
+(* Slots are PLACEHOLDERS.
+   They do NOT execute logic.
+   Filters are PURE transformations. *)
+
+Comment
+  ::= "<!--" TEXT "-->" ;
+
+
+(* =========================================================
+   PART 2: MICRONAUT LAYER (NON-STRUCTURAL PERCEPTION)
+   ========================================================= *)
+
+MicronautLayer
+  ::= Micronaut* ;
+
+Micronaut
+  ::= "@micronaut" MicronautName
+      "(" MicronautTarget ")"
+      "{" MicronautRules "}" ;
+
+MicronautName
+  ::= IDENTIFIER ;
+
+(* ---------------------------------------------------------
+   2.1 MICRONAUT TARGETING
+   --------------------------------------------------------- *)
+
+MicronautTarget
+  ::= BlockTarget
+    | SelectorTarget ;
+
+BlockTarget
+  ::= "header"
+    | "body"
+    | "sidebars"
+    | "footer" ;
+
+SelectorTarget
+  ::= ClassSelector
+    | IdSelector
+    | DescendantSelector ;
+
+ClassSelector
+  ::= "." IDENTIFIER ;
+
+IdSelector
+  ::= "#" IDENTIFIER ;
+
+DescendantSelector
+  ::= BlockTarget SelectorTarget ;
+
+(* Micronauts MAY target blocks or subnodes.
+   Micronauts MUST NOT redefine structure. *)
+
+(* ---------------------------------------------------------
+   2.2 MICRONAUT RULES (PERCEPTION ONLY)
+   --------------------------------------------------------- *)
+
+MicronautRules
+  ::= MicronautRule* ;
+
+MicronautRule
+  ::= LayoutRule
+    | ThemeRule
+    | MotionRule
+    | DensityRule
+    | VisibilityRule
+    | SpacingRule
+    | TypographyRule
+    | ColorRule
+    | ResponsiveRule ;
+
+(* ---------------------------------------------------------
+   2.3 LAYOUT RULES
+   --------------------------------------------------------- *)
+
+LayoutRule
+  ::= "layout" ":" LayoutValue ";" ;
+
+LayoutValue
+  ::= LayoutType
+    | LayoutType LayoutOptions ;
+
+LayoutType
+  ::= "grid"
+    | "flex"
+    | "stack"
+    | "flow"
+    | "columns"
+    | "masonry" ;
+
+LayoutOptions
+  ::= "[" LayoutOption ("," LayoutOption)* "]" ;
+
+LayoutOption
+  ::= "columns" ":" INTEGER
+    | "gap" ":" SizeValue
+    | "align" ":" AlignValue
+    | "justify" ":" JustifyValue ;
+
+AlignValue
+  ::= "start" | "center" | "end" | "stretch" ;
+
+JustifyValue
+  ::= "start" | "center" | "end" | "between" | "around" ;
+
+(* ---------------------------------------------------------
+   2.4 THEME RULES
+   --------------------------------------------------------- *)
+
+ThemeRule
+  ::= "theme" ":" ThemeValue ";" ;
+
+ThemeValue
+  ::= ThemeType
+    | ThemeType ThemeOptions ;
+
+ThemeType
+  ::= "light"
+    | "dark"
+    | "auto"
+    | "system"
+    | IDENTIFIER ;
+
+ThemeOptions
+  ::= "[" ThemeOption ("," ThemeOption)* "]" ;
+
+ThemeOption
+  ::= "accent" ":" ColorValue
+    | "contrast" ":" ContrastValue ;
+
+ContrastValue
+  ::= "normal" | "high" | "reduced" ;
+
+(* ---------------------------------------------------------
+   2.5 MOTION RULES
+   --------------------------------------------------------- *)
+
+MotionRule
+  ::= "motion" ":" MotionValue ";" ;
+
+MotionValue
+  ::= MotionType
+    | MotionType MotionOptions ;
+
+MotionType
+  ::= "none"
+    | "subtle"
+    | "moderate"
+    | "expressive"
+    | "reduced" ;
+
+MotionOptions
+  ::= "[" MotionOption ("," MotionOption)* "]" ;
+
+MotionOption
+  ::= "duration" ":" DurationValue
+    | "easing" ":" EasingValue ;
+
+DurationValue
+  ::= INTEGER "ms"
+    | FLOAT "s" ;
+
+EasingValue
+  ::= "ease"
+    | "linear"
+    | "ease-in"
+    | "ease-out"
+    | "ease-in-out"
+    | "cubic-bezier(" FLOAT "," FLOAT "," FLOAT "," FLOAT ")" ;
+
+(* ---------------------------------------------------------
+   2.6 DENSITY RULES
+   --------------------------------------------------------- *)
+
+DensityRule
+  ::= "density" ":" DensityValue ";" ;
+
+DensityValue
+  ::= DensityType
+    | DensityType DensityOptions ;
+
+DensityType
+  ::= "compact"
+    | "comfortable"
+    | "normal"
+    | "spacious" ;
+
+DensityOptions
+  ::= "[" DensityOption ("," DensityOption)* "]" ;
+
+DensityOption
+  ::= "scale" ":" FLOAT ;
+
+(* ---------------------------------------------------------
+   2.7 VISIBILITY RULES
+   --------------------------------------------------------- *)
+
+VisibilityRule
+  ::= "visibility" ":" VisibilityValue ";" ;
+
+VisibilityValue
+  ::= VisibilityType
+    | VisibilityType VisibilityCondition ;
+
+VisibilityType
+  ::= "show"
+    | "hide"
+    | "collapse"
+    | "fade" ;
+
+VisibilityCondition
+  ::= "@" BreakpointName
+    | "@" MediaQuery ;
+
+BreakpointName
+  ::= "mobile"
+    | "tablet"
+    | "desktop"
+    | "wide" ;
+
+MediaQuery
+  ::= "(" MediaFeature ")" ;
+
+MediaFeature
+  ::= "min-width" ":" SizeValue
+    | "max-width" ":" SizeValue
+    | "prefers-color-scheme" ":" ThemeType
+    | "prefers-reduced-motion" ;
+
+(* ---------------------------------------------------------
+   2.8 SPACING RULES
+   --------------------------------------------------------- *)
+
+SpacingRule
+  ::= "spacing" ":" SpacingValue ";" ;
+
+SpacingValue
+  ::= SpacingType
+    | SpacingType SpacingOptions ;
+
+SpacingType
+  ::= "none"
+    | "tight"
+    | "normal"
+    | "relaxed"
+    | "loose" ;
+
+SpacingOptions
+  ::= "[" SpacingOption ("," SpacingOption)* "]" ;
+
+SpacingOption
+  ::= "padding" ":" SizeValue
+    | "margin" ":" SizeValue
+    | "gap" ":" SizeValue ;
+
+SizeValue
+  ::= INTEGER "px"
+    | FLOAT "rem"
+    | FLOAT "em"
+    | INTEGER "%" ;
+
+(* ---------------------------------------------------------
+   2.9 TYPOGRAPHY RULES
+   --------------------------------------------------------- *)
+
+TypographyRule
+  ::= "typography" ":" TypographyValue ";" ;
+
+TypographyValue
+  ::= TypographyType
+    | TypographyType TypographyOptions ;
+
+TypographyType
+  ::= "prose"
+    | "ui"
+    | "mono"
+    | "display" ;
+
+TypographyOptions
+  ::= "[" TypographyOption ("," TypographyOption)* "]" ;
+
+TypographyOption
+  ::= "scale" ":" FLOAT
+    | "leading" ":" LeadingValue
+    | "tracking" ":" TrackingValue ;
+
+LeadingValue
+  ::= "tight" | "normal" | "relaxed" | "loose" ;
+
+TrackingValue
+  ::= "tight" | "normal" | "wide" ;
+
+(* ---------------------------------------------------------
+   2.10 COLOR RULES
+   --------------------------------------------------------- *)
+
+ColorRule
+  ::= "color" ":" ColorValue ";" ;
+
+ColorValue
+  ::= ColorKeyword
+    | HexColor
+    | RgbColor
+    | HslColor
+    | ColorVariable ;
+
+ColorKeyword
+  ::= "primary"
+    | "secondary"
+    | "accent"
+    | "surface"
+    | "background"
+    | "foreground"
+    | "muted"
+    | "error"
+    | "warning"
+    | "success" ;
+
+HexColor
+  ::= "#" HEX_DIGIT HEX_DIGIT HEX_DIGIT
+    | "#" HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT ;
+
+RgbColor
+  ::= "rgb(" INTEGER "," INTEGER "," INTEGER ")"
+    | "rgba(" INTEGER "," INTEGER "," INTEGER "," FLOAT ")" ;
+
+HslColor
+  ::= "hsl(" INTEGER "," INTEGER "%" "," INTEGER "%" ")"
+    | "hsla(" INTEGER "," INTEGER "%" "," INTEGER "%" "," FLOAT ")" ;
+
+ColorVariable
+  ::= "--" IDENTIFIER ;
+
+(* ---------------------------------------------------------
+   2.11 RESPONSIVE RULES
+   --------------------------------------------------------- *)
+
+ResponsiveRule
+  ::= "@" BreakpointName "{" MicronautRules "}" ;
+
+(* Responsive rules nest other rules within breakpoints.
+   They do NOT alter structure. *)
+
+
+(* =========================================================
+   PART 3: LEXICAL TOKENS
+   ========================================================= *)
+
+IDENTIFIER
+  ::= LETTER (LETTER | DIGIT | "-" | "_")* ;
+
+TEXT
+  ::= (CHAR)+ ;
+
+INTEGER
+  ::= DIGIT+ ;
+
+FLOAT
+  ::= DIGIT+ "." DIGIT+ ;
+
+HEX_DIGIT
+  ::= DIGIT | [a-fA-F] ;
+
+LETTER
+  ::= [a-zA-Z] ;
+
+DIGIT
+  ::= [0-9] ;
+
+CHAR
+  ::= [^\<\>\{\}] ;
+
+WHITESPACE
+  ::= [ \t\n\r]+ ;
+
+
+(* =========================================================
+   PART 4: HARD INVARIANTS (GRAMMAR-ENFORCED)
+   ========================================================= *)
+
+(*
+   STRUCTURAL INVARIANTS:
+
+   1. Atomic blocks CANNOT be omitted
+      - All four blocks MUST exist in every template
+      - Grammar has no optional block form
+
+   2. Atomic blocks CANNOT be reordered
+      - Canonical order: header, body, sidebars, footer
+      - Grammar enforces sequence
+
+   3. Atomic blocks CANNOT be partially delivered
+      - AtomicBlockSet is indivisible
+      - No streaming of individual blocks
+
+   4. Blocks define structure ONLY
+      - No event handlers
+      - No script attributes
+      - No execution semantics
+
+
+   MICRONAUT INVARIANTS:
+
+   5. Micronauts CANNOT add or remove blocks
+      - Grammar does not provide block creation syntax
+
+   6. Micronauts CANNOT change block order
+      - Micronauts target existing blocks only
+
+   7. Micronauts CANNOT inject nodes
+      - No node creation in MicronautRules
+
+   8. Micronauts CANNOT create slots
+      - Slots exist only in BlockContent
+
+   9. Micronauts affect PERCEPTION only
+      - Layout, theme, motion, density, visibility
+      - All rules are CSS-mappable
+      - No state, no execution
+
+
+   VALIDITY INVARIANTS:
+
+   10. Templates are valid IFF:
+       - All four blocks exist
+       - Block order is canonical
+       - Micronauts (if present) target existing elements
+
+   11. Invalid forms CANNOT be expressed
+       - Grammar rejects at parse time
+       - No runtime checks needed
+*)
+
+
+(* =========================================================
+   PART 5: EXAMPLES
+   ========================================================= *)
+
+(*
+   EXAMPLE 1: Minimal Valid Template
+   ---------------------------------
+
+   <header></header>
+   <body></body>
+   <sidebars></sidebars>
+   <footer></footer>
+
+
+   EXAMPLE 2: Template with Content
+   --------------------------------
+
+   <header>
+     <nav>
+       <div class="logo">{{site.name}}</div>
+     </nav>
+   </header>
+   <body>
+     <main>
+       <article>{{content}}</article>
+     </main>
+   </body>
+   <sidebars>
+     <aside class="left">{{sidebar.left}}</aside>
+     <aside class="right">{{sidebar.right}}</aside>
+   </sidebars>
+   <footer>
+     <div>{{copyright}}</div>
+   </footer>
+
+
+   EXAMPLE 3: Template with Micronauts
+   -----------------------------------
+
+   <header>...</header>
+   <body>...</body>
+   <sidebars>...</sidebars>
+   <footer>...</footer>
+
+   @micronaut base(body) {
+     layout: grid[columns: 12, gap: 1rem];
+     theme: auto;
+     density: comfortable;
+   }
+
+   @micronaut nav(header nav) {
+     layout: flex[align: center, justify: between];
+     spacing: normal[padding: 1rem];
+   }
+
+   @micronaut responsive(body) {
+     @mobile {
+       layout: stack;
+       density: compact;
+     }
+     @desktop {
+       layout: grid[columns: 12];
+       density: spacious;
+     }
+   }
+
+
+   EXAMPLE 4: ILLEGAL (Grammar Rejects)
+   ------------------------------------
+
+   <!-- Missing body block - ILLEGAL -->
+   <header></header>
+   <sidebars></sidebars>
+   <footer></footer>
+
+   <!-- Wrong order - ILLEGAL -->
+   <body></body>
+   <header></header>
+   <sidebars></sidebars>
+   <footer></footer>
+
+   <!-- Micronaut creating structure - ILLEGAL -->
+   @micronaut illegal(body) {
+     inject: <div>new content</div>;  // Not in grammar
+   }
+*)
+
+
+(* =========================================================
+   PART 6: MAPPING TO SYSTEM LAYERS
+   ========================================================= *)
+
+(*
+   K'UHUL π
+   → Collapses state that fills slots
+   → Slots are: {{slotName}}
+   → π resolves: {{user.name}} → "Alice"
+
+   Object Server
+   → Transports entire AtomicBlockSet atomically
+   → No partial delivery
+   → Hash covers full template
+
+   Client / DOM
+   → Swaps blocks in single operation
+   → No incremental block updates
+   → Atomic replacement
+
+   Atomic CSS Micronauts
+   → Activate AFTER structure swap
+   → Apply perception rules
+   → Generate CSS custom properties
+   → No structural authority
+*)
+
+
+(* =========================================================
+   END OF GRAMMAR
+   ========================================================= *)

@@ -26,7 +26,7 @@ export interface MicroAtomicContext {
   timestamp: number;
 }
 
-export type ContextType = 'math' | 'code' | 'resume' | 'web' | 'general';
+export type ContextType = 'math' | 'code' | 'resume' | 'web' | 'atomic' | 'general';
 
 // ============================================================================
 // MicroAtomics Registry
@@ -122,6 +122,16 @@ export const MICROATOMICS: Record<string, MicroAtomic> = {
     priority: 70,
     active: true,
   },
+
+  // Atomic Framework Focus
+  AtomicMicroAtomic: {
+    id: 'atomic',
+    role: 'projects atomic framework context',
+    responsibility: 'atomic_framing',
+    domains: ['object_server', 'atomic_blocks', 'micronauts', 'projections', 'invariants', 'authority'],
+    priority: 85,
+    active: true,
+  },
 };
 
 // ============================================================================
@@ -195,6 +205,7 @@ export class MicroAtomicOrchestrator {
       code: ['ProgrammingMicroAtomic', 'CodeGenMicroAtomic'],
       resume: ['ResumeMicroAtomic'],
       web: ['WebMicroAtomic', 'CodeGenMicroAtomic'],
+      atomic: ['AtomicMicroAtomic', 'WebMicroAtomic'],
       general: [],
     };
 
