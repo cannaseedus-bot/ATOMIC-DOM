@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ATOMIC-DOM Documentation</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        'atomic': { primary: '#0891b2', secondary: '#10b981', glow: '#36f9a7', dark: '#0f172a' }
+      }
+    }
+  }
+}
+</script>
+<style>
+:root{--bg:#02040a;--fg:#dfffe7;--glow:#36f9a7;--aqua:#60f5ff}
+*{box-sizing:border-box;scroll-behavior:smooth}
+html{scroll-padding-top:80px}
+.glow-text{text-shadow:0 0 8px rgba(54,249,167,0.5)}
+.card{border:1.5px solid rgba(54,249,167,0.3);border-radius:12px;background:rgba(54,249,167,.04);padding:16px;margin:16px 0;box-shadow:0 0 12px rgba(54,249,167,.1)}
+.card:hover{border-color:rgba(54,249,167,0.5);box-shadow:0 0 20px rgba(54,249,167,.15)}
+pre{background:#04130f;border:1px solid #0b7;padding:12px;border-radius:8px;overflow:auto}
+code{background:#021a14;color:#8bf0c6;padding:2px 5px;border-radius:4px;font-size:0.9em}
+pre code{background:transparent;padding:0}
+.badge{display:inline-block;background:var(--glow);color:#031;font-weight:700;border-radius:4px;padding:2px 8px;margin-right:6px;font-size:0.75rem}
+.badge-legacy{background:#f59e0b;color:#000}
+.badge-new{background:#10b981}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{border:1px solid rgba(54,249,167,0.3);padding:10px;text-align:left}
+.table th{background:rgba(54,249,167,0.1)}
+nav a.active{border-left-color:var(--glow);background:rgba(54,249,167,0.1)}
+.version-toggle{display:flex;border:1px solid rgba(54,249,167,0.3);border-radius:8px;overflow:hidden}
+.version-toggle button{flex:1;padding:10px 16px;background:transparent;border:none;color:#9af2c9;cursor:pointer;transition:all 0.2s}
+.version-toggle button.active{background:rgba(54,249,167,0.2);color:#fff}
+.version-toggle button:hover:not(.active){background:rgba(54,249,167,0.1)}
+/* Splash animation */
+@keyframes pulse-glow{0%,100%{opacity:0.5;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
+.splash-icon{animation:pulse-glow 2s ease-in-out infinite}
+@keyframes fade-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fade-up 0.5s ease-out forwards}
+</style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+<!-- Fixed Header -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-3">
+      <svg class="h-8 w-8 text-atomic-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-2.25-1.313M21 7.5v2.25m0-2.25l-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3l2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0-2.25l2.25 1.313"/>
+      </svg>
+      <span class="text-xl font-bold">ATOMIC<span class="text-atomic-primary">-DOM</span></span>
+    </a>
+    <div class="version-toggle">
+      <button id="btn-modern" class="active" onclick="showVersion('modern')">v4 Modern</button>
+      <button id="btn-legacy" onclick="showVersion('legacy')">v3 Legacy</button>
+    </div>
+    <a href="https://github.com/cannaseedus-bot/ATOMIC-DOM" target="_blank" class="text-slate-400 hover:text-white">
+      <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"/></svg>
+    </a>
+  </div>
+</header>
+
+<div class="flex pt-16">
+  <!-- Sidebar Navigation -->
+  <nav id="sidebar" class="fixed left-0 top-16 bottom-0 w-64 overflow-y-auto border-r border-slate-800 bg-slate-950/50 p-4">
+    <!-- Modern Nav -->
+    <div id="nav-modern">
+      <h3 class="text-xs uppercase text-slate-500 font-semibold mb-2 mt-4">Getting Started</h3>
+      <a href="#intro" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Introduction</a>
+      <a href="#install" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Installation</a>
+      <a href="#splash" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Splash Runtime</a>
+
+      <h3 class="text-xs uppercase text-slate-500 font-semibold mb-2 mt-6">Core Concepts</h3>
+      <a href="#atomic-blocks" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Atomic Blocks</a>
+      <a href="#state" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">State Management</a>
+      <a href="#plugins" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Plugins</a>
+
+      <h3 class="text-xs uppercase text-slate-500 font-semibold mb-2 mt-6">API Reference</h3>
+      <a href="#parser-api" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Parser</a>
+      <a href="#compiler-api" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Compiler</a>
+      <a href="#runtime-api" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Runtime</a>
+      <a href="#typescript-api" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">TypeScript</a>
+
+      <h3 class="text-xs uppercase text-slate-500 font-semibold mb-2 mt-6">Tools</h3>
+      <a href="#cli" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">CLI</a>
+      <a href="#vscode" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">VS Code Extension</a>
+      <a href="#benchmarks" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Benchmarks</a>
+    </div>
+
+    <!-- Legacy Nav -->
+    <div id="nav-legacy" class="hidden">
+      <h3 class="text-xs uppercase text-amber-500 font-semibold mb-2 mt-4">Legacy Runtime v3</h3>
+      <a href="#legacy-whats-new" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">What's New</a>
+      <a href="#legacy-concept" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Concept</a>
+      <a href="#legacy-layout" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">File Layout</a>
+      <a href="#legacy-runtime" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Runtime Boot</a>
+      <a href="#legacy-binding" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Reactive Bindings</a>
+      <a href="#legacy-scx" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">SCX / Cipher</a>
+      <a href="#legacy-effects" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Effects</a>
+      <a href="#legacy-api" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Runtime API</a>
+      <a href="#legacy-deploy" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Deploy</a>
+      <a href="#legacy-templates" class="block py-2 px-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg border-l-2 border-transparent">Templates</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="ml-64 flex-1 p-8 max-w-4xl">
+
+    <!-- ========== MODERN DOCS ========== -->
+    <div id="content-modern">
+
+      <section id="intro" class="mb-12">
+        <h1 class="text-4xl font-bold text-white mb-4 glow-text">ATOMIC-DOM</h1>
+        <p class="text-xl text-slate-300 mb-6">Transactional DOM updates with atomic blocks. Batch mutations, eliminate layout thrashing, build performant UIs.</p>
+
+        <div class="flex gap-4 mb-8">
+          <span class="badge badge-new">v4.0</span>
+          <span class="text-slate-400">TypeScript • Plugin Architecture • LSP Support</span>
+        </div>
+
+        <div class="card">
+          <h3 class="text-lg font-semibold text-white mb-3">Quick Install</h3>
+          <pre><code>npm install atomic-dom</code></pre>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <div class="card text-center">
+            <div class="text-3xl mb-2">⚡</div>
+            <h4 class="font-semibold">Fast</h4>
+            <p class="text-sm text-slate-400">Single reflow per atomic block</p>
+          </div>
+          <div class="card text-center">
+            <div class="text-3xl mb-2">🔌</div>
+            <h4 class="font-semibold">Extensible</h4>
+            <p class="text-sm text-slate-400">Plugin-based architecture</p>
+          </div>
+          <div class="card text-center">
+            <div class="text-3xl mb-2">📝</div>
+            <h4 class="font-semibold">TypeScript</h4>
+            <p class="text-sm text-slate-400">Full type safety</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="install" class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4 glow-text">Installation</h2>
+
+        <div class="card">
+          <h3 class="font-semibold mb-3">npm / yarn / pnpm</h3>
+          <pre><code># npm
+npm install atomic-dom
+
+# yarn
+yarn add atomic-dom
+
+# pnpm
+pnpm add atomic-dom</code></pre>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-3">Basic Usage</h3>
+          <pre><code>import { parse, compile } from 'atomic-dom';
+
+// Parse ASXR source
+const ast = parse(`
+  @atomic [app] {
+    @dom div[container] {
+      text: "Hello, ATOMIC-DOM!"
+    }
+  }
+`);
+
+// Compile to JavaScript
+const js = compile(source);</code></pre>
+        </div>
+      </section>
+
+      <section id="splash" class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4 glow-text">Splash Runtime</h2>
+        <p class="text-slate-300 mb-4">ATOMIC-DOM includes a built-in splash screen runtime for seamless app loading experiences.</p>
+
+        <div class="card">
+          <h3 class="font-semibold mb-3">Splash Configuration</h3>
+          <pre><code>import { createSplashRuntime } from 'atomic-dom/runtime';
+
+const splash = createSplashRuntime({
+  logo: '/atomic-dom.svg',
+  title: 'My App',
+  theme: 'dark',
+  minDisplayTime: 800,  // ms
+  onProgress: (percent) => console.log(`Loading: ${percent}%`),
+  onReady: (app) => app.mount('#root')
+});
+
+splash.start();</code></pre>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-3">HTML Integration</h3>
+          <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;My App&lt;/title&gt;
+  &lt;style&gt;
+    #splash {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: #0f172a;
+    }
+    #splash.fade-out { opacity: 0; transition: opacity 0.3s; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id="splash"&gt;
+    &lt;div class="splash-content"&gt;
+      &lt;svg class="splash-icon"&gt;...&lt;/svg&gt;
+      &lt;div class="splash-progress"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div id="app" hidden&gt;&lt;/div&gt;
+
+  &lt;script type="module"&gt;
+    import { AtomicApp } from 'atomic-dom';
+
+    const app = new AtomicApp({
+      splash: { minTime: 800 },
+      root: '#app'
+    });
+
+    await app.init();
+    document.getElementById('splash').classList.add('fade-out');
+    setTimeout(() => {
+      document.getElementById('splash').remove();
+      document.getElementById('app').hidden = false;
+    }, 300);
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+      </section>
+
+      <section id="atomic-blocks" class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4 glow-text">Atomic Blocks</h2>
+        <p class="text-slate-300 mb-4">Atomic blocks are the core primitive. All mutations within a block are batched and applied atomically.</p>
+
+        <div class="card">
+          <h3 class="font-semibold mb-3">Syntax</h3>
+          <pre><code>@atomic [block-id] {
+  // Properties
+  prop: value = "default";
+
+  // DOM nodes
+  @dom div[container] {
+    class: "wrapper";
+
+    @dom h1 { text: {{title}} }
+    @dom p { text: {{description}} }
+  }
+
+  // Nested blocks
+  @component [child] { ... }
+}</code></pre>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-3">TypeScript Decorators</h3>
+          <pre><code>import { Atomic, Prop, Reactive, On } from 'atomic-dom/typescript';
+
+@Atomic('counter')
+class Counter {
+  @Reactive(0)
+  count: number;
+
+  @On('click')
+  increment() {
+    this.count++;
+  }
+}</code></pre>
+        </div>
+      </section>
+
+      <section id="state" class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4 glow-text">State Management</h2>
+
+        <div class="card">
+          <h3 class="font-semibold mb-3">State Blocks</h3>
+          <pre><code>@state [user] {
+  name: "John",
+  score: 0,
+  level: 1
+}
+
+@atomic [scoreboard] {
+  @dom div {
+    text: "Score: " + {{user.score}}
+  }
+}</code></pre>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-3">State Proposals</h3>
+          <pre><code>@propose [level-up] {
+  prior: { user.level: 1 }
+  next: { user.level: 2 }
+  constraints: [
+    "user.score >= 100"
+  ]
+}</code></pre>
+        </div>
+      </section>
+
+      <section id="plugins" class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4 glow-text">Plugins</h2>
+
+        <div class="card">
+          <h3 class="font-semibold mb-3">Using Plugins</h3>
+          <pre><code>@use plugin "control-flow" from "atomic-dom/plugins";
+@use plugin "jsx-syntax" from "atomic-dom/plugins";
+
+@atomic [app] {
+  @if ({{user.loggedIn}}) {
+    @dom div { text: "Welcome back!" }
+  } @else {
+    @dom div { text: "Please log in" }
+  }
+}</code></pre>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-3">Built-in Plugins</h3>
+          <table class="table">
+            <tr><th>Plugin</th><th>Description</th></tr>
+            <tr><td><code>control-flow</code></td><td>@if, @for, @while, @switch</td></tr>
+            <tr><td><code>jsx-syntax</code></td><td>JSX element support</td></tr>
+            <tr><td><code>vue-syntax</code></td><td>Vue template directives</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="parser-api" class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4 glow-text">Parser API</h2>
+
+        <div class="card">
+          <pre><code>import { parse, Lexer, Parser } from 'atomic-dom';
+
+// Quick parse
+const ast = parse(source);
+
+// Manual lexing + parsing
+const lexer = new Lexer(source);
+const tokens = lexer.tokenize();
+const parser = new Parser(tokens);
+const ast = parser.parse();</code></pre>
+        </div>
+      </section>
+
+      <section id="compiler-api" class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4 glow-text">Compiler API</h2>
+
+        <div class="card">
+          <pre><code>import { compile, generate, CodeGenerator } from 'atomic-dom';
+
+// Quick compile
+const js = compile(source, {
+  format: 'esm',
+  minify: false,
+  sourcemap: true
+});
+
+// Manual generation
+const generator = new CodeGenerator(ast, options);
+const output = generator.generate();</code></pre>
+        </div>
+      </section>
+
+      <section id="runtime-api" class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4 glow-text">Runtime API</h2>
+
+        <div class="card">
+          <table class="table">
+            <tr><th>Function</th><th>Description</th></tr>
+            <tr><td><code>createBlock(type, id, props)</code></td><td>Create a block instance</td></tr>
+            <tr><td><code>createDom(selector, id, props)</code></td><td>Create DOM node</td></tr>
+            <tr><td><code>state.get(path)</code></td><td>Get state value</td></tr>
+            <tr><td><code>state.set(path, value)</code></td><td>Set state value</td></tr>
+            <tr><td><code>propose(proposal)</code></td><td>Submit state proposal</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="typescript-api" class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4 glow-text">TypeScript Integration</h2>
+
+        <div class="card">
+          <h3 class="font-semibold mb-3">Decorators</h3>
+          <table class="table">
+            <tr><th>Decorator</th><th>Type</th><th>Description</th></tr>
+            <tr><td><code>@Atomic(id)</code></td><td>Class</td><td>Mark class as atomic block</td></tr>
+            <tr><td><code>@Component(id)</code></td><td>Class</td><td>Mark as component</td></tr>
+            <tr><td><code>@State(id)</code></td><td>Class</td><td>Mark as state block</td></tr>
+            <tr><td><code>@Prop(opts)</code></td><td>Property</td><td>Declare prop</td></tr>
+            <tr><td><code>@Reactive(init)</code></td><td>Property</td><td>Reactive property</td></tr>
+            <tr><td><code>@On(event)</code></td><td>Method</td><td>Event handler</td></tr>
+            <tr><td><code>@Watch(path)</code></td><td>Method</td><td>State watcher</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="cli" class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4 glow-text">CLI</h2>
+
+        <div class="card">
+          <pre><code># Compile ASXR files
+npx asxr compile src/app.asxr -o dist/
+
+# Run tests
+npx asxr test tests/
+
+# Start LSP server
+npx asxr-lsp</code></pre>
+        </div>
+      </section>
+
+      <section id="vscode" class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4 glow-text">VS Code Extension</h2>
+        <p class="text-slate-300 mb-4">Full editor support with syntax highlighting, snippets, and LSP integration.</p>
+
+        <div class="card">
+          <h3 class="font-semibold mb-3">Features</h3>
+          <ul class="list-disc list-inside text-slate-300 space-y-1">
+            <li>Syntax highlighting for .asxr files</li>
+            <li>20+ code snippets</li>
+            <li>Auto-completion</li>
+            <li>Hover documentation</li>
+            <li>Go to definition</li>
+            <li>Real-time diagnostics</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="benchmarks" class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4 glow-text">Benchmarks</h2>
+        <p class="text-slate-300 mb-4">ATOMIC-DOM's batched approach significantly outperforms naive DOM manipulation.</p>
+
+        <div class="card">
+          <h3 class="font-semibold mb-3">Performance Comparison (1000 elements)</h3>
+          <div class="space-y-3">
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>Naive DOM</span><span class="text-red-400">~15ms</span>
+              </div>
+              <div class="h-3 bg-slate-700 rounded-full overflow-hidden">
+                <div class="h-full bg-red-500 rounded-full" style="width:100%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>Virtual DOM</span><span class="text-purple-400">~8ms</span>
+              </div>
+              <div class="h-3 bg-slate-700 rounded-full overflow-hidden">
+                <div class="h-full bg-purple-500 rounded-full" style="width:53%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="text-atomic-primary font-semibold">ATOMIC-DOM</span><span class="text-atomic-primary">~3ms</span>
+              </div>
+              <div class="h-3 bg-slate-700 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-full" style="width:20%"></div>
+              </div>
+            </div>
+          </div>
+          <p class="text-sm text-slate-400 mt-4">Run full benchmarks: <code>npx ts-node benchmarks/benchmark.ts</code></p>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========== LEGACY DOCS ========== -->
+    <div id="content-legacy" class="hidden">
+
+      <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-8">
+        <div class="flex items-center gap-3">
+          <span class="badge badge-legacy">LEGACY</span>
+          <span class="text-amber-200">This is the v3 Static Runtime documentation. For new projects, use <a href="#" onclick="showVersion('modern');return false" class="text-amber-400 underline">ATOMIC-DOM v4</a>.</span>
+        </div>
+      </div>
+
+      <section id="legacy-whats-new" class="card mb-8">
+        <h2 class="text-xl font-bold text-amber-400 mb-4">✨ What's New in v3 (Legacy)</h2>
+        <ul class="space-y-2 text-slate-300">
+          <li><span class="badge badge-legacy">LEGACY</span> Dual-deliverable model: <strong>Runtime Ops</strong> + <strong>Local Authoring (≤40KB)</strong>.</li>
+          <li><span class="badge badge-legacy">LEGACY</span> <code>Atomic.init()</code> boot contract and lifecycle hooks.</li>
+          <li><span class="badge badge-legacy">LEGACY</span> Micro reactive bindings via <code>data-bind</code> + <code>Atomic.update()</code>.</li>
+          <li><span class="badge badge-legacy">LEGACY</span> SCX token grammar + optional Symbolic Cipher rotation.</li>
+        </ul>
+      </section>
+
+      <section id="legacy-concept" class="card mb-8">
+        <h2 class="text-xl font-bold text-amber-400 mb-4">🧭 Concept</h2>
+        <p class="text-slate-300 mb-4"><strong>Atomic HTML</strong> = one self-contained HTML file that can host a full ASX app. It loads a JSON shell (<code>.asx</code>) and renders with <em>no framework</em>.</p>
+        <div class="grid grid-cols-2 gap-4 mt-4">
+          <div class="bg-slate-800/50 p-4 rounded-lg">
+            <strong class="text-white">Authoring</strong>
+            <p class="text-sm text-slate-400">Use Local Guide (≤40KB) offline to write and preview.</p>
+          </div>
+          <div class="bg-slate-800/50 p-4 rounded-lg">
+            <strong class="text-white">Runtime</strong>
+            <p class="text-sm text-slate-400">Serve via CDN/app server. Control with Ops API.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="legacy-layout" class="card mb-8">
+        <h2 class="text-xl font-bold text-amber-400 mb-4">🧱 File Layout</h2>
+        <pre><code>/atomic/
+├─ atomic-runtime.html         ← runtime ops (v3)
+├─ atomic-local.html           ← 40KB local authoring
+├─ app.asx                     ← your app shell (JSON)
+└─ /assets/ friendly-bot.png …</code></pre>
+      </section>
+
+      <section id="legacy-runtime" class="card mb-8">
+        <h2 class="text-xl font-bold text-amber-400 mb-4">🚀 Runtime Boot (Ops)</h2>
+        <p class="text-slate-300 mb-4">Embed a fake-boot splash, then mount UI.</p>
+        <pre><code>&lt;div id="splash"&gt;Booting…&lt;/div&gt;
+&lt;main id="app" hidden&gt;&lt;/main&gt;
+&lt;script&gt;
+const Atomic = {
+  state:{}, effects:[], routes:{}, readyCbs:[],
+  init({asx="/app.asx", onReady=()=>{}}={}){
+    fetch(asx).then(r=>r.json()).then(cfg=>{
+      this.cfg=cfg; this.state=cfg.$state||{};
+      this.routes=cfg.$routes||{};
+      setTimeout(()=>{
+        document.getElementById('splash').remove();
+        document.getElementById('app').hidden=false;
+        this.mount(); onReady(this);
+      },800);
+    });
+  },
+  mount(){ this.renderRoute(Object.keys(this.routes)[0]||"home"); },
+  renderRoute(name){
+    const root=document.getElementById('app');
+    root.innerHTML = "&lt;h2&gt;"+(name||"home")+"&lt;/h2&gt;";
+    this.update();
+  },
+  set(path,val){
+    const seg=path.split('.'); let o=this.state;
+    while(seg.length>1){const k=seg.shift(); o=o[k]=o[k]??{};}
+    o[seg[0]]=val; this.update();
+  },
+  update(){
+    document.querySelectorAll("[data-bind]").forEach(el=>{
+      const p=el.getAttribute("data-bind").split('.');
+      let v=this.state;
+      for(const k of p){ v = v?.[k]; }
+      el.textContent = v ?? "";
+    });
+  },
+  route(name){ this.renderRoute(name); },
+  effect(run,ctx={}){ console.log("run SCX:",run,ctx); },
+  onReady(cb){ this.readyCbs.push(cb); }
+};
+Atomic.init({asx:"/app.asx", onReady:()=>console.log("ready!")});
+&lt;/script&gt;</code></pre>
+      </section>
+
+      <section id="legacy-binding" class="card mb-8">
+        <h2 class="text-xl font-bold text-amber-400 mb-4">📡 Reactive Bindings</h2>
+        <pre><code>&lt;strong&gt;Score:&lt;/strong&gt; &lt;span data-bind="user.score"&gt;&lt;/span&gt;
+&lt;button onclick="Atomic.set('user.score',(Atomic.state.user.score||0)+5)"&gt;+5&lt;/button&gt;</code></pre>
+      </section>
+
+      <section id="legacy-scx" class="card mb-8">
+        <h2 class="text-xl font-bold text-amber-400 mb-4">🧠 SCX / Cipher</h2>
+        <table class="table">
+          <tr><th>Token</th><th>Meaning</th><th>Example</th></tr>
+          <tr><td><code>(?)</code></td><td>if</td><td><code>(?) user.score >= 100 (∴) (💬>) "Level up!"</code></td></tr>
+          <tr><td><code>(∴)</code></td><td>then</td><td>then-block</td></tr>
+          <tr><td><code>(¬)</code></td><td>else</td><td>else-block</td></tr>
+          <tr><td><code>(⊕)</code></td><td>increment</td><td><code>(⊕) user.score</code></td></tr>
+        </table>
+        <p class="text-sm text-slate-400 mt-4">For production, encode SCX with a rotating alias map; decode server-side, never <code>eval</code> strings.</p>
+      </section>
+
+      <section id="legacy-effects" class="card mb-8">
+        <h2 class="text-xl font-bold text-amber-400 mb-4">⚡ Effects</h2>
+        <pre><code>{
+  "$effects":[
+    {"when":"user.score","run":"(?) user.score ≥ 100 (∴) (💬>) 'GG' (⊕) user.level"}
+  ]
+}</code></pre>
+      </section>
+
+      <section id="legacy-api" class="card mb-8">
+        <h2 class="text-xl font-bold text-amber-400 mb-4">🔌 Runtime API (Ops)</h2>
+        <table class="table">
+          <tr><th>Method</th><th>Description</th><th>Snippet</th></tr>
+          <tr><td><code>Atomic.init({asx,onReady})</code></td><td>Boot and mount</td><td><code>Atomic.init({asx:"/app.asx"})</code></td></tr>
+          <tr><td><code>Atomic.set(path,val)</code></td><td>Mutate state</td><td><code>Atomic.set("user.score",42)</code></td></tr>
+          <tr><td><code>Atomic.update()</code></td><td>Rebind DOM</td><td><code>Atomic.update()</code></td></tr>
+          <tr><td><code>Atomic.route(name)</code></td><td>Render route</td><td><code>Atomic.route("game")</code></td></tr>
+          <tr><td><code>Atomic.effect(run,ctx)</code></td><td>Run SCX string</td><td><code>Atomic.effect("(💬>) 'Hi'")</code></td></tr>
+        </table>
+      </section>
+
+      <section id="legacy-deploy" class="card mb-8">
+        <h2 class="text-xl font-bold text-amber-400 mb-4">☁️ Deploy & Versioning</h2>
+        <ol class="list-decimal list-inside text-slate-300 space-y-2">
+          <li>Commit both deliverables: <code>atomic-runtime.html</code> and <code>atomic-local.html</code>.</li>
+          <li>Serve <code>atomic-runtime.html</code> behind your CDN. Cache for 1h; revalidate on deploy.</li>
+          <li>Keep <code>app.asx</code> immutable per release; bump querystring for hotfixes.</li>
+          <li>Optional: preload assets with <code>&lt;link rel="preload"&gt;</code> for splash.</li>
+        </ol>
+      </section>
+
+      <section id="legacy-templates" class="card mb-8">
+        <h2 class="text-xl font-bold text-amber-400 mb-4">📋 Templates</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h3 class="font-semibold mb-2">Minimal <code>app.asx</code></h3>
+            <pre><code>{
+  "$schema":"asx-shell-v1",
+  "$state":{"user":{"score":0}},
+  "$routes":{"home":{}},
+  "$effects":[
+    {"when":"user.score",
+     "run":"(?) user.score ≥ 10 (∴) (💬>) 'Ding'"}
+  ]
+}</code></pre>
+          </div>
+          <div>
+            <h3 class="font-semibold mb-2">Embed Block</h3>
+            <pre><code>&lt;div data-bind="user.score"&gt;&lt;/div&gt;
+&lt;script&gt;
+  Atomic.init({asx:"/app.asx"});
+&lt;/script&gt;</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <div class="text-center text-slate-500 border-t border-slate-800 pt-8 mt-8">
+        Atomic HTML v3 • Legacy Static Runtime • Updated Nov 2025
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function showVersion(version) {
+  const isModern = version === 'modern';
+
+  // Toggle buttons
+  document.getElementById('btn-modern').classList.toggle('active', isModern);
+  document.getElementById('btn-legacy').classList.toggle('active', !isModern);
+
+  // Toggle nav
+  document.getElementById('nav-modern').classList.toggle('hidden', !isModern);
+  document.getElementById('nav-legacy').classList.toggle('hidden', isModern);
+
+  // Toggle content
+  document.getElementById('content-modern').classList.toggle('hidden', !isModern);
+  document.getElementById('content-legacy').classList.toggle('hidden', isModern);
+
+  // Scroll to top
+  window.scrollTo(0, 0);
+}
+
+// Highlight active nav on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      const activeLink = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+      if (activeLink) activeLink.classList.add('active');
+    }
+  });
+}, { threshold: 0.5, rootMargin: '-100px 0px -50% 0px' });
+
+document.querySelectorAll('section[id]').forEach(section => observer.observe(section));
+</script>
+
+</body>
+</html>

@@ -6,6 +6,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
+    "atomic-dom": "dist/cli/setup.js",
     "asxr": "dist/cli.js",
     "asxr-lsp": "dist/lsp-server.js"
   },
@@ -17,6 +18,10 @@
     "./runtime": {
       "types": "./dist/runtime/index.d.ts",
       "import": "./dist/runtime/index.js"
+    },
+    "./splash": {
+      "types": "./dist/splash/index.d.ts",
+      "import": "./dist/splash/index.js"
     },
     "./compiler": {
       "types": "./dist/compiler/index.d.ts",
@@ -45,12 +50,21 @@
     "./typescript": {
       "types": "./dist/typescript/index.d.ts",
       "import": "./dist/typescript/index.js"
+    },
+    "./cli": {
+      "types": "./dist/cli/index.d.ts",
+      "import": "./dist/cli/index.js"
+    },
+    "./kuhul": {
+      "types": "./dist/kuhul/index.d.ts",
+      "import": "./dist/kuhul/index.js"
     }
   },
   "scripts": {
     "build": "tsc",
     "test": "node dist/parser/parser.test.js",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "docs": "open docs/index.html"
   },
   "keywords": [
     "dom",

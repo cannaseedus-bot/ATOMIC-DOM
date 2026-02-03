@@ -1,0 +1,299 @@
+{
+  "$schema": "./config.schema.json",
+  "name": "kuhul-atomic-cluster",
+  "version": "1.0.0",
+
+  "model": {
+    "architecture": "atomic-experts",
+    "totalExperts": 108,
+    "activeExperts": 4,
+    "routerType": "context-gated",
+
+    "dimensions": {
+      "expert": 512,
+      "shared": 1024,
+      "hidden": 2048,
+      "vocab": 32000
+    },
+
+    "quantization": {
+      "enabled": true,
+      "precision": "int4",
+      "expertPrecision": "int8",
+      "routerPrecision": "fp16",
+      "supportedFormats": ["int2", "int4", "int8", "fp16", "fp32"]
+    }
+  },
+
+  "cluster": {
+    "nodes": [
+      {
+        "id": "node-0",
+        "role": "router",
+        "gpu": {
+          "device": "cuda:0",
+          "memory": "8GB",
+          "compute": "sm_80"
+        },
+        "experts": []
+      },
+      {
+        "id": "node-1",
+        "role": "expert-host",
+        "gpu": {
+          "device": "cuda:1",
+          "memory": "16GB",
+          "compute": "sm_80"
+        },
+        "experts": ["math-*", "algorithms-*"]
+      },
+      {
+        "id": "node-2",
+        "role": "expert-host",
+        "gpu": {
+          "device": "cuda:2",
+          "memory": "16GB",
+          "compute": "sm_80"
+        },
+        "experts": ["lang-*", "web-*"]
+      },
+      {
+        "id": "node-3",
+        "role": "expert-host",
+        "gpu": {
+          "device": "cuda:3",
+          "memory": "16GB",
+          "compute": "sm_80"
+        },
+        "experts": ["data-*", "infra-*", "arch-*"]
+      },
+      {
+        "id": "node-4",
+        "role": "expert-host",
+        "gpu": {
+          "device": "cuda:4",
+          "memory": "8GB",
+          "compute": "sm_80"
+        },
+        "experts": ["resume-*", "docs-*", "reserved-*"]
+      }
+    ],
+
+    "sharding": {
+      "strategy": "expert-parallel",
+      "replicationFactor": 1,
+      "loadBalancing": "weighted-round-robin"
+    }
+  },
+
+  "runtime": {
+    "batchSize": 32,
+    "maxSequenceLength": 2048,
+    "maxConcurrentRequests": 128,
+
+    "memory": {
+      "kvCacheSize": "4GB",
+      "expertCacheSize": "2GB",
+      "preloadExperts": ["math-algebra", "lang-python", "lang-typescript"]
+    },
+
+    "routing": {
+      "topK": 4,
+      "temperature": 0.7,
+      "loadBalanceLoss": 0.01,
+      "auxiliaryLoss": 0.001
+    },
+
+    "inference": {
+      "backend": "triton",
+      "kernelFusion": true,
+      "flashAttention": true,
+      "quantizedMatmul": true
+    }
+  },
+
+  "expertRegistry": {
+    "categories": {
+      "math": {
+        "count": 10,
+        "byteSize": "2-4",
+        "parent": "MathMicroAtomic",
+        "experts": [
+          "math-algebra",
+          "math-calculus",
+          "math-statistics",
+          "math-linear-algebra",
+          "math-discrete",
+          "math-numerical",
+          "math-geometry",
+          "math-probability",
+          "math-optimization",
+          "math-proofs"
+        ]
+      },
+      "languages": {
+        "count": 15,
+        "byteSize": "2-4",
+        "parent": "ProgrammingMicroAtomic",
+        "experts": [
+          "lang-python",
+          "lang-typescript",
+          "lang-javascript",
+          "lang-rust",
+          "lang-go",
+          "lang-java",
+          "lang-cpp",
+          "lang-c",
+          "lang-csharp",
+          "lang-swift",
+          "lang-kotlin",
+          "lang-ruby",
+          "lang-php",
+          "lang-sql",
+          "lang-shell"
+        ]
+      },
+      "web": {
+        "count": 12,
+        "byteSize": "2-4",
+        "parent": "WebMicroAtomic",
+        "experts": [
+          "web-react",
+          "web-vue",
+          "web-angular",
+          "web-svelte",
+          "web-nextjs",
+          "web-css",
+          "web-html",
+          "web-api",
+          "web-graphql",
+          "web-websocket",
+          "web-pwa",
+          "web-accessibility"
+        ]
+      },
+      "data": {
+        "count": 10,
+        "byteSize": "2-4",
+        "parent": "CodeGenMicroAtomic",
+        "experts": [
+          "data-pytorch",
+          "data-tensorflow",
+          "data-pandas",
+          "data-numpy",
+          "data-sklearn",
+          "data-transformers",
+          "data-mlops",
+          "data-visualization",
+          "data-preprocessing",
+          "data-deployment"
+        ]
+      },
+      "infra": {
+        "count": 12,
+        "byteSize": "2-4",
+        "parent": "CodeGenMicroAtomic",
+        "experts": [
+          "infra-docker",
+          "infra-kubernetes",
+          "infra-aws",
+          "infra-gcp",
+          "infra-azure",
+          "infra-terraform",
+          "infra-ansible",
+          "infra-cicd",
+          "infra-monitoring",
+          "infra-security",
+          "infra-networking",
+          "infra-databases"
+        ]
+      },
+      "resume": {
+        "count": 8,
+        "byteSize": "2",
+        "parent": "ResumeMicroAtomic",
+        "experts": [
+          "resume-tech",
+          "resume-management",
+          "resume-academic",
+          "resume-creative",
+          "resume-finance",
+          "resume-healthcare",
+          "resume-legal",
+          "resume-general"
+        ]
+      },
+      "algorithms": {
+        "count": 8,
+        "byteSize": "2-4",
+        "parent": "ProgrammingMicroAtomic",
+        "experts": [
+          "algo-sorting",
+          "algo-graph",
+          "algo-dynamic",
+          "algo-greedy",
+          "algo-search",
+          "algo-tree",
+          "algo-string",
+          "algo-complexity"
+        ]
+      },
+      "architecture": {
+        "count": 8,
+        "byteSize": "2-4",
+        "parent": "ProgrammingMicroAtomic",
+        "experts": [
+          "arch-microservices",
+          "arch-monolith",
+          "arch-serverless",
+          "arch-event-driven",
+          "arch-cqrs",
+          "arch-ddd",
+          "arch-patterns",
+          "arch-scaling"
+        ]
+      },
+      "docs": {
+        "count": 6,
+        "byteSize": "2",
+        "parent": "OutputMicroAtomic",
+        "experts": [
+          "docs-api",
+          "docs-tutorial",
+          "docs-readme",
+          "docs-changelog",
+          "docs-specification",
+          "docs-comments"
+        ]
+      },
+      "reserved": {
+        "count": 19,
+        "byteSize": "2-4",
+        "parent": "CustomMicroAtomic",
+        "experts": [
+          "reserved-01", "reserved-02", "reserved-03", "reserved-04",
+          "reserved-05", "reserved-06", "reserved-07", "reserved-08",
+          "reserved-09", "reserved-10", "reserved-11", "reserved-12",
+          "reserved-13", "reserved-14", "reserved-15", "reserved-16",
+          "reserved-17", "reserved-18", "reserved-19"
+        ]
+      }
+    }
+  },
+
+  "training": {
+    "baseModel": "llama-7b",
+    "loraRank": 64,
+    "loraAlpha": 128,
+    "learningRate": 2e-5,
+    "warmupSteps": 1000,
+    "epochs": 3,
+
+    "expertTraining": {
+      "freezeRouter": false,
+      "freezeShared": false,
+      "expertDropout": 0.1,
+      "loadBalanceCoef": 0.01
+    }
+  }
+}

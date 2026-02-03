@@ -150,6 +150,67 @@ export {
   type TypeGenOptions,
 } from './typescript/index.js';
 
+// Splash runtime exports
+export {
+  createSplashRuntime,
+  boot,
+  AtomicApp,
+  type SplashConfig,
+  type SplashRuntime,
+} from './splash/index.js';
+
+// CLI exports
+export {
+  runSetup,
+  quickSetup,
+  printHelp,
+  printVersion,
+  printLogo,
+  SetupWizard,
+  COLORS,
+  colorize,
+  type AtomicConfig,
+  type ProjectionMode,
+} from './cli/index.js';
+
+// K'UHUL MicroAtomics exports
+export {
+  // MicroAtomics System
+  MICROATOMICS,
+  MicroAtomicOrchestrator,
+  orchestrator,
+  getMicroAtomicNames,
+  getMicroAtomicById,
+  getMicroAtomicsByResponsibility,
+  // Action Words
+  ACTION_WORDS,
+  ACTION_WORD_CATEGORIES,
+  getAllActionWords,
+  getActionWordsByCategory,
+  getActionWordsByStrength,
+  extractActionWords,
+  suggestStrongerWords,
+  // Context Detection
+  detectContext,
+  getAllContextScores,
+  getContextDescription,
+  getContextEmoji,
+  // Inference Engine
+  InferenceEngine,
+  inferenceEngine,
+  handleCLICommand,
+  // Types
+  type MicroAtomic,
+  type MicroAtomicContext,
+  type ContextType,
+  type ActionWord,
+  type ActionWordCategory,
+  type ContextScore,
+  type InferenceResponse,
+  type CLICommand,
+  type CLIResult,
+} from './kuhul/index.js';
+
 // Re-export parse as parseASXR for convenience
 export { parse as parseASXR } from './parser/parser.js';
 

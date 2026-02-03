@@ -1,0 +1,26 @@
+<div class="bg-slate-700/50 border border-slate-600 rounded-lg p-3 my-2 transition-all duration-300 ease-in-out"
+     [class.highlight-animation]="node().isUpdated">
+  <div class="flex items-center space-x-2 flex-wrap">
+    <span class="text-atomic-secondary font-mono">&lt;{{ node().tag }}</span>
+    @for (key of objectKeys(node().attributes); track key) {
+      <span class="text-cyan-400">{{ key }}="<span class="text-emerald-300">{{ node().attributes[key] }}</span>"</span>
+    }
+    <span class="text-atomic-secondary font-mono">&gt;</span>
+  </div>
+
+  @if (node().children.length > 0) {
+    <div class="pl-4 sm:pl-6 border-l border-dashed border-slate-500 mt-2 ml-2">
+      @for (child of node().children; track $index) {
+        @if (isDomNode(child)) {
+          <app-dom-visualizer [node]="child"></app-dom-visualizer>
+        } @else {
+          <div class="text-slate-200 py-1 font-mono text-sm break-all transition-colors duration-500"
+               [class.text-amber-300]="node().isUpdated"
+               [class.font-bold]="node().isUpdated">"{{ child }}"</div>
+        }
+      }
+    </div>
+  }
+  
+  <div class="text-atomic-secondary font-mono mt-2">&lt;/{{ node().tag }}&gt;</div>
+</div>

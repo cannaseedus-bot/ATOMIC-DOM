@@ -4,6 +4,92 @@
 
 ---
 
+## Live Demo: Cloudflare Deployment
+
+<img src="https://github.com/cannaseedus-bot/ATOMIC-DOM/blob/main/screenshots/cloudflare-nexus-studio.png" alt="Nexus Studio with Phi-3 AI running on Cloudflare Pages" />
+
+> **Nexus Studio with Phi-3 AI** — Running via Cloudflare Tunnel. Build apps with AI intelligence, no coding required. Features AI Quick Start, AI Assistant, AI Code Generation, and self-optimizing AI Components.
+
+**Live URL:** Deployed via Cloudflare Pages with tunnel access through local network.
+
+---
+
+## Core Concept: Tags as Semantic Coordinates
+
+**K'UHUL tags are NOT syntax sugar.** They are **tensor coordinates** in semantic space—a navigable map for AI inference.
+
+> **Deep Dive:** See [`KUHUL_SEMANTIC_MAPPING.md`](./KUHUL_SEMANTIC_MAPPING.md) for complete visual explanations, code examples, and the full theory behind tensor mapping, encryption mapping, and matrix inference.
+
+```
+Traditional markup:  <div class="math">x² + y²</div>     ← Human label
+K'UHUL mapping:      @atomic [math-geometry-circle] {}   ← AI coordinate
+```
+
+### The Three Mapping Techniques
+
+| Technique | Analogy | Function |
+|-----------|---------|----------|
+| **Tensor Mapping** | GPS coordinates | Position in multi-dimensional semantic space |
+| **Encryption Mapping** | Key-value cipher | Tag = key that unlocks exact meaning |
+| **Matrix Inference** | Geometric transforms | Relations between blocks → execution flow |
+
+### How AI Uses the Map
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    SEMANTIC SPACE                           │
+│                                                             │
+│     @atomic [math-calc-derivative]                          │
+│              ↓                                              │
+│     Position: (math=0.9, calc=0.8, derivative=0.95)        │
+│              ↓                                              │
+│     AI NAVIGATES to this coordinate                         │
+│              ↓                                              │
+│     Activates experts in that region                        │
+│              ↓                                              │
+│     Generates from EXACT semantic location                  │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**The AI doesn't "understand" your code—it LOCATES it in semantic space and activates the experts stationed at those coordinates.**
+
+### Geometric Relations → Execution Semantics
+
+| Geometry | Relation | Execution |
+|----------|----------|-----------|
+| Adjacent blocks | `A ⊣ B` | Sequential: `A; B` |
+| Nested blocks | `A ⊃ B` | Scoped: `A { B }` |
+| Symmetric blocks | `A ≅ B` | Bidirectional: `A ↔ B` |
+| Parallel blocks | `A ∥ B` | Concurrent: `A \|\| B` |
+
+This is why π-Geometric Calculus is the foundation: **all inference is navigation in π-modulated space**.
+
+### DOM Control Hierarchy
+
+The Object Server controls the DOM through Atomic Blocks—**not raw DOM operations**:
+
+```
+Object Server (defines behavior via objects)
+      ↓ emits
+Atomic Blocks (@atomic) — transactional boundary, AI coordinates
+      ↓ contains
+DOM Blocks (@dom) — individual DOM operations
+      ↓ projects to
+Browser DOM — actual document.* rendering
+```
+
+| Level | Block | Contains | Purpose |
+|-------|-------|----------|---------|
+| 1 | Object Server | Atomic Blocks | Behavior definition |
+| 2 | `@atomic [id]` | DOM Blocks | Transaction + AI coordinate |
+| 3 | `@dom type[id]` | Properties | DOM operation |
+| 4 | Browser DOM | — | Rendered UI |
+
+> See [`OBJECT_SERVER_SPEC.md`](./OBJECT_SERVER_SPEC.md) Section 16 for complete DOM control documentation.
+
+---
+
 ## Project Status
 
 | Component | Status | Document |
@@ -22,7 +108,25 @@
 | **Language Server (LSP)** | :white_check_mark: Complete | `src/lsp/` |
 | **VS Code Extension** | :white_check_mark: Complete | `editors/vscode/` |
 | **TypeScript Integration** | :white_check_mark: Complete | `src/typescript/` |
-| **Hybrid Wormhole Architecture** | :white_check_mark: Designed | `HYBRID_WORMHOLE_ARCHITECTURE.md` |
+| **Splash Runtime** | :white_check_mark: Complete | `src/splash/` |
+| **Documentation Site** | :white_check_mark: Complete | `docs/index.html` |
+| **Performance Benchmarks** | :white_check_mark: Complete | `benchmarks/` |
+| **CLI Setup Wizard** | :white_check_mark: Complete | `src/cli/` |
+| **Interactive Playground** | :white_check_mark: Complete | `playground/` |
+| **K'UHUL MicroAtomics** | :white_check_mark: Complete | `src/kuhul/` |
+| **Cluster Runtime** | :white_check_mark: Complete | `cluster/` |
+| **Atomic Expert Training** | :white_check_mark: Complete | `training/` |
+| **Atomic Framework Spec** | :white_check_mark: Complete | `ATOMIC_FRAMEWORK.md` |
+| **Object Server Spec** | :white_check_mark: Complete | `OBJECT_SERVER_SPEC.md` |
+| **Architecture Layers** | :white_check_mark: Complete | `ARCHITECTURE_LAYERS.md` |
+| **Atomic Blocks Grammar** | :white_check_mark: Complete | `ATOMIC_BLOCKS_GRAMMAR.ebnf` |
+| **π-Geometric Calculus** | :white_check_mark: Complete | `src/kuhul/pi-geometric.ts` |
+| **Unified Inference API** | :white_check_mark: Complete | `src/kuhul/api-server.ts` |
+| **Semantic Mapping Guide** | :white_check_mark: Complete | `KUHUL_SEMANTIC_MAPPING.md` |
+| **Bootstrap Runtime** | :white_check_mark: Complete | `src/bootstrap/atomic-bootstrap.js` |
+| **AGL Server Runtime** | :white_check_mark: Complete | `AGL_SERVER_RUNTIME_SPEC.md` |
+| **MX2LM Agent Foreman** | :white_check_mark: Complete | `tools/mx2lm.py` |
+| **KUHUL π Grammar** | :lock: FROZEN | `KUHUL_PI_GRAMMAR.md` |
 
 ---
 
@@ -57,7 +161,22 @@
 - [x] **Language Server (LSP)** — Editor integration with diagnostics, completion, hover (`src/lsp/`)
 - [x] **VS Code Extension** — Syntax highlighting, snippets, LSP client (`editors/vscode/`)
 - [x] **TypeScript Integration** — Decorators, AST transforms, type generators (`src/typescript/`)
-- [ ] Documentation site and playground
+- [x] **Splash Runtime** — Boot screen, progress tracking, lifecycle hooks (`src/splash/`)
+- [x] **Documentation Site** — Interactive docs with Legacy/Modern version toggle (`docs/`)
+- [x] **Performance Benchmarks** — DOM comparison benchmarks (`benchmarks/`)
+- [x] **CLI Setup Wizard** — Interactive project setup with projection modes (`src/cli/`)
+- [x] **Interactive Playground** — Browser-based ASXR editor with live preview (`playground/`)
+- [x] **K'UHUL MicroAtomics** — Orchestration layer with context detection and action words (`src/kuhul/`)
+- [x] **GPU Cluster Runtime** — JSON cluster config and Python model builder with 2-4 byte quantization (`cluster/`)
+- [x] **Atomic Expert Training Pipeline** — Dataset loading, expert mapping, and LoRA fine-tuning (`training/`)
+- [x] **RLHF Data Import** — Personal conversation import from OpenAI, Claude, Mistral, DeepSeek (`training/rlhf_importer.py`)
+- [x] **Atomic Framework Spec** — Object-first framework where behavior requires explicit declaration (`ATOMIC_FRAMEWORK.md`)
+- [x] **Object Server Spec** — Server behavior defined by objects, not code (`OBJECT_SERVER_SPEC.md`)
+- [x] **Architecture Layers** — Cognitive foundation: DNS→HTTP→JSON→Runtime→Projection (`ARCHITECTURE_LAYERS.md`)
+- [x] **Atomic Blocks Grammar** — 4 indivisible structural units + Micronauts (`ATOMIC_BLOCKS_GRAMMAR.ebnf`)
+- [x] **π-Geometric Calculus** — Tensor algebra with π-modulation, matrix inference engine (`src/kuhul/pi-geometric.ts`)
+- [x] **Unified Inference API** — Single entry point for text/glyph/hybrid inference (`src/kuhul/api-server.ts`)
+- [x] **KUHUL π Grammar** — Canonical enforcement grammar v1.1, frozen (`KUHUL_PI_GRAMMAR.md`)
 - [ ] Community plugin registry
 
 ---
@@ -478,12 +597,539 @@ output_spec      = "{",
 }
 ```
 
+---
+
+## Legacy v3: Atomic HTML (Static Runtime)
+
+ATOMIC-DOM v3 was a static HTML runtime that enabled reactive behavior without a build step. It's now marked as legacy and superseded by the modern ASXR compiler, but remains useful for simple static sites and quick prototypes.
+
+### Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **No Build Step** | Works directly in the browser with vanilla HTML |
+| **Data Binding** | `data-bind` attribute for reactive DOM updates |
+| **SCX/Cipher** | String transformation and encryption utilities |
+| **Effects System** | Built-in visual effects (fade, slide, pulse) |
+| **File Inference** | Automatic file type detection and routing |
+
+### Basic Usage
+
+```html
+<!-- Include the legacy runtime -->
+<script src="atomic-v3.js"></script>
+
+<!-- Reactive binding -->
+<div data-bind="message">Hello World</div>
+
+<!-- Update via API -->
+<script>
+  atomicHTML.set('message', 'Updated!');
+</script>
+```
+
+### Reactive Bindings
+
+```html
+<!-- Text binding -->
+<span data-bind="user.name"></span>
+
+<!-- Class binding -->
+<div data-class="isActive ? 'active' : ''"></div>
+
+<!-- Style binding -->
+<div data-style="color: {{theme.primary}}"></div>
+
+<!-- Event binding -->
+<button data-on="click: handleClick">Click Me</button>
+```
+
+### SCX/Cipher System
+
+```javascript
+// String cipher for obfuscation
+const encoded = atomicHTML.scx.encode('sensitive-data');
+const decoded = atomicHTML.scx.decode(encoded);
+
+// Template interpolation
+const result = atomicHTML.scx.template('Hello {{name}}!', { name: 'World' });
+```
+
+### Effects API
+
+```javascript
+// Built-in effects
+atomicHTML.effects.fade('#element', { duration: 300 });
+atomicHTML.effects.slide('#element', { direction: 'left' });
+atomicHTML.effects.pulse('#element', { count: 3 });
+```
+
+### Migration to Modern ATOMIC-DOM
+
+Legacy v3 code can be gradually migrated to modern ASXR:
+
+| Legacy v3 | Modern ASXR |
+|-----------|-------------|
+| `data-bind="key"` | `@state key = value` |
+| `data-on="click: fn"` | `@on click { ... }` |
+| `atomicHTML.set(k, v)` | State proposals in atomic blocks |
+| Effects API | CSS transitions + `@dom` blocks |
+
+See the [documentation site](docs/index.html) for a side-by-side comparison with version toggle.
+
+---
+
 ## Goals
 
 - Make **atomic DOM updates** the default, not the optimization.
 - Keep the **core minimal**, with features added via plugins.
 - Provide a **unified grammar** for batching, patching, and extensible syntax.
 - Enable **multi-shell authoring** without sacrificing performance.
+
+---
+
+## K'UHUL Atomic Expert Architecture
+
+ATOMIC-DOM includes an **Atomic Expert** inference architecture with 118 specialized expert modules.
+
+> **Note**: Atomic Experts are NOT code modules. They are declarative taxonomy entries defined by objects (JSON/TypeScript), not executable JS/TS agents. This distinguishes them from traditional MoE architectures.
+
+```
+Input → Context Router → Top-K Expert Selection → Weighted Merge → Output
+            │                    │
+       detectContext()    ┌──────┴──────┐
+                          │ 99 Defined  │
+                          │ 19 Reserved │
+                          └─────────────┘
+```
+
+### Expert Categories
+
+| Category | Experts | Parent MicroAtomic |
+|----------|---------|-------------------|
+| Mathematics | 10 | MathMicroAtomic |
+| Languages | 15 | ProgrammingMicroAtomic |
+| Web | 12 | WebMicroAtomic |
+| Data/ML | 10 | CodeGenMicroAtomic |
+| Infrastructure | 12 | CodeGenMicroAtomic |
+| Resume | 8 | ResumeMicroAtomic |
+| Algorithms | 8 | ProgrammingMicroAtomic |
+| Architecture | 8 | ProgrammingMicroAtomic |
+| Documentation | 6 | OutputMicroAtomic |
+| **Atomic Framework** | **10** | AtomicMicroAtomic |
+| **Reserved** | **19** | Fine-tuning slots |
+
+### Model Specs
+
+- **Architecture**: Atomic Experts with top-4 routing
+- **Experts**: 118 total (99 defined + 19 reserved for fine-tuning)
+- **Dimensions**: 512 expert / 1024 shared
+- **Router**: Context-gated (uses `detectContext()`)
+
+### Reserved Experts (Fine-tuning)
+
+19 expert slots are reserved for personalized fine-tuning:
+
+```typescript
+const customExpert = {
+  id: 'custom-01',
+  name: 'My Company API Expert',
+  parent: 'CodeGenMicroAtomic',
+  trainingDataPath: './data/my-api-docs/',
+  inheritFrom: 'web-api',  // Extend existing expert
+};
+```
+
+See [`KUHUL_ATOMIC_EXPERTS.md`](./KUHUL_ATOMIC_EXPERTS.md) for complete documentation.
+
+---
+
+## GPU Cluster Runtime
+
+The `cluster/` directory provides infrastructure for deploying Atomic Expert models with low-byte quantization (2-4 bytes per parameter).
+
+### Configuration
+
+```json
+{
+  "model": {
+    "totalExperts": 118,
+    "activeExperts": 4,
+    "quantization": {
+      "precision": "int4",
+      "expertPrecision": "int8",
+      "routerPrecision": "fp16"
+    }
+  },
+  "cluster": {
+    "nodes": [
+      { "id": "node-0", "role": "router", "gpu": { "device": "cuda:0" } },
+      { "id": "node-1", "role": "expert-host", "experts": ["math-*", "lang-*"] }
+    ]
+  }
+}
+```
+
+### Model Builder CLI
+
+```bash
+# Generate deployment plan
+python cluster/model_builder.py build --config cluster/runtime.json
+
+# Generate quantization kernels
+python cluster/model_builder.py quantize --precision int4
+
+# Generate all CUDA kernels
+python cluster/model_builder.py kernels --config cluster/runtime.json
+
+# Export to ONNX/safetensors
+python cluster/model_builder.py export --format onnx
+
+# Show model info
+python cluster/model_builder.py info --config cluster/runtime.json
+```
+
+### Quantization Precision
+
+| Format | Bits | Bytes/Element | Use Case |
+|--------|------|---------------|----------|
+| INT2 | 2 | 0.25 | Ultra-compressed experts |
+| INT4 | 4 | 0.5 | Default expert weights |
+| INT8 | 8 | 1.0 | High-precision experts |
+| FP16 | 16 | 2.0 | Router weights |
+| FP32 | 32 | 4.0 | Accumulation buffers |
+
+### GPU Kernel Generation
+
+The model builder generates optimized CUDA kernels:
+
+- **Dequantization**: INT2/INT4/INT8 → FP32 unpacking
+- **Expert Forward**: Gated Linear Unit with SiLU activation
+- **Top-K Router**: Softmax + sparse expert selection
+
+```cuda
+// Generated INT4 dequantization kernel
+__global__ void dequant_int4_kernel(
+    const uint8_t* input,
+    float* output,
+    float scale,
+    int zero_point,
+    int num_elements
+);
+```
+
+### Memory Footprint
+
+With INT4 quantization:
+- **Per Expert**: ~1.5 MB (512×2048×2 projections)
+- **108 Experts**: ~162 MB
+- **Router**: ~256 KB
+- **Total Model**: ~165 MB (vs ~660 MB at FP32)
+
+---
+
+## Atomic Expert Training Pipeline
+
+The `training/` directory provides a complete pipeline for training the K'UHUL Atomic Expert model on coding datasets.
+
+### Training Datasets
+
+| Dataset | Source | Experts | Features |
+|---------|--------|---------|----------|
+| DeepPlanning | Qwen | algo-*, arch-* | Planning, reasoning |
+| SFT Data Code | eth-dl-rewards | lang-* | Supervised fine-tuning |
+| A1 Code Apps | mlfoundations | algo-*, lang-python | Competitive programming |
+| Agent Tool Use | Mgmgrand420 | infra-*, web-api | Tool use, function calling |
+| GPT-5 Codex | Mgmgrand420 | lang-* (5 languages) | Multi-language code |
+| DeepThink Code | Mgmgrand420 | algo-*, math-* | Chain-of-thought reasoning |
+| Dolphin Coder | Mgmgrand420 | lang-*, web-* | Instruction following |
+| Code Feedback | Mgmgrand420 | docs-*, resume-tech | Code review |
+
+### Quick Start
+
+```bash
+# Install dependencies
+pip install -r training/requirements.txt
+
+# Download datasets
+./training/download_datasets.sh
+
+# View expert coverage
+python training/expert_mapping.py coverage
+
+# Train model
+python training/train.py --config training/datasets.json
+```
+
+### Training Configuration
+
+```json
+{
+  "training": {
+    "baseModel": "Qwen/Qwen2.5-0.5B",
+    "epochs": 3,
+    "batchSize": 4,
+    "gradientAccumulationSteps": 8,
+    "atomicExperts": {
+      "numExperts": 118,
+      "numActiveExperts": 4,
+      "routerAuxLossCoef": 0.01
+    },
+    "lora": {
+      "enabled": true,
+      "rank": 64,
+      "alpha": 128
+    }
+  }
+}
+```
+
+### Expert Coverage
+
+```
+ CATEGORY COVERAGE
+   math         ████░░░░░░░░░░░░░░░░  20.0% (2/10)
+   languages    ████████████░░░░░░░░  53.3% (8/15)
+   web          ████████░░░░░░░░░░░░  33.3% (4/12)
+   algorithms   ████████████░░░░░░░░  50.0% (4/8)
+   infra        ████░░░░░░░░░░░░░░░░  25.0% (3/12)
+   docs         ██████░░░░░░░░░░░░░░  33.3% (2/6)
+   reserved     ░░░░░░░░░░░░░░░░░░░░   0.0% (0/19)
+```
+
+Reserved experts (19 slots) are available for domain-specific fine-tuning.
+
+### RLHF Data Import
+
+Import your personal AI conversations for training:
+
+```bash
+# Import conversations from multiple providers
+python training/rlhf_importer.py --provider openai --input ~/exports/openai/
+python training/rlhf_importer.py --provider claude --input ~/exports/claude/
+python training/rlhf_importer.py --provider mistral --input ~/exports/mistral/
+
+# Train with RLHF data (2x weight)
+python training/train.py --config training/datasets.json --rlhf ./rlhf_data
+```
+
+| Provider | Export Location | Format |
+|----------|-----------------|--------|
+| OpenAI/ChatGPT | Settings → Data controls → Export | `conversations.json` |
+| Claude | Settings → Export data | `conversations.json` |
+| Mistral | Settings → Export | `*.jsonl` |
+| DeepSeek | Settings → Export | `*.json` |
+
+See [`training/RLHF_IMPORT_GUIDE.md`](./training/RLHF_IMPORT_GUIDE.md) for detailed instructions.
+
+---
+
+## π-Geometric Calculus Foundation
+
+The `src/kuhul/pi-geometric.ts` module implements the mathematical foundation where **all geometry is π-modulated**.
+
+### Core Axiom
+
+> "All curvature is π-modulated"
+
+Every geometric operation in the system uses π as the fundamental unit:
+- **Position**: `P = (x·π, y·π, z·π)`
+- **Orientation**: `θ = nπ/k` for integers n, k
+- **Curvature**: `κ = π/r` for radius r
+
+### Tensor Algebra
+
+```typescript
+import { PiTensor, PI } from './src/kuhul';
+
+const tensor = new PiTensor({
+  position: [1, 2, 0],      // Will be π-scaled
+  orientation: PI / 4,       // 45° = π/4
+  curvature: PI / 10,       // Circle with radius 10
+});
+
+// Compose tensors
+const combined = tensor1.compose(tensor2, 0.5);
+
+// Transform operations
+const rotated = tensor.rotate(4);  // Rotate by π/4
+const scaled = tensor.scaleBy(2);  // Scale by factor of 2
+```
+
+### Matrix Inference Engine
+
+Geometric relations map to execution semantics:
+
+| Geometry | Relation | Execution |
+|----------|----------|-----------|
+| Adjacent | `A ⊣ B` | Sequential: `A; B` |
+| Contained | `A ⊃ B` | Scoped: `A { B }` |
+| Symmetric | `A ≅ B` | Dual: `A ↔ B` |
+| Tangent | `A ◯ B` | Dependency: `B ← A` |
+| Parallel | `A ∥ B` | Concurrent: `A \|\| B` |
+
+```typescript
+import { MatrixInference, AGLPipeline } from './src/kuhul';
+
+const inference = new MatrixInference();
+
+// Register glyphs with geometric relations
+inference.register({
+  id: 'glyph-A',
+  type: 'primitive',
+  position: [0, 0, 0],
+  orientation: 0,
+  relations: [
+    { type: 'adjacent', target: 'glyph-B', weight: 0.9 }
+  ]
+});
+
+// Run inference to get execution semantics
+const results = inference.infer();
+// → [{ rule: 'adjacency_to_sequence', target: 'glyph-A; glyph-B', ... }]
+```
+
+### AGL Pipeline
+
+The AGL (A Glyph Language) pipeline converts visual glyphs to executable programs:
+
+```typescript
+import { AGLPipeline } from './src/kuhul';
+
+const pipeline = new AGLPipeline();
+const program = pipeline.process([
+  { id: 'init', position: [0, 0, 0], relations: [{ type: 'adjacent', target: 'compute' }] },
+  { id: 'compute', position: [1, 0, 0], relations: [{ type: 'contained', target: 'output' }] },
+  { id: 'output', position: [1, 0.5, 0] }
+]);
+
+// program.executionPlan contains ordered steps:
+// 1. dependency resolution
+// 2. concurrent operations
+// 3. scoped execution
+// 4. sequential flow
+```
+
+---
+
+## Unified Inference API Server
+
+The `src/kuhul/api-server.ts` provides a **single entry point** for all inference operations.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  UnifiedInferenceServer                      │
+├─────────────────────────────────────────────────────────────┤
+│  Request Types:                                              │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐                      │
+│  │  text   │  │  glyph  │  │ hybrid  │                      │
+│  └────┬────┘  └────┬────┘  └────┬────┘                      │
+│       │            │            │                            │
+│       ▼            ▼            ▼                            │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              Expert Router (Top-K)                   │    │
+│  │         detectContext() → routingScores              │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                          │                                   │
+│       ┌──────────────────┼──────────────────┐               │
+│       ▼                  ▼                  ▼               │
+│  ┌─────────┐      ┌─────────────┐     ┌──────────┐         │
+│  │ Backend │      │ π-Geometric │     │ Action   │         │
+│  │Inference│      │  Analysis   │     │  Words   │         │
+│  └─────────┘      └─────────────┘     └──────────┘         │
+│                          │                                   │
+│                          ▼                                   │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              UnifiedResponse                         │    │
+│  │  { text, context, experts, geometric, tokens }       │    │
+│  └─────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Quick Start
+
+```typescript
+import { createMockServer, UnifiedInferenceServer } from './src/kuhul';
+
+// Create server (mock backend for testing)
+const server = createMockServer();
+await server.initialize();
+
+// Text inference
+const response = await server.infer({
+  input: 'Explain the quadratic formula',
+  type: 'text',
+  geometric: true  // Include π-geometric analysis
+});
+
+console.log(response.data.text);
+console.log(response.data.experts);    // Activated experts
+console.log(response.data.geometric);  // Tensor analysis
+console.log(response.timing);          // Performance metrics
+```
+
+### Request Types
+
+| Type | Input | Use Case |
+|------|-------|----------|
+| `text` | String prompt | Standard inference |
+| `glyph` | `GlyphInput[]` | AGL program execution |
+| `hybrid` | String + geometric | Text with tensor analysis |
+
+### HTTP Integration
+
+```typescript
+import { handleHTTPRequest, inferenceServer } from './src/kuhul';
+
+// Initialize once
+await inferenceServer.initialize();
+
+// Handle requests (Express-compatible)
+app.post('/api/v1/infer', async (req, res) => {
+  const response = await handleHTTPRequest(inferenceServer, {
+    method: req.method,
+    path: req.path,
+    body: req.body,
+  });
+  res.status(response.status).json(response.body);
+});
+```
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/infer` | POST | Run inference (text/glyph/hybrid) |
+| `/api/v1/route` | POST | Route-only (no inference) |
+| `/api/v1/health` | GET | Server health check |
+| `/api/v1/stats` | GET | Server statistics |
+
+### Response Format
+
+```typescript
+interface UnifiedResponse {
+  id: string;
+  success: boolean;
+  data: {
+    text: string;                    // Generated response
+    context: ContextType;            // Detected context
+    experts: ExpertInfo[];           // Activated experts
+    routing: Record<string, number>; // Expert scores
+    actionWords: ActionWordInfo[];   // Extracted action words
+    suggestions: ActionWordInfo[];   // Stronger alternatives
+    geometric?: GeometricData;       // π-Geometric analysis
+    tokens: TokenUsage;              // Token counts
+  };
+  timing: {
+    total: number;
+    routing: number;
+    inference: number;
+    geometric?: number;
+  };
+}
+```
 
 ---
 
@@ -525,3 +1171,43 @@ The specification documents are **locked** — contributions should focus on:
 - Tooling (editor support, LSP)
 - Documentation and examples
 - Test suites and validation
+
+---
+
+## Future Updates & Roadmap
+
+### Planned for v0.2.0
+
+| Feature | Priority | Description |
+|---------|----------|-------------|
+| **Interactive Playground** | High | Browser-based ASXR editor with live preview |
+| **Plugin Registry** | High | Community plugin discovery and installation |
+| **WASM Compilation** | Medium | Compile ASXR to WebAssembly for performance-critical apps |
+| **Server-Side Rendering** | Medium | Full SSR support with hydration |
+| **Dev Tools Extension** | Medium | Browser devtools panel for debugging atomic blocks |
+
+### Proposed for v0.3.0
+
+| Feature | Priority | Description |
+|---------|----------|-------------|
+| **Hot Module Replacement** | High | HMR support for ASXR files in development |
+| **Native Mobile Runtime** | Medium | React Native / Capacitor integration |
+| **Visual Block Editor** | Medium | Drag-and-drop editor for atomic blocks |
+| **AI-Assisted Generation** | Low | LLM integration for generating ASXR from descriptions |
+| **Binary AST Format** | Low | Optimized binary AST for faster parsing |
+
+### Long-Term Vision
+
+- **TC39 Proposal**: Explore standardizing atomic DOM operations in ECMAScript
+- **Browser Integration**: Work with browser vendors on native transaction support
+- **Cross-Platform**: Extend ASXR beyond web to native desktop and embedded systems
+- **Universal Runtime**: Single runtime targeting DOM, Canvas, WebGL, and terminal
+
+### Suggested Community Contributions
+
+1. **Framework Adapters** — Create plugins for popular frameworks (Svelte, Solid, Qwik)
+2. **Build Tool Plugins** — Vite, Webpack, Rollup, esbuild integrations
+3. **Linting Rules** — ESLint/Biome rules for ASXR best practices
+4. **Benchmarks** — Real-world performance comparisons with existing solutions
+5. **Tutorials** — Step-by-step guides for common use cases
+6. **Translations** — Documentation in other languages
