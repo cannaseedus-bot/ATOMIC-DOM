@@ -754,7 +754,225 @@ Event handlers MUST NOT:
 
 ---
 
-## 15. Glossary
+## 16. DOM Control via Atomic Blocks
+
+### 16.1 The Control Hierarchy
+
+The Object Server controls the DOM through a strict hierarchy:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        CONTROL HIERARCHY                                │
+│                                                                         │
+│   ┌─────────────────────────────────────────────────────────────────┐  │
+│   │                     OBJECT SERVER                                │  │
+│   │         (defines behavior via governed objects)                  │  │
+│   │                                                                  │  │
+│   │   Emits:  Atomic Blocks as projection output                    │  │
+│   └─────────────────────────┬───────────────────────────────────────┘  │
+│                             │                                           │
+│                             ▼                                           │
+│   ┌─────────────────────────────────────────────────────────────────┐  │
+│   │                     ATOMIC BLOCKS (@atomic)                      │  │
+│   │         (transactional units of DOM intent)                      │  │
+│   │                                                                  │  │
+│   │   Contains:  DOM Blocks as children                             │  │
+│   └─────────────────────────┬───────────────────────────────────────┘  │
+│                             │                                           │
+│                             ▼                                           │
+│   ┌─────────────────────────────────────────────────────────────────┐  │
+│   │                     DOM BLOCKS (@dom)                            │  │
+│   │         (individual DOM operations)                              │  │
+│   │                                                                  │  │
+│   │   Projects to:  Browser DOM elements                            │  │
+│   └─────────────────────────┬───────────────────────────────────────┘  │
+│                             │                                           │
+│                             ▼                                           │
+│   ┌─────────────────────────────────────────────────────────────────┐  │
+│   │                     BROWSER DOM (API DOM)                        │  │
+│   │         (actual document.* operations)                           │  │
+│   │                                                                  │  │
+│   │   Renders:  Visible UI                                          │  │
+│   └─────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### 16.2 Block Containment
+
+Atomic Blocks are **parents** that contain DOM Blocks as **children**:
+
+```
+@atomic [component-id] {           ← Parent: transactional boundary
+
+    @dom frame[header] {           ← Child: DOM operation
+        prop: display = "flex";
+    }
+
+    @dom text[title] {             ← Child: DOM operation
+        content: "Hello World";
+    }
+
+    @dom frame[body] {             ← Child: DOM operation
+        @dom list[items] {         ← Nested child: nested DOM
+            // ...
+        }
+    }
+}
+```
+
+The relationship is:
+
+| Level | Block Type | Contains | Projects To |
+|-------|------------|----------|-------------|
+| 1 | Object Server | Atomic Blocks | — |
+| 2 | Atomic Block (`@atomic`) | DOM Blocks | Transaction boundary |
+| 3 | DOM Block (`@dom`) | Properties, nested DOM | DOM elements |
+| 4 | Browser DOM | — | Rendered UI |
+
+### 16.3 Object Server Projection to Atomic Blocks
+
+When an Object Server projects, it can emit Atomic Blocks:
+
+```json
+{
+  "id": "object://ui/dashboard",
+  "projections": {
+    "dom": {
+      "type": "atomic-block",
+      "emit": {
+        "@atomic": {
+          "id": "dashboard",
+          "children": [
+            {
+              "@dom": {
+                "type": "frame",
+                "id": "header",
+                "props": { "display": "flex" }
+              }
+            },
+            {
+              "@dom": {
+                "type": "text",
+                "id": "title",
+                "content": "@payload.title"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+### 16.4 Why Atomic Blocks Are Not Syntax Sugar
+
+Atomic Blocks are **semantic coordinates for AI navigation**, not syntactic convenience:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│   TRADITIONAL MARKUP                    ATOMIC BLOCKS                   │
+│   ──────────────────                    ─────────────                   │
+│                                                                         │
+│   <div class="header">                  @atomic [ui-header] {           │
+│     <h1>Title</h1>                        @dom frame[header] {          │
+│   </div>                                    @dom text[title] {}         │
+│                                           }                             │
+│   ↓                                     }                               │
+│   Human-readable label                  ↓                               │
+│   No semantic coordinates               Tensor coordinate in            │
+│   AI must guess meaning                 semantic space                  │
+│                                         AI NAVIGATES to exact           │
+│                                         location                        │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+The `@atomic [ui-header]` tag is a **coordinate** in semantic space:
+- `ui` = domain dimension
+- `header` = component dimension
+
+AI doesn't parse the DOM structure—it **locates** the semantic position and activates experts at those coordinates.
+
+### 16.5 Transaction Semantics
+
+Atomic Blocks provide **transactional guarantees** that raw DOM cannot:
+
+```
+@atomic [update-dashboard] {
+    // All operations inside are batched
+    @dom frame[widget-1] { prop: opacity = "0.5"; }
+    @dom frame[widget-2] { prop: opacity = "0.5"; }
+    @dom frame[widget-3] { prop: opacity = "0.5"; }
+    @dom text[status] { content: "Updating..."; }
+}
+// Single reflow when block commits
+```
+
+| Guarantee | Raw DOM | Atomic Block |
+|-----------|---------|--------------|
+| Batched mutations | Manual | Automatic |
+| Single reflow | Not guaranteed | Guaranteed |
+| Rollback on error | Not possible | Supported |
+| AI-navigable | No | Yes (tensor coords) |
+
+### 16.6 The Complete Data Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│  1. Request arrives at Object Server                                    │
+│     GET /objects/ui/dashboard                                           │
+│                             │                                           │
+│                             ▼                                           │
+│  2. Object Server resolves + loads + verifies                          │
+│     object://ui/dashboard → descriptor + payload                       │
+│                             │                                           │
+│                             ▼                                           │
+│  3. Object Server projects to Atomic Block                             │
+│     projection: "dom" → @atomic [dashboard] { ... }                    │
+│                             │                                           │
+│                             ▼                                           │
+│  4. Atomic Block parsed by runtime                                      │
+│     @atomic [dashboard] → tensor coords (ui=0.9, dashboard=0.95)       │
+│                             │                                           │
+│                             ▼                                           │
+│  5. DOM Blocks extracted as children                                    │
+│     @dom frame[header], @dom text[title], ...                          │
+│                             │                                           │
+│                             ▼                                           │
+│  6. DOM operations batched + committed                                  │
+│     document.createElement, setAttribute, appendChild                   │
+│     (single reflow)                                                     │
+│                             │                                           │
+│                             ▼                                           │
+│  7. Browser renders UI                                                  │
+│     Visible output                                                      │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### 16.7 Block Type Reference
+
+| Block | Syntax | Purpose | Children |
+|-------|--------|---------|----------|
+| Atomic | `@atomic [id] {}` | Transaction boundary | DOM blocks, nested atomic |
+| DOM | `@dom type[id] {}` | DOM element operation | Properties, nested DOM |
+| State | `@state key = value` | State declaration | — |
+| Proposal | `@propose {}` | State change request | Key-value pairs |
+
+### 16.8 Invariants
+
+1. **Object Server MUST NOT emit raw DOM operations** — only Atomic Blocks
+2. **Atomic Blocks MUST contain DOM Blocks** — not raw HTML/JS
+3. **DOM Blocks MUST project to DOM API** — not direct mutation
+4. **Tags ARE coordinates** — not labels or syntax sugar
+
+---
+
+## 17. Glossary
 
 | Term | Definition |
 |------|------------|
@@ -765,18 +983,29 @@ Event handlers MUST NOT:
 | **Invariant** | Constraint that must hold true |
 | **Authority** | Permission level of an object |
 | **Escalation** | Explicit increase in authority |
+| **Atomic Block** | Transactional boundary containing DOM operations |
+| **DOM Block** | Individual DOM operation within an Atomic Block |
+| **Tensor Coordinate** | Semantic position in multi-dimensional space |
 
 ---
 
-## 16. References
+## 18. References
 
 - [ATOMIC_FRAMEWORK.md](./ATOMIC_FRAMEWORK.md) — Framework specification
 - [ARCHITECTURE_LAYERS.md](./ARCHITECTURE_LAYERS.md) — Cognitive foundation
 - [KUHUL_ATOMIC_EXPERTS.md](./KUHUL_ATOMIC_EXPERTS.md) — Atomic Expert system
+- [KUHUL_SEMANTIC_MAPPING.md](./KUHUL_SEMANTIC_MAPPING.md) — Semantic mapping and tensor coordinates
 
 ---
 
-## 17. Changelog
+## 19. Changelog
+
+### v1.1.0 (2025)
+
+- Added DOM Control via Atomic Blocks (Section 16)
+- Clarified Atomic Block → DOM Block hierarchy
+- Added tensor coordinate semantics
+- Updated glossary with block definitions
 
 ### v1.0.0 (2024)
 
@@ -787,4 +1016,4 @@ Event handlers MUST NOT:
 
 ---
 
-*An Object Server interprets. It does not decide.*
+*An Object Server interprets. It does not decide. It emits Atomic Blocks. The DOM obeys.*
