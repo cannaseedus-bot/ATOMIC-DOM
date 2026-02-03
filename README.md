@@ -4,6 +4,16 @@
 
 ---
 
+## Live Demo: Cloudflare Deployment
+
+<img src="https://github.com/cannaseedus-bot/ATOMIC-DOM/blob/main/screenshots/cloudflare-nexus-studio.png" alt="Nexus Studio with Phi-3 AI running on Cloudflare Pages" />
+
+> **Nexus Studio with Phi-3 AI** — Running via Cloudflare Tunnel. Build apps with AI intelligence, no coding required. Features AI Quick Start, AI Assistant, AI Code Generation, and self-optimizing AI Components.
+
+**Live URL:** Deployed via Cloudflare Pages with tunnel access through local network.
+
+---
+
 ## Core Concept: Tags as Semantic Coordinates
 
 **K'UHUL tags are NOT syntax sugar.** They are **tensor coordinates** in semantic space—a navigable map for AI inference.
