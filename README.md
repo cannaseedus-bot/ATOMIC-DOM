@@ -109,6 +109,7 @@ Browser DOM — actual document.* rendering
 | **Atomic Expert Training** | :white_check_mark: Complete | `training/` |
 | **Atomic Framework Spec** | :white_check_mark: Complete | `ATOMIC_FRAMEWORK.md` |
 | **Object Server Spec** | :white_check_mark: Complete | `OBJECT_SERVER_SPEC.md` |
+| **Object Database Spec** | :white_check_mark: Complete | `OBJECT_DATABASE_SPEC.md` |
 | **Architecture Layers** | :white_check_mark: Complete | `ARCHITECTURE_LAYERS.md` |
 | **Atomic Blocks Grammar** | :white_check_mark: Complete | `ATOMIC_BLOCKS_GRAMMAR.ebnf` |
 | **π-Geometric Calculus** | :white_check_mark: Complete | `src/kuhul/pi-geometric.ts` |
