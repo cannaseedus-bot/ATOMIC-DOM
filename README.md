@@ -8,6 +8,8 @@
 
 **K'UHUL tags are NOT syntax sugar.** They are **tensor coordinates** in semantic space—a navigable map for AI inference.
 
+> **Deep Dive:** See [`KUHUL_SEMANTIC_MAPPING.md`](./KUHUL_SEMANTIC_MAPPING.md) for complete visual explanations, code examples, and the full theory behind tensor mapping, encryption mapping, and matrix inference.
+
 ```
 Traditional markup:  <div class="math">x² + y²</div>     ← Human label
 K'UHUL mapping:      @atomic [math-geometry-circle] {}   ← AI coordinate
@@ -87,6 +89,7 @@ This is why π-Geometric Calculus is the foundation: **all inference is navigati
 | **Atomic Blocks Grammar** | :white_check_mark: Complete | `ATOMIC_BLOCKS_GRAMMAR.ebnf` |
 | **π-Geometric Calculus** | :white_check_mark: Complete | `src/kuhul/pi-geometric.ts` |
 | **Unified Inference API** | :white_check_mark: Complete | `src/kuhul/api-server.ts` |
+| **Semantic Mapping Guide** | :white_check_mark: Complete | `KUHUL_SEMANTIC_MAPPING.md` |
 
 ---
 
