@@ -124,6 +124,9 @@ Browser DOM — actual document.* rendering
 | **Unified Inference API** | :white_check_mark: Complete | `src/kuhul/api-server.ts` |
 | **Semantic Mapping Guide** | :white_check_mark: Complete | `KUHUL_SEMANTIC_MAPPING.md` |
 | **Bootstrap Runtime** | :white_check_mark: Complete | `src/bootstrap/atomic-bootstrap.js` |
+| **AGL Server Runtime** | :white_check_mark: Complete | `AGL_SERVER_RUNTIME_SPEC.md` |
+| **MX2LM Agent Foreman** | :white_check_mark: Complete | `tools/mx2lm.py` |
+| **KUHUL π Grammar** | :lock: FROZEN | `KUHUL_PI_GRAMMAR.md` |
 
 ---
 
@@ -173,6 +176,7 @@ Browser DOM — actual document.* rendering
 - [x] **Atomic Blocks Grammar** — 4 indivisible structural units + Micronauts (`ATOMIC_BLOCKS_GRAMMAR.ebnf`)
 - [x] **π-Geometric Calculus** — Tensor algebra with π-modulation, matrix inference engine (`src/kuhul/pi-geometric.ts`)
 - [x] **Unified Inference API** — Single entry point for text/glyph/hybrid inference (`src/kuhul/api-server.ts`)
+- [x] **KUHUL π Grammar** — Canonical enforcement grammar v1.1, frozen (`KUHUL_PI_GRAMMAR.md`)
 - [ ] Community plugin registry
 
 ---
