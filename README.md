@@ -125,6 +125,7 @@ Browser DOM — actual document.* rendering
 | **Semantic Mapping Guide** | :white_check_mark: Complete | `KUHUL_SEMANTIC_MAPPING.md` |
 | **Bootstrap Runtime** | :white_check_mark: Complete | `src/bootstrap/atomic-bootstrap.js` |
 | **AGL Server Runtime** | :white_check_mark: Complete | `AGL_SERVER_RUNTIME_SPEC.md` |
+| **MX2LM Agent Foreman** | :white_check_mark: Complete | `tools/mx2lm.py` |
 
 ---
 
