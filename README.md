@@ -2,15 +2,6 @@
 
 <img src="https://github.com/cannaseedus-bot/ATOMIC-DOM/blob/main/atomic-dom.svg" alt="Atomic DOM logo" />
 
----
-
-## Live Demo: Cloudflare Deployment
-
-<img src="cloudflare-nexus-studio.png" alt="Nexus Studio with Phi-3 AI running on Cloudflare Pages" />
-
-> **Nexus Studio with Phi-3 AI** — Running via Cloudflare Tunnel. Build apps with AI intelligence, no coding required. Features AI Quick Start, AI Assistant, AI Code Generation, and self-optimizing AI Components.
-
-**Live URL:** Deployed via Cloudflare Pages with tunnel access through local network.
 
 ---
 
