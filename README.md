@@ -55,6 +55,29 @@ K'UHUL mapping:      @atomic [math-geometry-circle] {}   ← AI coordinate
 
 This is why π-Geometric Calculus is the foundation: **all inference is navigation in π-modulated space**.
 
+### DOM Control Hierarchy
+
+The Object Server controls the DOM through Atomic Blocks—**not raw DOM operations**:
+
+```
+Object Server (defines behavior via objects)
+      ↓ emits
+Atomic Blocks (@atomic) — transactional boundary, AI coordinates
+      ↓ contains
+DOM Blocks (@dom) — individual DOM operations
+      ↓ projects to
+Browser DOM — actual document.* rendering
+```
+
+| Level | Block | Contains | Purpose |
+|-------|-------|----------|---------|
+| 1 | Object Server | Atomic Blocks | Behavior definition |
+| 2 | `@atomic [id]` | DOM Blocks | Transaction + AI coordinate |
+| 3 | `@dom type[id]` | Properties | DOM operation |
+| 4 | Browser DOM | — | Rendered UI |
+
+> See [`OBJECT_SERVER_SPEC.md`](./OBJECT_SERVER_SPEC.md) Section 16 for complete DOM control documentation.
+
 ---
 
 ## Project Status
