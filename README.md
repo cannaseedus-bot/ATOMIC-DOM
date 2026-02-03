@@ -123,6 +123,7 @@ Browser DOM — actual document.* rendering
 | **π-Geometric Calculus** | :white_check_mark: Complete | `src/kuhul/pi-geometric.ts` |
 | **Unified Inference API** | :white_check_mark: Complete | `src/kuhul/api-server.ts` |
 | **Semantic Mapping Guide** | :white_check_mark: Complete | `KUHUL_SEMANTIC_MAPPING.md` |
+| **Bootstrap Runtime** | :white_check_mark: Complete | `src/bootstrap/atomic-bootstrap.js` |
 
 ---
 
