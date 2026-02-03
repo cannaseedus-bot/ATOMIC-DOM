@@ -22,6 +22,7 @@
 | **Language Server (LSP)** | :white_check_mark: Complete | `src/lsp/` |
 | **VS Code Extension** | :white_check_mark: Complete | `editors/vscode/` |
 | **TypeScript Integration** | :white_check_mark: Complete | `src/typescript/` |
+| **Hybrid Wormhole Architecture** | :white_check_mark: Designed | `HYBRID_WORMHOLE_ARCHITECTURE.md` |
 
 ---
 
