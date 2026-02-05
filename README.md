@@ -118,6 +118,7 @@ Browser DOM — actual document.* rendering
 | **Bootstrap Runtime** | :white_check_mark: Complete | `src/bootstrap/atomic-bootstrap.js` |
 | **AGL Server Runtime** | :white_check_mark: Complete | `AGL_SERVER_RUNTIME_SPEC.md` |
 | **MX2LM Agent Foreman** | :white_check_mark: Complete | `tools/mx2lm.py` |
+| **MATRIX Binary Packer** | :white_check_mark: Complete | `tools/binary_pack.py` |
 | **KUHUL π Grammar** | :lock: FROZEN | `KUHUL_PI_GRAMMAR.md` |
 
 ---
