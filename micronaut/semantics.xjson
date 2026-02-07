@@ -1,0 +1,22 @@
+{
+  "$schema": "kuhul://schema/tsg.v1",
+  "id": "kuhul-tsg:micronaut",
+  "version": "1.0.0",
+  "mode": "sealed",
+  "description": "KUHUL-TSG semantic schema for Micronaut SCO/1 object.",
+  "channels": {
+    "chat": {
+      "source": "io/chat.txt",
+      "record": "message"
+    },
+    "stream": {
+      "source": "io/stream.txt",
+      "record": "semantic_emission"
+    }
+  },
+  "constraints": {
+    "append_only": true,
+    "cm1_payload": true,
+    "no_runtime_mutation": true
+  }
+}

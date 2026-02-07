@@ -81,6 +81,35 @@ Browser DOM — actual document.* rendering
 
 ---
 
+## Micronaut Object Server (SCO/1)
+
+Micronaut is now a **sealed SCO/1 object** orchestrated by a **PowerShell file router**. There is **no JavaScript runtime** and no host-side inference logic. Micronaut only speaks through append-only files and sealed data.
+
+```
+micronaut/
+├─ micronaut.s7
+├─ object.toml
+├─ semantics.xjson
+├─ brains/
+├─ io/
+│  ├─ chat.txt
+│  ├─ stream.txt
+│  └─ snapshot/
+├─ trace/
+└─ proof/
+```
+
+**File protocol**
+- `io/chat.txt` is the canonical append-only input log.
+- `io/stream.txt` is the canonical append-only semantic emission log.
+
+**Orchestrator**
+- `micronaut/micronaut.ps1` exposes a loopback file router and never executes inference logic directly.
+
+See the `micronaut/` directory for the authoritative object layout and orchestrator reference.
+
+---
+
 ## Project Status
 
 | Component | Status | Document |
