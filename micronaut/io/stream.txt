@@ -1,0 +1,2 @@
+>> t=0 ctx=@init mass=1.0
+Micronaut stream initialized.

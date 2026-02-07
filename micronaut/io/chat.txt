@@ -1,0 +1,9 @@
+--- MESSAGE ---
+id: 00000000-0000-0000-0000-000000000000
+time: 0
+role: system
+intent: chat
+context: default
+payload:
+Micronaut IO channel initialized.
+--- END ---

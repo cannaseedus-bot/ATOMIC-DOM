@@ -1,0 +1,29 @@
+id = "object://micronaut/sco1"
+name = "micronaut"
+version = "1.0.0"
+standard = "SCO/1"
+
+[authority]
+mode = "projection_only"
+executable = true
+host = "powershell"
+
+[paths]
+root = "."
+semantics = "./semantics.xjson"
+executable = "./micronaut.s7"
+brains = "./brains"
+
+[io]
+chat = "./io/chat.txt"
+stream = "./io/stream.txt"
+snapshot_dir = "./io/snapshot"
+
+[trace]
+trace = "./trace/scxq2.trace"
+proof = "./proof/scxq2.proof"
+
+[invariants]
+append_only = ["io/chat.txt", "io/stream.txt"]
+no_host_logic = true
+sealed_brains = true
