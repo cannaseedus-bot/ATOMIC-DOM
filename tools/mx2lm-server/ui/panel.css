@@ -1,0 +1,318 @@
+/**
+ * MX2LM CSS Micronaut UI Panel
+ *
+ * Projection-only styling driven by CSS custom properties.
+ * No JS logic - CSS does all the work.
+ *
+ * Micronaut Targets:
+ *   --mx2lm-health:  0..1  Health indicator
+ *   --mx2lm-uptime:  int   Seconds since start
+ *   --mx2lm-traffic: 0..1  Normalized request rate
+ *   --mx2lm-glow:    0..1  Activity glow intensity
+ */
+
+:root {
+  /* Micronaut Target Variables */
+  --mx2lm-health: 1;
+  --mx2lm-uptime: 0;
+  --mx2lm-traffic: 0;
+  --mx2lm-glow: 0;
+
+  /* Theme Colors */
+  --mx2lm-bg-primary: #0b1020;
+  --mx2lm-bg-secondary: #0f172a;
+  --mx2lm-text-primary: #e2e8f0;
+  --mx2lm-text-secondary: #94a3b8;
+  --mx2lm-accent: #38bdf8;
+  --mx2lm-success: #22c55e;
+  --mx2lm-warning: #eab308;
+  --mx2lm-error: #ef4444;
+  --mx2lm-border: #334155;
+}
+
+/* ========================================
+   Main Panel Container
+   ======================================== */
+
+.mx2lm-panel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 280px;
+  padding: 16px;
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--mx2lm-bg-primary), var(--mx2lm-bg-secondary) 60%);
+  border: 1px solid var(--mx2lm-border);
+  font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 13px;
+  color: var(--mx2lm-text-primary);
+
+  /* Glow effect driven by --mx2lm-glow */
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 0 calc(20px * var(--mx2lm-glow)) rgba(56, 189, 248, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  /* Opacity driven by health */
+  opacity: calc(0.6 + 0.4 * var(--mx2lm-health));
+
+  transition:
+    box-shadow 0.3s ease,
+    opacity 0.3s ease,
+    transform 0.2s ease;
+
+  z-index: 9999;
+}
+
+.mx2lm-panel:hover {
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   Panel Header
+   ======================================== */
+
+.mx2lm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--mx2lm-border);
+}
+
+.mx2lm-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.mx2lm-logo {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, var(--mx2lm-accent), #818cf8);
+}
+
+.mx2lm-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+
+  /* Color driven by health threshold */
+  background: var(--mx2lm-success);
+
+  /* Pulse animation when healthy */
+  animation: mx2lm-pulse 2s ease-in-out infinite;
+}
+
+@keyframes mx2lm-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* ========================================
+   Health Indicator Bar
+   ======================================== */
+
+.mx2lm-health-bar {
+  margin-bottom: 12px;
+}
+
+.mx2lm-health-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: var(--mx2lm-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mx2lm-health-track {
+  height: 6px;
+  border-radius: 6px;
+  background: var(--mx2lm-border);
+  overflow: hidden;
+}
+
+.mx2lm-health-fill {
+  height: 100%;
+  border-radius: 6px;
+
+  /* Width driven by --mx2lm-health */
+  width: calc(100% * var(--mx2lm-health));
+
+  /* Color gradient based on health level */
+  background: linear-gradient(
+    90deg,
+    var(--mx2lm-success) 0%,
+    var(--mx2lm-success) 60%,
+    var(--mx2lm-warning) 80%,
+    var(--mx2lm-error) 100%
+  );
+  background-size: 200% 100%;
+  background-position: calc((1 - var(--mx2lm-health)) * 100%) 0;
+
+  transition: width 0.5s ease, background-position 0.5s ease;
+}
+
+/* ========================================
+   Stats Grid
+   ======================================== */
+
+.mx2lm-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mx2lm-stat {
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mx2lm-stat-label {
+  font-size: 10px;
+  color: var(--mx2lm-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.mx2lm-stat-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--mx2lm-accent);
+}
+
+/* ========================================
+   Traffic Indicator
+   ======================================== */
+
+.mx2lm-traffic {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mx2lm-traffic-label {
+  font-size: 11px;
+  color: var(--mx2lm-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mx2lm-traffic-dots {
+  display: flex;
+  gap: 3px;
+  flex: 1;
+}
+
+.mx2lm-traffic-dot {
+  width: 4px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--mx2lm-border);
+  transition: background 0.2s ease;
+}
+
+/* Animate dots based on traffic level */
+.mx2lm-traffic-dot:nth-child(1) {
+  background: color-mix(
+    in srgb,
+    var(--mx2lm-accent) calc(var(--mx2lm-traffic) * 500%),
+    var(--mx2lm-border)
+  );
+}
+.mx2lm-traffic-dot:nth-child(2) {
+  background: color-mix(
+    in srgb,
+    var(--mx2lm-accent) calc((var(--mx2lm-traffic) - 0.2) * 500%),
+    var(--mx2lm-border)
+  );
+}
+.mx2lm-traffic-dot:nth-child(3) {
+  background: color-mix(
+    in srgb,
+    var(--mx2lm-accent) calc((var(--mx2lm-traffic) - 0.4) * 500%),
+    var(--mx2lm-border)
+  );
+}
+.mx2lm-traffic-dot:nth-child(4) {
+  background: color-mix(
+    in srgb,
+    var(--mx2lm-accent) calc((var(--mx2lm-traffic) - 0.6) * 500%),
+    var(--mx2lm-border)
+  );
+}
+.mx2lm-traffic-dot:nth-child(5) {
+  background: color-mix(
+    in srgb,
+    var(--mx2lm-accent) calc((var(--mx2lm-traffic) - 0.8) * 500%),
+    var(--mx2lm-border)
+  );
+}
+
+/* ========================================
+   Collapsed State
+   ======================================== */
+
+.mx2lm-panel.collapsed {
+  width: auto;
+  padding: 8px 12px;
+}
+
+.mx2lm-panel.collapsed .mx2lm-header {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.mx2lm-panel.collapsed .mx2lm-health-bar,
+.mx2lm-panel.collapsed .mx2lm-stats,
+.mx2lm-panel.collapsed .mx2lm-traffic {
+  display: none;
+}
+
+/* ========================================
+   Dark Mode Overrides
+   ======================================== */
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --mx2lm-bg-primary: #f8fafc;
+    --mx2lm-bg-secondary: #e2e8f0;
+    --mx2lm-text-primary: #1e293b;
+    --mx2lm-text-secondary: #64748b;
+    --mx2lm-border: #cbd5e1;
+  }
+
+  .mx2lm-panel {
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.1),
+      0 0 calc(20px * var(--mx2lm-glow)) rgba(56, 189, 248, 0.25);
+  }
+}
+
+/* ========================================
+   Responsive
+   ======================================== */
+
+@media (max-width: 400px) {
+  .mx2lm-panel {
+    left: 10px;
+    right: 10px;
+    width: auto;
+    bottom: 10px;
+  }
+}

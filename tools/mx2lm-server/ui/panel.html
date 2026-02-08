@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MX2LM Server Panel</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+
+  <!-- MX2LM Status Panel -->
+  <div class="mx2lm-panel">
+    <!-- Header -->
+    <div class="mx2lm-header">
+      <div class="mx2lm-title">
+        <div class="mx2lm-logo"></div>
+        <span>MX2LM Server</span>
+      </div>
+      <div class="mx2lm-status-dot"></div>
+    </div>
+
+    <!-- Health Bar -->
+    <div class="mx2lm-health-bar">
+      <div class="mx2lm-health-label">
+        <span>Health</span>
+        <span id="health-value">100%</span>
+      </div>
+      <div class="mx2lm-health-track">
+        <div class="mx2lm-health-fill"></div>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="mx2lm-stats">
+      <div class="mx2lm-stat">
+        <div class="mx2lm-stat-label">Uptime</div>
+        <div class="mx2lm-stat-value" id="uptime-value">0s</div>
+      </div>
+      <div class="mx2lm-stat">
+        <div class="mx2lm-stat-label">Requests</div>
+        <div class="mx2lm-stat-value" id="requests-value">0</div>
+      </div>
+    </div>
+
+    <!-- Traffic Indicator -->
+    <div class="mx2lm-traffic">
+      <span class="mx2lm-traffic-label">Traffic</span>
+      <div class="mx2lm-traffic-dots">
+        <div class="mx2lm-traffic-dot"></div>
+        <div class="mx2lm-traffic-dot"></div>
+        <div class="mx2lm-traffic-dot"></div>
+        <div class="mx2lm-traffic-dot"></div>
+        <div class="mx2lm-traffic-dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WebSocket Binding -->
+  <script src="ws-bind.js"></script>
+
+  <!-- Update text values from WS data -->
+  <script>
+    (function() {
+      const ws = new WebSocket('ws://127.0.0.1:4141/ws/status');
+
+      ws.onmessage = function(event) {
+        try {
+          const data = JSON.parse(event.data);
+
+          // Update health percentage
+          const healthEl = document.getElementById('health-value');
+          if (healthEl) {
+            healthEl.textContent = data.healthy ? '100%' : '20%';
+          }
+
+          // Update uptime
+          const uptimeEl = document.getElementById('uptime-value');
+          if (uptimeEl) {
+            uptimeEl.textContent = formatUptime(data.uptime || 0);
+          }
+
+          // Update requests
+          const requestsEl = document.getElementById('requests-value');
+          if (requestsEl) {
+            requestsEl.textContent = formatNumber(data.requests || 0);
+          }
+        } catch (e) {
+          console.warn('Failed to parse WS message:', e);
+        }
+      };
+
+      ws.onerror = function() {
+        console.log('Server not running - start with: node server.khl');
+      };
+
+      function formatUptime(seconds) {
+        if (seconds < 60) return seconds + 's';
+        if (seconds < 3600) return Math.floor(seconds / 60) + 'm';
+        return Math.floor(seconds / 3600) + 'h';
+      }
+
+      function formatNumber(n) {
+        if (n < 1000) return n.toString();
+        return (n / 1000).toFixed(1) + 'k';
+      }
+    })();
+  </script>
+
+  <!-- Demo content -->
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      font-family: system-ui, sans-serif;
+      color: #e2e8f0;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+    }
+
+    p {
+      color: #94a3b8;
+      max-width: 600px;
+      line-height: 1.6;
+    }
+
+    code {
+      background: rgba(255,255,255,0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'SF Mono', monospace;
+    }
+  </style>
+
+  <h1>MX2LM Server Panel Demo</h1>
+  <p>
+    This page demonstrates the MX2LM CSS Micronaut UI Panel.
+    The panel in the bottom-right corner updates automatically
+    via WebSocket when the server is running.
+  </p>
+  <p>
+    Start the server with: <code>node server.khl</code>
+  </p>
+  <p>
+    The panel's appearance is driven entirely by CSS custom properties:
+  </p>
+  <ul>
+    <li><code>--mx2lm-health</code> - Controls opacity and health bar fill</li>
+    <li><code>--mx2lm-uptime</code> - Seconds since server start</li>
+    <li><code>--mx2lm-traffic</code> - Normalized request rate (0-1)</li>
+    <li><code>--mx2lm-glow</code> - Activity glow intensity</li>
+  </ul>
+
+</body>
+</html>

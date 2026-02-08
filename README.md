@@ -127,6 +127,12 @@ Browser DOM — actual document.* rendering
 | **AGL Server Runtime** | :white_check_mark: Complete | `AGL_SERVER_RUNTIME_SPEC.md` |
 | **MX2LM Agent Foreman** | :white_check_mark: Complete | `tools/mx2lm.py` |
 | **KUHUL π Grammar** | :lock: FROZEN | `KUHUL_PI_GRAMMAR.md` |
+| **System Topology** | :lock: FROZEN | `KUHUL_SYSTEM_TOPOLOGY.md` |
+| **Atomic Blocks Spec** | :lock: FROZEN | `ATOMIC_BLOCKS_SPEC.md` |
+| **Template Grammar** | :lock: FROZEN | `ATOMIC_BLOCKS_MICRONAUTS.ebnf` |
+| **CM-1 Control Spec** | :lock: FROZEN | `CONTROL_MICRONAUT_1_SPEC.md` |
+| **MX2LM Server Runtime** | :white_check_mark: Complete | `MX2LM_SERVER_RUNTIME_SPEC.md` |
+| **MX2LM Server CLI** | :white_check_mark: Complete | `tools/mx2lm-server/` |
 
 ---
 
@@ -177,6 +183,12 @@ Browser DOM — actual document.* rendering
 - [x] **π-Geometric Calculus** — Tensor algebra with π-modulation, matrix inference engine (`src/kuhul/pi-geometric.ts`)
 - [x] **Unified Inference API** — Single entry point for text/glyph/hybrid inference (`src/kuhul/api-server.ts`)
 - [x] **KUHUL π Grammar** — Canonical enforcement grammar v1.1, frozen (`KUHUL_PI_GRAMMAR.md`)
+- [x] **System Topology** — Cartography spec for component coexistence (`KUHUL_SYSTEM_TOPOLOGY.md`)
+- [x] **Atomic Blocks Spec** — Quantum state machines documentation (`ATOMIC_BLOCKS_SPEC.md`)
+- [x] **Template Grammar** — 4-block templates + micronauts EBNF (`ATOMIC_BLOCKS_MICRONAUTS.ebnf`)
+- [x] **CM-1 Control Spec** — Invisible control alphabet for pre-semantic phase (`CONTROL_MICRONAUT_1_SPEC.md`)
+- [x] **MX2LM Server Runtime** — KUHUL-governed local server loop (`MX2LM_SERVER_RUNTIME_SPEC.md`)
+- [x] **MX2LM Server CLI** — π-decay lifecycle management (`tools/mx2lm-server/`)
 - [ ] Community plugin registry
 
 ---

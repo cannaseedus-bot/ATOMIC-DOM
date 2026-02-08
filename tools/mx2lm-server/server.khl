@@ -1,0 +1,196 @@
+/**
+ * MX2LM Server Runtime - Reference Implementation (MX2LM-SR-1)
+ *
+ * Role: A pure runtime loop.
+ * - No spawning
+ * - No policy
+ * - No authority
+ *
+ * Invariants enforced:
+ * - localhost only
+ * - read-only
+ * - single loop
+ * - observable health
+ * - zero side effects outside serving
+ */
+
+// ⟁runtime⟁ mx2lm.server.v1
+
+const http = require('http');
+const { WebSocketServer } = require('ws');
+
+// Server configuration
+const CONFIG = {
+  host: '127.0.0.1',
+  port: 4141,
+  protocol: 'http+ws',
+  mode: 'static+status+ws'
+};
+
+// Server state
+const state = {
+  uptime: 0,
+  requests: 0,
+  healthy: true,
+  last_tick_ms: Date.now(),
+  started_at: Date.now()
+};
+
+// WebSocket clients
+const wsClients = new Set();
+
+/**
+ * Create snapshot of current state
+ */
+function snapshot() {
+  return {
+    ts: Date.now(),
+    uptime: state.uptime,
+    requests: state.requests,
+    healthy: state.healthy,
+    last_tick_ms: state.last_tick_ms
+  };
+}
+
+/**
+ * Broadcast snapshot to all WebSocket clients
+ */
+function broadcast() {
+  const data = JSON.stringify(snapshot());
+  for (const client of wsClients) {
+    if (client.readyState === 1) { // OPEN
+      client.send(data);
+    }
+  }
+}
+
+/**
+ * HTTP request handler
+ */
+function handleRequest(req, res) {
+  state.requests++;
+
+  // Set CORS headers for localhost
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:*');
+  res.setHeader('Content-Type', 'application/json');
+
+  const url = new URL(req.url, `http://${CONFIG.host}:${CONFIG.port}`);
+
+  // ⟁endpoint⟁ GET "/"
+  if (url.pathname === '/' && req.method === 'GET') {
+    res.writeHead(200);
+    res.end(JSON.stringify({
+      service: 'MX2LM Server Runtime',
+      version: '1.0.0',
+      ws: '/ws/status',
+      status: 'ok',
+      endpoints: ['/', '/status', '/health']
+    }));
+    return;
+  }
+
+  // ⟁endpoint⟁ GET "/status"
+  if (url.pathname === '/status' && req.method === 'GET') {
+    res.writeHead(200);
+    res.end(JSON.stringify({
+      uptime: state.uptime,
+      requests: state.requests,
+      healthy: state.healthy,
+      started_at: state.started_at,
+      ws_clients: wsClients.size
+    }));
+    return;
+  }
+
+  // ⟁endpoint⟁ GET "/health"
+  if (url.pathname === '/health' && req.method === 'GET') {
+    res.writeHead(state.healthy ? 200 : 503);
+    res.end(JSON.stringify({
+      healthy: state.healthy
+    }));
+    return;
+  }
+
+  // 404 for unknown endpoints
+  res.writeHead(404);
+  res.end(JSON.stringify({
+    error: 'Not Found',
+    path: url.pathname
+  }));
+}
+
+/**
+ * Create HTTP server
+ */
+const server = http.createServer(handleRequest);
+
+/**
+ * Create WebSocket server
+ * ⟁ws⟁ "/ws/status"
+ */
+const wss = new WebSocketServer({ server, path: '/ws/status' });
+
+wss.on('connection', (ws) => {
+  wsClients.add(ws);
+
+  // Send initial snapshot on connect
+  ws.send(JSON.stringify(snapshot()));
+
+  ws.on('close', () => {
+    wsClients.delete(ws);
+  });
+
+  // Server is send-only; ignore client messages
+  ws.on('message', () => {
+    // No-op: clients cannot send messages
+  });
+});
+
+/**
+ * Tick loop - updates state every second
+ * ⟁loop⟁ tick
+ */
+function tick() {
+  state.uptime += 1;
+  state.last_tick_ms = Date.now();
+
+  // Broadcast to all WebSocket clients
+  broadcast();
+}
+
+// Start tick interval
+const tickInterval = setInterval(tick, 1000);
+
+/**
+ * Graceful shutdown
+ */
+function shutdown() {
+  console.log('\n[MX2LM] Shutting down...');
+
+  clearInterval(tickInterval);
+
+  // Close all WebSocket connections
+  for (const client of wsClients) {
+    client.close(1000, 'Server shutting down');
+  }
+
+  server.close(() => {
+    console.log('[MX2LM] Server stopped.');
+    process.exit(0);
+  });
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+
+/**
+ * Start server
+ * Sek boot -> bind -> serve -> tick
+ */
+server.listen(CONFIG.port, CONFIG.host, () => {
+  console.log(`[MX2LM] Server Runtime v1.0.0`);
+  console.log(`[MX2LM] Listening on http://${CONFIG.host}:${CONFIG.port}`);
+  console.log(`[MX2LM] WebSocket on ws://${CONFIG.host}:${CONFIG.port}/ws/status`);
+  console.log(`[MX2LM] Endpoints: /, /status, /health`);
+  console.log(`[MX2LM] Press Ctrl+C to stop.`);
+});

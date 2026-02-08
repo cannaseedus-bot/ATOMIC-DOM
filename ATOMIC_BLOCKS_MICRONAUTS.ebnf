@@ -1,0 +1,237 @@
+(* =========================================================
+   ATOMIC TEMPLATE GRAMMAR
+   Version: 1.0.0
+   Status: FROZEN
+   Projection-only - Non-authoritative
+   ========================================================= *)
+
+Template
+  ::= AtomicBlockSet ;
+
+(* ---------------------------------------------------------
+   1. ATOMIC BLOCK SET (INDIVISIBLE)
+   --------------------------------------------------------- *)
+
+AtomicBlockSet
+  ::= HeaderBlock
+      BodyBlock
+      SidebarsBlock
+      FooterBlock ;
+
+(* Order is canonical.
+   All four MUST exist.
+   Partial templates are illegal. *)
+
+(* ---------------------------------------------------------
+   2. ATOMIC BLOCK DEFINITIONS (STRUCTURE)
+   --------------------------------------------------------- *)
+
+HeaderBlock
+  ::= "<header>" BlockContent "</header>" ;
+
+BodyBlock
+  ::= "<body>" BlockContent "</body>" ;
+
+SidebarsBlock
+  ::= "<sidebars>" BlockContent "</sidebars>" ;
+
+FooterBlock
+  ::= "<footer>" BlockContent "</footer>" ;
+
+(* Blocks define STRUCTURE ONLY.
+   No behavior, no execution. *)
+
+(* ---------------------------------------------------------
+   3. BLOCK CONTENT
+   --------------------------------------------------------- *)
+
+BlockContent
+  ::= (StructuralNode | TextNode | Slot)* ;
+
+StructuralNode
+  ::= "<section>" BlockContent "</section>"
+    | "<article>" BlockContent "</article>"
+    | "<nav>" BlockContent "</nav>"
+    | "<div>" BlockContent "</div>" ;
+
+TextNode
+  ::= TEXT ;
+
+Slot
+  ::= "{{" SlotName "}}" ;
+
+SlotName
+  ::= IDENTIFIER ;
+
+(* Slots are placeholders.
+   They do not execute logic. *)
+
+(* ---------------------------------------------------------
+   4. MICRONAUT ATTACHMENT (NON-STRUCTURAL)
+   --------------------------------------------------------- *)
+
+MicronautLayer
+  ::= Micronaut* ;
+
+Micronaut
+  ::= "@micronaut" MicronautName
+      "(" MicronautTarget ")"
+      "{" MicronautRules "}" ;
+
+MicronautName
+  ::= IDENTIFIER ;
+
+MicronautTarget
+  ::= "header"
+    | "body"
+    | "sidebars"
+    | "footer"
+    | BlockSelector ;
+
+BlockSelector
+  ::= "." IDENTIFIER
+    | "#" IDENTIFIER ;
+
+(* Micronauts MAY target blocks or subnodes,
+   but MUST NOT redefine structure. *)
+
+(* ---------------------------------------------------------
+   5. MICRONAUT RULES (PERCEPTION ONLY)
+   --------------------------------------------------------- *)
+
+MicronautRules
+  ::= MicronautRule* ;
+
+MicronautRule
+  ::= LayoutRule
+    | ThemeRule
+    | MotionRule
+    | DensityRule
+    | VisibilityRule ;
+
+LayoutRule
+  ::= "layout" ":" LayoutType ";" ;
+
+LayoutType
+  ::= "grid"
+    | "flex"
+    | "stack"
+    | "flow" ;
+
+ThemeRule
+  ::= "theme" ":" ThemeType ";" ;
+
+ThemeType
+  ::= "light"
+    | "dark"
+    | "auto"
+    | IDENTIFIER ;
+
+MotionRule
+  ::= "motion" ":" MotionType ";" ;
+
+MotionType
+  ::= "none"
+    | "subtle"
+    | "expressive" ;
+
+DensityRule
+  ::= "density" ":" DensityType ";" ;
+
+DensityType
+  ::= "compact"
+    | "normal"
+    | "spacious" ;
+
+VisibilityRule
+  ::= "visibility" ":" VisibilityType ";" ;
+
+VisibilityType
+  ::= "show"
+    | "hide"
+    | "collapse" ;
+
+(* ---------------------------------------------------------
+   6. TERMINAL DEFINITIONS
+   --------------------------------------------------------- *)
+
+TEXT
+  ::= [^<>{}]+ ;
+
+IDENTIFIER
+  ::= [a-zA-Z_][a-zA-Z0-9_-]* ;
+
+(* ---------------------------------------------------------
+   7. HARD INVARIANTS (GRAMMAR-ENFORCED)
+   --------------------------------------------------------- *)
+
+(*  - Micronauts CANNOT:
+        * add or remove blocks
+        * change block order
+        * inject nodes
+        * create slots
+        * affect atomicity
+
+    - Atomic blocks CANNOT:
+        * be omitted
+        * be reordered
+        * be partially delivered
+
+    - Templates are valid IFF:
+        * all four blocks exist
+        * micronauts are optional
+*)
+
+(* ---------------------------------------------------------
+   8. EXAMPLE USAGE
+   --------------------------------------------------------- *)
+
+(*
+<header>
+  <nav>{{navigation}}</nav>
+</header>
+
+<body>
+  <article>{{content}}</article>
+</body>
+
+<sidebars>
+  <section>{{sidebar_left}}</section>
+  <section>{{sidebar_right}}</section>
+</sidebars>
+
+<footer>
+  {{copyright}}
+</footer>
+
+@micronaut layout(body) {
+  layout: grid;
+  density: normal;
+}
+
+@micronaut theme(header) {
+  theme: dark;
+  motion: subtle;
+}
+*)
+
+(* ---------------------------------------------------------
+   9. INVARIANT GUARANTEES
+   --------------------------------------------------------- *)
+
+(* This grammar guarantees by construction:
+
+   1. A template CANNOT exist without all 4 blocks
+   2. A Micronaut CANNOT touch structure
+   3. Styling, layout, motion are pure perception
+   4. Atomic delivery is implicit (grammar has no partial form)
+   5. No runtime checks needed - invalid forms cannot be expressed
+
+*)
+
+(* ---------------------------------------------------------
+   10. FINAL STATEMENT
+   --------------------------------------------------------- *)
+
+(* Structure is finite and atomic;
+   Perception is infinite and optional. *)
