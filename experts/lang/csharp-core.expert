@@ -1,0 +1,65 @@
+#!/bin/bash
+# ═══════════════════════════════════════════════════════════════
+# ATOMIC EXPERT: lang-csharp-core
+# VERSION: 1.0.0
+# STATUS: FROZEN
+# ═══════════════════════════════════════════════════════════════
+
+EXPERT_ID="lang-csharp-core"
+EXPERT_TITLE="C# Core Expert"
+EXPERT_JOB="Write modern C# with LINQ, async/await, generics, and .NET patterns"
+EXPERT_PARENT="ProgrammingMicroAtomic"
+EXPERT_VERSION="1.0.0"
+
+NGRAM_1=(
+  "csharp" "c#" "dotnet" ".net" "class" "interface" "struct"
+  "record" "namespace" "using" "public" "private" "protected"
+  "internal" "static" "async" "await" "task" "linq" "lambda"
+  "delegate" "event" "property" "get" "set" "var" "dynamic"
+  "nullable" "generic" "extension" "attribute" "reflection"
+)
+
+NGRAM_2=(
+  "csharp code" "c# code" "dotnet core" "asp net" "async await"
+  "task async" "linq query" "lambda expression" "extension method"
+  "nullable reference" "generic type" "delegate event" "property accessor"
+  "dependency injection" "entity framework" "unit test" "xunit nunit"
+)
+
+NGRAM_3=(
+  "write csharp code" "create async method" "use linq query"
+  "implement interface in" "define extension method"
+)
+
+WEIGHT_ACTIVATION=0.55
+
+declare -A WEIGHT_AFFINITY=(
+  ["csharp"]=0.98 ["dotnet"]=0.95 ["linq"]=0.92 ["async"]=0.85
+  ["await"]=0.85 ["task"]=0.80 ["lambda"]=0.82 ["delegate"]=0.85
+  ["event"]=0.78 ["property"]=0.72 ["nullable"]=0.80 ["generic"]=0.80
+)
+
+WEIGHT_CONFIDENCE_MIN=0.70
+WEIGHT_CONFIDENCE_MAX=0.96
+WEIGHT_FLARE=0.18
+
+declare -A FLARE_SECONDARY=(
+  ["lang-java-core"]=0.30 ["arch-design-patterns"]=0.30 ["infra-azure-core"]=0.35
+)
+
+SANDBOX_READ_ONLY=true
+SANDBOX_ISOLATED=true
+SANDBOX_NO_NETWORK=true
+SANDBOX_NO_SPAWN=true
+SANDBOX_NO_WRITE=true
+
+tokenize() { echo "$1" | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]#' ' '; }
+calculate_activation() {
+  local input=$(tokenize "$1") score=0 matches=0
+  for gram in "${NGRAM_1[@]}"; do [[ " $input " == *" $gram "* ]] && { score=$(echo "$score + ${WEIGHT_AFFINITY[$gram]:-0.5}" | bc -l); ((matches++)); }; done
+  for gram in "${NGRAM_2[@]}"; do [[ "$input" == *"$gram"* ]] && { score=$(echo "$score + 0.85" | bc -l); ((matches++)); }; done
+  [ $matches -gt 0 ] && echo "scale=3; $score / $matches" | bc -l || echo 0
+}
+should_activate() { local s=$(calculate_activation "$1"); [ $(echo "$s >= $WEIGHT_ACTIVATION" | bc -l) -eq 1 ] && echo "ACTIVATE:$s" || echo "DORMANT:$s"; }
+get_status() { local s=$(calculate_activation "$1"); local a=$(echo "$s >= $WEIGHT_ACTIVATION" | bc -l); echo "{\"expert_id\":\"$EXPERT_ID\",\"activation_score\":$s,\"activated\":$([ "$a" -eq 1 ] && echo true || echo false)}"; }
+case "${1:-status}" in activate) should_activate "$2";; score) calculate_activation "$2";; status) get_status "$2";; info) echo "$EXPERT_ID: $EXPERT_TITLE";; *) echo "Usage: $0 {activate|score|status|info} [input]";; esac

@@ -1,0 +1,201 @@
+#!/bin/bash
+# ═══════════════════════════════════════════════════════════════
+# ATOMIC EXPERT: math-calculus-differential
+# VERSION: 1.0.0
+# STATUS: FROZEN
+# ═══════════════════════════════════════════════════════════════
+
+EXPERT_ID="math-calculus-differential"
+EXPERT_TITLE="Differential Equations Expert"
+EXPERT_JOB="Solve ordinary and partial differential equations, model dynamic systems, and analyze equilibrium solutions"
+EXPERT_PARENT="MathMicroAtomic"
+EXPERT_VERSION="1.0.0"
+
+# ─────────────────────────────────────────────────────────────────
+# SECTION 2: N-GRAM POOL
+# ─────────────────────────────────────────────────────────────────
+
+NGRAM_1=(
+  "differential"
+  "equation"
+  "ode"
+  "pde"
+  "ordinary"
+  "partial"
+  "initial"
+  "boundary"
+  "value"
+  "separable"
+  "linear"
+  "homogeneous"
+  "nonhomogeneous"
+  "particular"
+  "general"
+  "solution"
+  "equilibrium"
+  "stability"
+  "laplace"
+  "transform"
+  "fourier"
+  "eigenvalue"
+  "characteristic"
+  "wronskian"
+)
+
+NGRAM_2=(
+  "differential equation"
+  "solve ode"
+  "solve pde"
+  "initial value"
+  "boundary value"
+  "initial condition"
+  "boundary condition"
+  "separable equation"
+  "linear equation"
+  "first order"
+  "second order"
+  "higher order"
+  "homogeneous equation"
+  "particular solution"
+  "general solution"
+  "laplace transform"
+  "inverse laplace"
+  "fourier series"
+  "characteristic equation"
+  "equilibrium point"
+  "phase portrait"
+  "slope field"
+  "direction field"
+  "variation parameters"
+  "undetermined coefficients"
+)
+
+NGRAM_3=(
+  "solve differential equation"
+  "first order ode"
+  "second order ode"
+  "initial value problem"
+  "boundary value problem"
+  "solve by separation"
+  "apply laplace transform"
+  "find general solution"
+  "find particular solution"
+  "linear differential equation"
+  "system differential equations"
+)
+
+# ─────────────────────────────────────────────────────────────────
+# SECTION 3: TENSOR WEIGHTS
+# ─────────────────────────────────────────────────────────────────
+
+WEIGHT_ACTIVATION=0.60
+
+declare -A WEIGHT_AFFINITY=(
+  ["differential"]=0.95
+  ["equation"]=0.70
+  ["ode"]=0.98
+  ["pde"]=0.98
+  ["separable"]=0.90
+  ["homogeneous"]=0.85
+  ["linear"]=0.70
+  ["initial"]=0.75
+  ["boundary"]=0.75
+  ["laplace"]=0.88
+  ["transform"]=0.72
+  ["equilibrium"]=0.82
+  ["stability"]=0.78
+  ["characteristic"]=0.80
+  ["wronskian"]=0.92
+  ["fourier"]=0.85
+)
+
+WEIGHT_CONFIDENCE_MIN=0.70
+WEIGHT_CONFIDENCE_MAX=0.96
+
+WEIGHT_FLARE=0.18
+
+declare -A FLARE_SECONDARY=(
+  ["math-calculus-derivative"]=0.40
+  ["math-calculus-integral"]=0.35
+  ["math-algebra-linear"]=0.30
+  ["lang-python"]=0.25
+)
+
+# ─────────────────────────────────────────────────────────────────
+# SECTION 4: OUTPUT TEMPLATES
+# ─────────────────────────────────────────────────────────────────
+
+TEMPLATE_SEPARABLE='Separable ODE: dy/dx = f(x)g(y)
+1. Separate: dy/g(y) = f(x)dx
+2. Integrate both sides
+3. Solve for y (if possible)'
+
+TEMPLATE_LINEAR_FIRST='First Order Linear: dy/dx + P(x)y = Q(x)
+Integrating factor: μ(x) = e^∫P(x)dx
+Solution: y = (1/μ)∫μQ(x)dx'
+
+TEMPLATE_LINEAR_SECOND='Second Order Linear: y'\'\'' + p(x)y'\'' + q(x)y = r(x)
+1. Solve homogeneous: y_h
+2. Find particular: y_p
+3. General: y = y_h + y_p'
+
+TEMPLATE_LAPLACE='Laplace Transform:
+L{f(t)} = F(s) = ∫₀^∞ e^(-st)f(t)dt
+L{y'\''} = sY(s) - y(0)
+L{y'\'\''} = s²Y(s) - sy(0) - y'\''(0)'
+
+# ─────────────────────────────────────────────────────────────────
+# SECTION 5: SANDBOX BOUNDARY
+# ─────────────────────────────────────────────────────────────────
+
+SANDBOX_READ_ONLY=true
+SANDBOX_ISOLATED=true
+SANDBOX_NO_NETWORK=true
+SANDBOX_NO_SPAWN=true
+SANDBOX_NO_WRITE=true
+
+# ─────────────────────────────────────────────────────────────────
+# SECTION 6: ACTIVATION FUNCTIONS
+# ─────────────────────────────────────────────────────────────────
+
+tokenize() { echo "$1" | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]' ' '; }
+
+calculate_activation() {
+  local input=$(tokenize "$1")
+  local score=0 matches=0
+  for gram in "${NGRAM_1[@]}"; do
+    if [[ " $input " == *" $gram "* ]]; then
+      local w=${WEIGHT_AFFINITY[$gram]:-0.5}
+      score=$(echo "$score + $w" | bc -l); ((matches++))
+    fi
+  done
+  for gram in "${NGRAM_2[@]}"; do
+    if [[ "$input" == *"$gram"* ]]; then
+      score=$(echo "$score + 0.85" | bc -l); ((matches++))
+    fi
+  done
+  [ $matches -gt 0 ] && score=$(echo "scale=3; $score / $matches" | bc -l) || score=0
+  echo "$score"
+}
+
+should_activate() {
+  local score=$(calculate_activation "$1")
+  local result=$(echo "$score >= $WEIGHT_ACTIVATION" | bc -l)
+  [ "$result" -eq 1 ] && echo "ACTIVATE:$score" || echo "DORMANT:$score"
+}
+
+get_status() {
+  local input="$1" score=$(calculate_activation "$input")
+  local active=$(echo "$score >= $WEIGHT_ACTIVATION" | bc -l)
+  cat << EOF
+{"expert_id":"$EXPERT_ID","activation_score":$score,"threshold":$WEIGHT_ACTIVATION,"activated":$([ "$active" -eq 1 ] && echo "true" || echo "false")}
+EOF
+}
+
+case "${1:-status}" in
+  activate) should_activate "$2" ;;
+  score) calculate_activation "$2" ;;
+  status) get_status "$2" ;;
+  info) echo "Expert: $EXPERT_ID"; echo "Title: $EXPERT_TITLE"; echo "Job: $EXPERT_JOB" ;;
+  *) echo "Usage: $0 {activate|score|status|info} [input]"; exit 1 ;;
+esac

@@ -1,0 +1,70 @@
+#!/bin/bash
+# ═══════════════════════════════════════════════════════════════
+# ATOMIC EXPERT: lang-rust-core
+# VERSION: 1.0.0
+# STATUS: FROZEN
+# ═══════════════════════════════════════════════════════════════
+
+EXPERT_ID="lang-rust-core"
+EXPERT_TITLE="Rust Core Expert"
+EXPERT_JOB="Write safe, concurrent Rust code with ownership, borrowing, lifetimes, and zero-cost abstractions"
+EXPERT_PARENT="ProgrammingMicroAtomic"
+EXPERT_VERSION="1.0.0"
+
+NGRAM_1=(
+  "rust" "cargo" "ownership" "borrowing" "borrow" "lifetime" "mut"
+  "mutable" "immutable" "reference" "dereference" "unsafe" "trait"
+  "impl" "struct" "enum" "match" "option" "result" "ok" "err"
+  "some" "none" "vec" "string" "str" "slice" "box" "rc" "arc"
+  "mutex" "rwlock" "channel" "async" "await" "future" "tokio"
+  "macro" "derive" "attribute" "crate" "module" "pub" "use"
+)
+
+NGRAM_2=(
+  "rust code" "cargo build" "cargo run" "ownership system" "borrow checker"
+  "lifetime annotation" "mutable reference" "immutable reference"
+  "pattern matching" "option type" "result type" "error handling"
+  "trait implementation" "generic type" "associated type" "derive macro"
+  "procedural macro" "unsafe block" "smart pointer" "reference counting"
+  "async await" "tokio runtime" "zero cost abstraction"
+)
+
+NGRAM_3=(
+  "write rust code" "implement trait for" "handle result error"
+  "use pattern matching" "create struct with" "define enum with"
+)
+
+WEIGHT_ACTIVATION=0.58
+
+declare -A WEIGHT_AFFINITY=(
+  ["rust"]=0.98 ["cargo"]=0.92 ["ownership"]=0.95 ["borrowing"]=0.95
+  ["borrow"]=0.92 ["lifetime"]=0.95 ["mut"]=0.80 ["trait"]=0.88
+  ["impl"]=0.85 ["struct"]=0.75 ["enum"]=0.78 ["match"]=0.82
+  ["option"]=0.85 ["result"]=0.85 ["unsafe"]=0.88 ["macro"]=0.82
+)
+
+WEIGHT_CONFIDENCE_MIN=0.72
+WEIGHT_CONFIDENCE_MAX=0.97
+WEIGHT_FLARE=0.18
+
+declare -A FLARE_SECONDARY=(
+  ["lang-cpp-core"]=0.30 ["lang-c-core"]=0.25 ["infra-linux-admin"]=0.20
+  ["algo-complexity"]=0.25
+)
+
+SANDBOX_READ_ONLY=true
+SANDBOX_ISOLATED=true
+SANDBOX_NO_NETWORK=true
+SANDBOX_NO_SPAWN=true
+SANDBOX_NO_WRITE=true
+
+tokenize() { echo "$1" | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]' ' '; }
+calculate_activation() {
+  local input=$(tokenize "$1") score=0 matches=0
+  for gram in "${NGRAM_1[@]}"; do [[ " $input " == *" $gram "* ]] && { score=$(echo "$score + ${WEIGHT_AFFINITY[$gram]:-0.5}" | bc -l); ((matches++)); }; done
+  for gram in "${NGRAM_2[@]}"; do [[ "$input" == *"$gram"* ]] && { score=$(echo "$score + 0.85" | bc -l); ((matches++)); }; done
+  [ $matches -gt 0 ] && echo "scale=3; $score / $matches" | bc -l || echo 0
+}
+should_activate() { local s=$(calculate_activation "$1"); [ $(echo "$s >= $WEIGHT_ACTIVATION" | bc -l) -eq 1 ] && echo "ACTIVATE:$s" || echo "DORMANT:$s"; }
+get_status() { local s=$(calculate_activation "$1"); local a=$(echo "$s >= $WEIGHT_ACTIVATION" | bc -l); echo "{\"expert_id\":\"$EXPERT_ID\",\"activation_score\":$s,\"activated\":$([ "$a" -eq 1 ] && echo true || echo false)}"; }
+case "${1:-status}" in activate) should_activate "$2";; score) calculate_activation "$2";; status) get_status "$2";; info) echo "$EXPERT_ID: $EXPERT_TITLE";; *) echo "Usage: $0 {activate|score|status|info} [input]";; esac

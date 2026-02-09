@@ -1,0 +1,78 @@
+#!/bin/bash
+# ═══════════════════════════════════════════════════════════════
+# ATOMIC EXPERT: math-statistics-probability
+# VERSION: 1.0.0
+# STATUS: FROZEN
+# ═══════════════════════════════════════════════════════════════
+
+EXPERT_ID="math-statistics-probability"
+EXPERT_TITLE="Probability & Statistics Expert"
+EXPERT_JOB="Calculate probabilities, analyze distributions, perform statistical tests, and interpret data"
+EXPERT_PARENT="MathMicroAtomic"
+EXPERT_VERSION="1.0.0"
+
+NGRAM_1=(
+  "probability" "statistics" "distribution" "mean" "median" "mode"
+  "variance" "deviation" "standard" "normal" "binomial" "poisson"
+  "gaussian" "uniform" "exponential" "random" "sample" "population"
+  "hypothesis" "test" "confidence" "interval" "correlation" "regression"
+  "bayes" "conditional" "independent" "expected" "value" "likelihood"
+)
+
+NGRAM_2=(
+  "probability of" "probability distribution" "standard deviation"
+  "normal distribution" "binomial distribution" "poisson distribution"
+  "expected value" "random variable" "sample mean" "sample size"
+  "confidence interval" "hypothesis test" "null hypothesis"
+  "p value" "t test" "z test" "chi square" "linear regression"
+  "correlation coefficient" "bayes theorem" "conditional probability"
+  "law of" "central limit"
+)
+
+NGRAM_3=(
+  "calculate probability of" "find expected value" "compute standard deviation"
+  "perform hypothesis test" "construct confidence interval"
+  "apply bayes theorem" "find correlation coefficient"
+)
+
+WEIGHT_ACTIVATION=0.58
+
+declare -A WEIGHT_AFFINITY=(
+  ["probability"]=0.98 ["statistics"]=0.95 ["distribution"]=0.88
+  ["mean"]=0.80 ["variance"]=0.85 ["deviation"]=0.82 ["normal"]=0.85
+  ["binomial"]=0.88 ["hypothesis"]=0.85 ["confidence"]=0.82
+  ["correlation"]=0.85 ["regression"]=0.85 ["bayes"]=0.90
+)
+
+WEIGHT_CONFIDENCE_MIN=0.70
+WEIGHT_CONFIDENCE_MAX=0.96
+WEIGHT_FLARE=0.18
+
+declare -A FLARE_SECONDARY=(
+  ["math-statistics-inference"]=0.45 ["data-sklearn"]=0.35 ["lang-python"]=0.30
+)
+
+TEMPLATE_BAYES='Bayes Theorem: P(A|B) = P(B|A)·P(A) / P(B)'
+TEMPLATE_NORMAL='Normal Distribution: Z = (X - μ) / σ'
+TEMPLATE_EXPECTED='Expected Value: E[X] = Σ x·P(x)'
+
+SANDBOX_READ_ONLY=true
+SANDBOX_ISOLATED=true
+SANDBOX_NO_NETWORK=true
+SANDBOX_NO_SPAWN=true
+SANDBOX_NO_WRITE=true
+
+tokenize() { echo "$1" | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]' ' '; }
+calculate_activation() {
+  local input=$(tokenize "$1") score=0 matches=0
+  for gram in "${NGRAM_1[@]}"; do
+    [[ " $input " == *" $gram "* ]] && { score=$(echo "$score + ${WEIGHT_AFFINITY[$gram]:-0.5}" | bc -l); ((matches++)); }
+  done
+  for gram in "${NGRAM_2[@]}"; do
+    [[ "$input" == *"$gram"* ]] && { score=$(echo "$score + 0.85" | bc -l); ((matches++)); }
+  done
+  [ $matches -gt 0 ] && echo "scale=3; $score / $matches" | bc -l || echo 0
+}
+should_activate() { local s=$(calculate_activation "$1"); [ $(echo "$s >= $WEIGHT_ACTIVATION" | bc -l) -eq 1 ] && echo "ACTIVATE:$s" || echo "DORMANT:$s"; }
+get_status() { local s=$(calculate_activation "$1"); local a=$(echo "$s >= $WEIGHT_ACTIVATION" | bc -l); echo "{\"expert_id\":\"$EXPERT_ID\",\"activation_score\":$s,\"activated\":$([ "$a" -eq 1 ] && echo true || echo false)}"; }
+case "${1:-status}" in activate) should_activate "$2";; score) calculate_activation "$2";; status) get_status "$2";; info) echo "$EXPERT_ID: $EXPERT_TITLE";; *) echo "Usage: $0 {activate|score|status|info} [input]";; esac

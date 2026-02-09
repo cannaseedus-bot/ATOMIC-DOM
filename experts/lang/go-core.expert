@@ -1,0 +1,69 @@
+#!/bin/bash
+# ═══════════════════════════════════════════════════════════════
+# ATOMIC EXPERT: lang-go-core
+# VERSION: 1.0.0
+# STATUS: FROZEN
+# ═══════════════════════════════════════════════════════════════
+
+EXPERT_ID="lang-go-core"
+EXPERT_TITLE="Go/Golang Core Expert"
+EXPERT_JOB="Write concurrent Go code with goroutines, channels, interfaces, and idiomatic patterns"
+EXPERT_PARENT="ProgrammingMicroAtomic"
+EXPERT_VERSION="1.0.0"
+
+NGRAM_1=(
+  "go" "golang" "goroutine" "channel" "chan" "select" "defer"
+  "panic" "recover" "interface" "struct" "method" "receiver"
+  "pointer" "slice" "map" "make" "new" "append" "range"
+  "package" "import" "func" "return" "error" "nil" "context"
+  "mutex" "waitgroup" "sync" "atomic" "module" "gomod"
+)
+
+NGRAM_2=(
+  "go code" "golang code" "goroutine channel" "go routine"
+  "error handling" "interface implementation" "struct method"
+  "pointer receiver" "value receiver" "slice append" "map iteration"
+  "defer statement" "panic recover" "context cancel" "sync mutex"
+  "wait group" "go module" "go mod" "go build" "go run" "go test"
+  "concurrent programming" "channel communication"
+)
+
+NGRAM_3=(
+  "write go code" "create goroutine with" "implement interface in"
+  "handle error in go" "use channel for" "defer function call"
+)
+
+WEIGHT_ACTIVATION=0.58
+
+declare -A WEIGHT_AFFINITY=(
+  ["go"]=0.95 ["golang"]=0.98 ["goroutine"]=0.95 ["channel"]=0.92
+  ["chan"]=0.90 ["defer"]=0.88 ["interface"]=0.82 ["struct"]=0.75
+  ["slice"]=0.80 ["map"]=0.72 ["context"]=0.85 ["mutex"]=0.85
+  ["waitgroup"]=0.88 ["gomod"]=0.85 ["error"]=0.70
+)
+
+WEIGHT_CONFIDENCE_MIN=0.72
+WEIGHT_CONFIDENCE_MAX=0.96
+WEIGHT_FLARE=0.18
+
+declare -A FLARE_SECONDARY=(
+  ["infra-docker-core"]=0.35 ["infra-kubernetes-core"]=0.35
+  ["web-api-rest"]=0.30 ["infra-cicd-core"]=0.25
+)
+
+SANDBOX_READ_ONLY=true
+SANDBOX_ISOLATED=true
+SANDBOX_NO_NETWORK=true
+SANDBOX_NO_SPAWN=true
+SANDBOX_NO_WRITE=true
+
+tokenize() { echo "$1" | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]' ' '; }
+calculate_activation() {
+  local input=$(tokenize "$1") score=0 matches=0
+  for gram in "${NGRAM_1[@]}"; do [[ " $input " == *" $gram "* ]] && { score=$(echo "$score + ${WEIGHT_AFFINITY[$gram]:-0.5}" | bc -l); ((matches++)); }; done
+  for gram in "${NGRAM_2[@]}"; do [[ "$input" == *"$gram"* ]] && { score=$(echo "$score + 0.85" | bc -l); ((matches++)); }; done
+  [ $matches -gt 0 ] && echo "scale=3; $score / $matches" | bc -l || echo 0
+}
+should_activate() { local s=$(calculate_activation "$1"); [ $(echo "$s >= $WEIGHT_ACTIVATION" | bc -l) -eq 1 ] && echo "ACTIVATE:$s" || echo "DORMANT:$s"; }
+get_status() { local s=$(calculate_activation "$1"); local a=$(echo "$s >= $WEIGHT_ACTIVATION" | bc -l); echo "{\"expert_id\":\"$EXPERT_ID\",\"activation_score\":$s,\"activated\":$([ "$a" -eq 1 ] && echo true || echo false)}"; }
+case "${1:-status}" in activate) should_activate "$2";; score) calculate_activation "$2";; status) get_status "$2";; info) echo "$EXPERT_ID: $EXPERT_TITLE";; *) echo "Usage: $0 {activate|score|status|info} [input]";; esac
