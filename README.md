@@ -133,6 +133,8 @@ Browser DOM — actual document.* rendering
 | **CM-1 Control Spec** | :lock: FROZEN | `CONTROL_MICRONAUT_1_SPEC.md` |
 | **MX2LM Server Runtime** | :white_check_mark: Complete | `MX2LM_SERVER_RUNTIME_SPEC.md` |
 | **MX2LM Server CLI** | :white_check_mark: Complete | `tools/mx2lm-server/` |
+| **Atomic Experts Spec** | :lock: FROZEN | `ATOMIC_EXPERTS_SPEC.md` |
+| **Expert Router** | :white_check_mark: Complete | `experts/router.sh` |
 
 ---
 
@@ -189,6 +191,8 @@ Browser DOM — actual document.* rendering
 - [x] **CM-1 Control Spec** — Invisible control alphabet for pre-semantic phase (`CONTROL_MICRONAUT_1_SPEC.md`)
 - [x] **MX2LM Server Runtime** — KUHUL-governed local server loop (`MX2LM_SERVER_RUNTIME_SPEC.md`)
 - [x] **MX2LM Server CLI** — π-decay lifecycle management (`tools/mx2lm-server/`)
+- [x] **Atomic Experts Spec** — Sandboxed n-gram pools with tensor-weighted activation (`ATOMIC_EXPERTS_SPEC.md`)
+- [x] **Expert Router** — Deterministic routing via n-gram matching (`experts/router.sh`)
 - [ ] Community plugin registry
 
 ---
