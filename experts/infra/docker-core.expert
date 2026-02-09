@@ -1,0 +1,53 @@
+#!/bin/bash
+# ATOMIC EXPERT: infra-docker-core | VERSION: 1.0.0 | STATUS: FROZEN
+EXPERT_ID="infra-docker-core"
+EXPERT_TITLE="Docker Core Expert"
+EXPERT_JOB="Build containers, write Dockerfiles, manage images, and orchestrate with Docker Compose"
+EXPERT_PARENT="CodeGenMicroAtomic"
+EXPERT_VERSION="1.0.0"
+
+NGRAM_1=(
+  "docker" "container" "image" "dockerfile" "compose" "build" "run"
+  "pull" "push" "registry" "layer" "cache" "volume" "mount" "network"
+  "port" "expose" "env" "entrypoint" "cmd" "copy" "add" "workdir"
+  "multistage" "alpine" "scratch" "healthcheck"
+)
+
+NGRAM_2=(
+  "docker container" "docker image" "docker compose" "docker build"
+  "docker run" "docker pull" "docker push" "dockerfile instruction"
+  "multistage build" "docker volume" "docker network" "container registry"
+  "docker hub" "environment variable" "port mapping" "health check"
+)
+
+NGRAM_3=(
+  "write dockerfile for" "create docker compose" "build docker image"
+  "run docker container" "multistage docker build"
+)
+
+WEIGHT_ACTIVATION=0.55
+declare -A WEIGHT_AFFINITY=(
+  ["docker"]=0.98 ["container"]=0.90 ["image"]=0.82 ["dockerfile"]=0.95
+  ["compose"]=0.92 ["build"]=0.72 ["volume"]=0.80 ["network"]=0.75
+  ["multistage"]=0.88 ["registry"]=0.80 ["layer"]=0.78 ["cache"]=0.72
+)
+WEIGHT_CONFIDENCE_MIN=0.72
+WEIGHT_CONFIDENCE_MAX=0.96
+WEIGHT_FLARE=0.22
+declare -A FLARE_SECONDARY=(["infra-kubernetes-core"]=0.45 ["infra-cicd-core"]=0.40 ["lang-bash-core"]=0.30)
+
+SANDBOX_READ_ONLY=true
+SANDBOX_ISOLATED=true
+SANDBOX_NO_NETWORK=true
+SANDBOX_NO_SPAWN=true
+
+tokenize() { echo "$1" | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]' ' '; }
+calculate_activation() {
+  local input=$(tokenize "$1") score=0 matches=0
+  for gram in "${NGRAM_1[@]}"; do [[ " $input " == *" $gram "* ]] && { score=$(echo "$score + ${WEIGHT_AFFINITY[$gram]:-0.5}" | bc -l); ((matches++)); }; done
+  for gram in "${NGRAM_2[@]}"; do [[ "$input" == *"$gram"* ]] && { score=$(echo "$score + 0.85" | bc -l); ((matches++)); }; done
+  [ $matches -gt 0 ] && echo "scale=3; $score / $matches" | bc -l || echo 0
+}
+should_activate() { local s=$(calculate_activation "$1"); [ $(echo "$s >= $WEIGHT_ACTIVATION" | bc -l) -eq 1 ] && echo "ACTIVATE:$s" || echo "DORMANT:$s"; }
+get_status() { local s=$(calculate_activation "$1"); local a=$(echo "$s >= $WEIGHT_ACTIVATION" | bc -l); echo "{\"expert_id\":\"$EXPERT_ID\",\"activation_score\":$s,\"activated\":$([ "$a" -eq 1 ] && echo true || echo false)}"; }
+case "${1:-status}" in activate) should_activate "$2";; score) calculate_activation "$2";; status) get_status "$2";; info) echo "$EXPERT_ID: $EXPERT_TITLE";; esac
